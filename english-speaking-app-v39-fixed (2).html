@@ -6687,21 +6687,25 @@ function _simpleHash(s){
 async function _afterLogin(){
   hideLoginWall();
   _renderLoggedInUI(_currentUser);
-  setSyncBadge('busy','🔄 Đang tải...');
 
-  // Đặt lại S.vocab về rỗng để tránh trộn data cũ
+  // Đặt lại S về rỗng để tránh trộn data cũ
   S.vocab=[];S.topics={};S.stats={streak:0,xp:0,lastDate:''};
 
-  if(_fbOk()){
-    await _loadUserDataFromFirestore(_currentUser.uid);
-    _startListeners(_currentUser.uid);
-  } else {
-    // Offline: load từ localStorage theo uid-namespaced key
-    _loadLocalData(_currentUser.uid);
-  }
-
+  // ── Bước 1: Hiển thị data local NGAY LẬP TỨC (không chờ cloud) ──
+  _loadLocalData(_currentUser.uid);
   updStats(); renderTopics(); renderVocabList(); renderWeekCal();
   showToast('👋 Chào mừng, '+(_currentUser.displayName||_currentUser.username)+'!');
+
+  // ── Bước 2: Load Firestore nền, cập nhật UI khi xong ──
+  if(_fbOk()){
+    setSyncBadge('busy','☁️ Đang đồng bộ...');
+    // Không await — chạy nền, không block UI
+    _loadUserDataFromFirestore(_currentUser.uid).then(()=>{
+      _startListeners(_currentUser.uid);
+    });
+  } else {
+    setSyncBadge('offline','💾 Dữ liệu cục bộ');
+  }
 }
 
 /* ═══════════════════════════════════════════════
@@ -6743,6 +6747,8 @@ const _doc={
 
 async function _loadUserDataFromFirestore(uid){
   try{
+    // Dùng cache của Firestore SDK trước (nếu offline persistence bật)
+    // source:'cache' trả về ngay lập tức, source:'server' lấy mới nhất
     const [statsSnap,topicsSnap,vocabSnap]=await Promise.all([
       _doc.stats(uid).get(),
       _doc.topics(uid).get(),
@@ -6756,16 +6762,19 @@ async function _loadUserDataFromFirestore(uid){
         S.vocab=vocabSnap.docs.map(d=>{ const r={id:d.id,...d.data()}; delete r._createdAt; delete r._updatedAt; return r; });
         S.vocab.forEach(v=>{ if(v.topic&&!S.topics[v.topic]) S.topics[v.topic]={desc:''}; });
       }
+      // Cập nhật UI với data mới từ cloud
+      updStats(); renderTopics(); renderVocabList(); renderWeekCal();
+      // Lưu cache local để lần sau load ngay
+      _saveLocalData(uid);
       setSyncBadge('ok','✅ Đã đồng bộ');
     } else {
-      // Lần đầu đăng nhập, cloud rỗng
+      // Cloud rỗng — không có gì để load
       setSyncBadge('ok','✅ Sẵn sàng');
     }
   }catch(e){
     console.error('[FB] Load error:',e);
-    setSyncBadge('err','❌ Lỗi tải');
-    // Fallback về localStorage
-    _loadLocalData(uid);
+    setSyncBadge('err','❌ Lỗi đồng bộ');
+    // Data local đã được hiển thị trước đó, không cần làm gì thêm
   }
 }
 
@@ -6779,39 +6788,55 @@ async function _cloudSaveMeta(uid){
 
 async function _migrateToCloud(uid){
   if(!_db||!uid) return;
-  const mb=_db.batch();
-  mb.set(_doc.stats(uid),{...S.stats,_migratedAt:firebase.firestore.FieldValue.serverTimestamp()});
-  mb.set(_doc.topics(uid),{topics:S.topics});
-  await mb.commit();
+  const total=S.vocab.length;
+
+  // Lưu meta + vocab song song
+  const metaBatch=_db.batch();
+  metaBatch.set(_doc.stats(uid),{...S.stats,_migratedAt:firebase.firestore.FieldValue.serverTimestamp()});
+  metaBatch.set(_doc.topics(uid),{topics:S.topics});
+
   const CHUNK=400;
+  const vocabBatches=[];
   for(let i=0;i<S.vocab.length;i+=CHUNK){
     const b=_db.batch();
     S.vocab.slice(i,i+CHUNK).forEach(v=>{
       b.set(_col.vocab(uid).doc(String(v.id)),
         {...v,_createdAt:firebase.firestore.FieldValue.serverTimestamp(),_updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
     });
-    await b.commit();
+    vocabBatches.push(b);
   }
+
+  // Commit meta + tất cả chunks song song
+  await Promise.all([
+    metaBatch.commit(),
+    ...vocabBatches.map(b=>b.commit())
+  ]);
+
+  setSyncBadge('ok',`✅ Đã upload ${total} từ`);
 }
 
-/* ─── Debounced cloud save ─── */
+/* ─── Debounced cloud save — 3s debounce, không spam Firestore ─── */
+let _lastSavedHash='';
+function _dataHash(){ return S.vocab.length+'|'+(S.stats.xp||0)+'|'+(S.stats.streak||0); }
+
 function _scheduleSave(){
   if(!_currentUser) return;
   clearTimeout(_syncTimer);
+  // Lưu local ngay lập tức (không debounce localStorage)
+  _saveLocalData(_currentUser.uid);
+
+  if(!_fbOk()){ setSyncBadge('offline','💾 Lưu local'); return; }
+
   setSyncBadge('busy','💾 Đang lưu...');
   _syncTimer=setTimeout(async()=>{
-    const uid=_currentUser.uid;
-    // Luôn lưu localStorage trước (offline backup)
-    _saveLocalData(uid);
-    if(_fbOk()){
-      try{
-        await _cloudSaveMeta(uid);
-        setSyncBadge('ok','✅ Đã lưu');
-      }catch(e){ console.error('[FB] save:',e); setSyncBadge('err','⚠️ Lỗi lưu'); }
-    } else {
-      setSyncBadge('offline','💾 Lưu local');
-    }
-  },1500);
+    const hash=_dataHash();
+    if(hash===_lastSavedHash){ setSyncBadge('ok','✅ Đã lưu'); return; } // không có gì thay đổi
+    try{
+      await _cloudSaveMeta(_currentUser.uid);
+      _lastSavedHash=hash;
+      setSyncBadge('ok','✅ Đã lưu');
+    }catch(e){ console.error('[FB] save:',e); setSyncBadge('err','⚠️ Lỗi lưu'); }
+  },3000); // 3s debounce — tránh write storm
 }
 
 /* ─── Realtime listeners ─── */
@@ -6900,11 +6925,11 @@ async function fbManualSync(){
   if(!_currentUser){ showToast('⚠️ Chưa đăng nhập','warn'); return; }
   setSyncBadge('busy','🔄 Đang sync...');
   try{
-    if(_fbOk()){
-      await _cloudSaveMeta(_currentUser.uid);
-      await _migrateToCloud(_currentUser.uid);
-    }
     _saveLocalData(_currentUser.uid);
+    if(_fbOk()){
+      await _migrateToCloud(_currentUser.uid);
+      _lastSavedHash=_dataHash(); // cập nhật hash sau sync
+    }
     setSyncBadge('ok','✅ Sync xong');
     showToast('✅ Đồng bộ hoàn tất!');
   }catch(e){
@@ -6916,29 +6941,62 @@ async function fbManualSync(){
 /* ═══════════════════════════════════════════════
    MONKEY-PATCH APP FUNCTIONS
 ═══════════════════════════════════════════════ */
-/* save() — gọi scheduled save thay vì localStorage gốc */
+/* save() — localStorage đã được _scheduleSave lo, chỉ cần schedule cloud */
 const _origSave=save;
 window.save=function(){
-  _origSave(); // vẫn lưu key gốc (session state)
-  _scheduleSave();
+  _origSave(); // lưu session state (panel, quiz state...)
+  if(_currentUser) _scheduleSave(); // schedule cloud + local data
 };
 
-/* addV() */
+/* addV() — batch words thay vì write từng cái */
+let _addVBuffer=[];
+let _addVTimer=null;
 const _origAddV=addV;
 window.addV=function(d){
   _origAddV(d);
+  if(!_fbOk()||!_currentUser) return;
   const v=S.vocab[S.vocab.length-1];
-  if(v) _cloudAddWord(v);
+  if(!v) return;
+  _addVBuffer.push(v);
+  clearTimeout(_addVTimer);
+  _addVTimer=setTimeout(async()=>{
+    const toWrite=[..._addVBuffer];
+    _addVBuffer=[];
+    if(!toWrite.length) return;
+    try{
+      if(toWrite.length===1){
+        // 1 từ → write trực tiếp
+        await _cloudAddWord(toWrite[0]);
+      } else {
+        // Nhiều từ → batch write (import scenario)
+        const CHUNK=400;
+        for(let i=0;i<toWrite.length;i+=CHUNK){
+          const b=_db.batch();
+          toWrite.slice(i,i+CHUNK).forEach(v=>{
+            b.set(_col.vocab(_currentUser.uid).doc(String(v.id)),
+              {...v,_createdAt:firebase.firestore.FieldValue.serverTimestamp(),_updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+          });
+          await b.commit();
+        }
+      }
+    }catch(e){ console.error('[FB] batch addV:',e); }
+  },300); // gom 300ms
 };
 
-/* confirmImport — bulk upload sau import */
+/* confirmImport — addV đã batch, chỉ cần save meta + chờ buffer flush */
 const _origConfirmImport=window.confirmImport;
 window.confirmImport=async function(){
   _origConfirmImport&&_origConfirmImport();
   if(_currentUser&&_fbOk()){
-    setSyncBadge('busy','⬆️ Uploading...');
-    try{ await _migrateToCloud(_currentUser.uid); setSyncBadge('ok','✅ Upload xong'); }
-    catch(e){ setSyncBadge('err','❌ Upload lỗi'); }
+    setSyncBadge('busy','⬆️ Đang upload...');
+    // Chờ buffer addV flush xong (300ms) rồi save meta
+    setTimeout(async()=>{
+      try{
+        await _cloudSaveMeta(_currentUser.uid);
+        _saveLocalData(_currentUser.uid);
+        setSyncBadge('ok','✅ Upload xong');
+      }catch(e){ setSyncBadge('err','❌ Upload lỗi'); }
+    },600);
   }
 };
 
