@@ -115,6 +115,10 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
 .wr-eval-correction-text{font-size:15px;font-weight:700;color:var(--teal);line-height:1.5;}
 .wr-eval-explain{font-size:12px;color:var(--ink3);margin-top:6px;line-height:1.5;font-style:italic;}
 
+/* Flashcard Prev/Next nav buttons */
+.fc-prev-btn:disabled,.fc-next-btn:disabled{opacity:.35;cursor:not-allowed;pointer-events:none;}
+.fc-prev-btn:not(:disabled):hover,.fc-next-btn:not(:disabled):hover{border-color:var(--teal);color:var(--teal);background:var(--teal-light);}
+
 /* Skeleton loading */
 .wr-skel{height:14px;background:linear-gradient(90deg,var(--bg2) 25%,var(--border) 50%,var(--bg2) 75%);background-size:200%;border-radius:7px;animation:shimmer 1.3s ease infinite;margin-bottom:8px;}
 
@@ -2008,10 +2012,44 @@ function runConfirmAction(){
    START STUDY
 ════════════════════════════════ */
 function startStudy(topic,mode){
-  S.currentTopic=topic;S.study={words:[...S.vocab.filter(v=>v.topic===topic)],idx:0};S.quiz={questions:[],current:0,correct:0,wrong:0,lives:3,missed:[],batchIdx:0};
+  // Khôi phục vị trí đã lưu nếu cùng topic và không phải bấm "Học lại"
+  let savedIdx = 0;
+  const isSameTopic = S.currentTopic === topic;
+  if(mode === 'restart'){
+    // Bấm "Học lại" → xóa cache vị trí, về đầu
+    try{
+      const raw = localStorage.getItem(SESSION_KEY);
+      if(raw){
+        const sess = JSON.parse(raw);
+        sess.studyIdx = 0;
+        localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+      }
+    }catch(e){}
+  } else {
+    // Tự động khôi phục vị trí từ session
+    try{
+      const raw = localStorage.getItem(SESSION_KEY);
+      if(raw){
+        const sess = JSON.parse(raw);
+        if(sess.currentTopic === topic && typeof sess.studyIdx === 'number'){
+          savedIdx = sess.studyIdx;
+        }
+      }
+    }catch(e){}
+  }
+  S.currentTopic=topic;
+  const topicWords=[...S.vocab.filter(v=>v.topic===topic)];
+  // Clamp idx để không vượt quá số từ hiện tại
+  savedIdx = Math.min(savedIdx, Math.max(topicWords.length-1, 0));
+  S.study={words:topicWords,idx:savedIdx};
+  S.quiz={questions:[],current:0,correct:0,wrong:0,lives:3,missed:[],batchIdx:0};
   showPanel('study');updPbar();
   if(mode==='quiz')switchTab('quiz',document.querySelector('#panel-study .tab-btn:nth-child(2)'));
   else switchTab('flashcard',document.querySelector('#panel-study .tab-btn:nth-child(1)'));
+  // Thông báo vị trí nếu tiếp tục dở
+  if(savedIdx > 0 && mode !== 'restart'){
+    showToast(`▶ Tiếp tục từ ${savedIdx+1}/${topicWords.length} — "${topicWords[savedIdx]?.word||''}"`, 'success');
+  }
 }
 function updPbar(){const{words,idx}=S.study;const pct=words.length?Math.round(idx/words.length*100):0;document.getElementById('study-pfill').style.width=pct+'%';document.getElementById('study-plbl').textContent=idx+'/'+words.length;}
 function switchTab(tab,btn){
@@ -2079,12 +2117,23 @@ function renderFlashcard(){
         ` : ''}
       </div>
 
-      <!-- Footer: đánh giá -->
-      <div class="fc-card-footer">
-        <div style="font-size:13px;color:var(--ink3);font-weight:600;width:100%;margin-bottom:4px">Bạn nhớ từ này không?</div>
-        <button class="rate-btn rb-hard" onclick="rateCard('hard')">😅 Khó nhớ</button>
-        <button class="rate-btn rb-ok" onclick="rateCard('ok')">🤔 Tạm ổn</button>
-        <button class="rate-btn rb-easy" onclick="rateCard('easy')">😊 Nhớ rồi!</button>
+      <!-- Footer: điều hướng Prev/Next + đánh giá -->
+      <div class="fc-card-footer" style="flex-direction:column;gap:12px;align-items:stretch;">
+        <!-- Hàng Prev / Next -->
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+          <button class="btn btn-outline btn-sm fc-prev-btn" onclick="fcPrev()" ${idx===0?'disabled':''} style="flex:1;justify-content:center;">← Trước</button>
+          <span style="font-size:12px;color:var(--ink4);font-weight:700;white-space:nowrap;">${idx+1} / ${words.length}</span>
+          <button class="btn btn-outline btn-sm fc-next-btn" onclick="fcNext()" ${idx>=words.length-1?'disabled':''} style="flex:1;justify-content:center;">Tiếp →</button>
+        </div>
+        <!-- Hàng đánh giá -->
+        <div>
+          <div style="font-size:13px;color:var(--ink3);font-weight:600;margin-bottom:8px;text-align:center;">Bạn nhớ từ này không?</div>
+          <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">
+            <button class="rate-btn rb-hard" onclick="rateCard('hard')">😅 Khó nhớ</button>
+            <button class="rate-btn rb-ok" onclick="rateCard('ok')">🤔 Tạm ổn</button>
+            <button class="rate-btn rb-easy" onclick="rateCard('easy')">😊 Nhớ rồi!</button>
+          </div>
+        </div>
       </div>
     </div>`;
 
@@ -2117,13 +2166,48 @@ function renderFlashcard(){
 // flipCard không còn dùng nhưng giữ để tránh lỗi nếu có ref cũ
 function flipCard(){}
 
+/* ── Prev / Next flashcard (không tính XP, chỉ điều hướng) ── */
+function fcPrev(){
+  if(S.study.idx > 0){
+    S.study.idx--;
+    _saveFcPosition();
+    updPbar();
+    renderFlashcard();
+  }
+}
+function fcNext(){
+  const{words,idx}=S.study;
+  if(idx < words.length - 1){
+    S.study.idx++;
+    _saveFcPosition();
+    updPbar();
+    renderFlashcard();
+  }
+}
+
+/* ── Lưu vị trí flashcard vào localStorage ngay lập tức ── */
+function _saveFcPosition(){
+  try{
+    const raw = localStorage.getItem(SESSION_KEY);
+    const sess = raw ? JSON.parse(raw) : {};
+    sess.studyIdx     = S.study.idx;
+    sess.currentTopic = S.currentTopic;
+    sess.panel        = 'study';
+    sess.studyTab     = 'flashcard';
+    localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+  }catch(e){}
+  save(); // cũng sync vào speakup4 để firebase biết
+}
+
 function rateCard(level){
   const{words,idx}=S.study;const w=words[idx%words.length];
   const v=S.vocab.find(x=>x.id===w.id);
   if(v){v.difficulty=level;v.reviewCount=(v.reviewCount||0)+1;if(level==='easy')v.learned=true;}
   gainXP(level==='easy'?10:level==='ok'?5:2);S.study.idx++;
+  _saveFcPosition(); // lưu vị trí ngay sau mỗi lần đánh giá
   if(S.study.idx>=words.length){
-    document.getElementById('tab-flashcard').innerHTML=`<div class="result"><div style="font-size:56px;margin-bottom:16px">🎉</div><div class="result-msg">Hoàn thành Flashcard!</div><div class="result-sub">Đã ôn xong ${words.length} từ</div><div class="xp-pill">+${words.length*7} XP ⚡</div><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn btn-primary" onclick="goTab('dialogue')">💬 Học hội thoại</button><button class="btn btn-outline" onclick="startStudy('${esc(S.currentTopic)}','flashcard')">🔄 Học lại</button></div></div>`;
+    S.study.idx=0;_saveFcPosition(); // reset về đầu khi hoàn thành
+    document.getElementById('tab-flashcard').innerHTML=`<div class="result"><div style="font-size:56px;margin-bottom:16px">🎉</div><div class="result-msg">Hoàn thành Flashcard!</div><div class="result-sub">Đã ôn xong ${words.length} từ</div><div class="xp-pill">+${words.length*7} XP ⚡</div><div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap"><button class="btn btn-primary" onclick="goTab('dialogue')">💬 Học hội thoại</button><button class="btn btn-outline" onclick="startStudy('${esc(S.currentTopic)}','restart')">🔄 Học lại</button></div></div>`;
   }else renderFlashcard();
   updPbar();save();
 }
