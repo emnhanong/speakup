@@ -1405,6 +1405,7 @@ function saveSession(){
       panel: activePanel,
       currentTopic: S.currentTopic,
       studyIdx: S.study?.idx || 0,
+      speakingIdx: (activeStudyTab==='speaking') ? (S.study?.idx||0) : undefined,
       studyTab: activeStudyTab,
       topicQuiz: S.quiz?.questions?.length ? {
         batchIdx: S.quiz.batchIdx||0,
@@ -1507,9 +1508,15 @@ function restoreSession(){
       }
     }
 
-    // ── Khôi phục Study (flashcard / topic quiz) ──
+    // ── Khôi phục Study (flashcard / quiz / speaking) ──
     if(sess.currentTopic){
-      S.study = { words:S.vocab.filter(v=>v.topic===sess.currentTopic), idx:sess.studyIdx||0 };
+      const topicWords = S.vocab.filter(v=>v.topic===sess.currentTopic);
+      // Flashcard dùng studyIdx
+      S.study = { words:topicWords, idx:sess.studyIdx||0 };
+      // Nếu tab đang là speaking thì dùng speakingIdx (nếu có)
+      if(sess.studyTab==='speaking' && typeof sess.speakingIdx==='number'){
+        S.study.idx = Math.min(sess.speakingIdx, Math.max(topicWords.length-1,0));
+      }
       if(sess.topicQuiz?.questions?.length){
         const tq = sess.topicQuiz;
         const questions = tq.questions.map(sq=>{
@@ -2012,43 +2019,65 @@ function runConfirmAction(){
    START STUDY
 ════════════════════════════════ */
 function startStudy(topic,mode){
-  // Khôi phục vị trí đã lưu nếu cùng topic và không phải bấm "Học lại"
-  let savedIdx = 0;
-  const isSameTopic = S.currentTopic === topic;
-  if(mode === 'restart'){
-    // Bấm "Học lại" → xóa cache vị trí, về đầu
-    try{
-      const raw = localStorage.getItem(SESSION_KEY);
-      if(raw){
-        const sess = JSON.parse(raw);
-        sess.studyIdx = 0;
-        localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
-      }
-    }catch(e){}
-  } else {
-    // Tự động khôi phục vị trí từ session
-    try{
-      const raw = localStorage.getItem(SESSION_KEY);
-      if(raw){
-        const sess = JSON.parse(raw);
-        if(sess.currentTopic === topic && typeof sess.studyIdx === 'number'){
-          savedIdx = sess.studyIdx;
-        }
-      }
-    }catch(e){}
+  const isRestart = (mode === 'restart');
+
+  // Đọc session đã lưu
+  let sess = null;
+  try{ const raw=localStorage.getItem(SESSION_KEY); if(raw) sess=JSON.parse(raw); }catch(e){}
+  const hasSavedSession = sess && sess.currentTopic === topic;
+
+  if(isRestart){
+    // "Học lại" → xóa sạch vị trí cũ
+    if(sess){ sess.studyIdx=0; sess.speakingIdx=0; sess.topicQuiz=null;
+      try{localStorage.setItem(SESSION_KEY,JSON.stringify(sess));}catch(e){} }
   }
-  S.currentTopic=topic;
-  const topicWords=[...S.vocab.filter(v=>v.topic===topic)];
-  // Clamp idx để không vượt quá số từ hiện tại
-  savedIdx = Math.min(savedIdx, Math.max(topicWords.length-1, 0));
-  S.study={words:topicWords,idx:savedIdx};
-  S.quiz={questions:[],current:0,correct:0,wrong:0,lives:3,missed:[],batchIdx:0};
-  showPanel('study');updPbar();
-  if(mode==='quiz')switchTab('quiz',document.querySelector('#panel-study .tab-btn:nth-child(2)'));
-  else switchTab('flashcard',document.querySelector('#panel-study .tab-btn:nth-child(1)'));
-  // Thông báo vị trí nếu tiếp tục dở
-  if(savedIdx > 0 && mode !== 'restart'){
-    showToast(`▶ Tiếp tục từ ${savedIdx+1}/${topicWords.length} — "${topicWords[savedIdx]?.word||''}"`, 'success');
+
+  S.currentTopic = topic;
+  const topicWords = [...S.vocab.filter(v=>v.topic===topic)];
+  const clamp = idx => Math.min(idx||0, Math.max(topicWords.length-1, 0));
+
+  // ── Flashcard idx ──
+  const savedFcIdx  = (!isRestart && hasSavedSession) ? clamp(sess.studyIdx) : 0;
+
+  // ── Speaking idx (riêng, fallback về studyIdx) ──
+  const savedSpkIdx = (!isRestart && hasSavedSession)
+    ? clamp(typeof sess.speakingIdx==='number' ? sess.speakingIdx : sess.studyIdx)
+    : 0;
+
+  // ── Quiz state ──
+  let restoredQuiz = null;
+  if(!isRestart && hasSavedSession && sess.topicQuiz?.questions?.length){
+    const tq = sess.topicQuiz;
+    const questions = tq.questions.map(sq=>{
+      const word = S.vocab.find(v=>String(v.id)===String(sq.word?.id));
+      return word ? {...sq, word} : null;
+    }).filter(Boolean);
+    if(questions.length) restoredQuiz = {...tq, questions};
+  }
+
+  // Gán state
+  S.study = {words:topicWords, idx:savedFcIdx};
+  S.quiz  = restoredQuiz || {questions:[],current:0,correct:0,wrong:0,lives:3,missed:[],batchIdx:0};
+
+  showPanel('study'); updPbar();
+
+  if(mode==='quiz'){
+    switchTab('quiz', document.querySelector('#panel-study .tab-btn:nth-child(2)'));
+    if(!isRestart && restoredQuiz && restoredQuiz.current>0){
+      const tot=restoredQuiz.questions.length;
+      showToast(`▶ Tiếp tục Bài tập — câu ${restoredQuiz.current+1}/${tot}`, 'success');
+    }
+  } else if(mode==='speaking'){
+    S.study.idx = savedSpkIdx;
+    switchTab('speaking', document.querySelector('#panel-study .tab-btn:nth-child(3)'));
+    if(!isRestart && savedSpkIdx>0){
+      showToast(`▶ Tiếp tục Speaking — từ ${savedSpkIdx+1}/${topicWords.length} — "${topicWords[savedSpkIdx]?.word||''}"`, 'success');
+    }
+  } else {
+    switchTab('flashcard', document.querySelector('#panel-study .tab-btn:nth-child(1)'));
+    if(!isRestart && savedFcIdx>0){
+      showToast(`▶ Tiếp tục Flashcard — từ ${savedFcIdx+1}/${topicWords.length} — "${topicWords[savedFcIdx]?.word||''}"`, 'success');
+    }
   }
 }
 function updPbar(){const{words,idx}=S.study;const pct=words.length?Math.round(idx/words.length*100):0;document.getElementById('study-pfill').style.width=pct+'%';document.getElementById('study-plbl').textContent=idx+'/'+words.length;}
@@ -2775,6 +2804,7 @@ function showFeedback(isOk, correctLabel){
 
 function advanceQ(){
   S.quiz.current++;
+  _saveQuizPosition();
   showQ();
 }
 
@@ -2782,6 +2812,7 @@ function advanceQ(){
 function prevQ(){
   if(S.quiz.current > 0){
     S.quiz.current--;
+    _saveQuizPosition();
     showQ();
   }
 }
@@ -2790,10 +2821,32 @@ function prevQ(){
 function skipQ(){
   if(S.quiz.current < S.quiz.questions.length - 1){
     S.quiz.current++;
+    _saveQuizPosition();
     showQ();
   } else {
     showQzBatchResult();
   }
+}
+
+/* ── Lưu vị trí quiz ngay lập tức ── */
+function _saveQuizPosition(){
+  try{
+    const raw = localStorage.getItem(SESSION_KEY);
+    const sess = raw ? JSON.parse(raw) : {};
+    sess.currentTopic = S.currentTopic;
+    sess.panel        = 'study';
+    sess.studyTab     = 'quiz';
+    sess.topicQuiz    = S.quiz?.questions?.length ? {
+      batchIdx : S.quiz.batchIdx||0,
+      current  : S.quiz.current||0,
+      correct  : S.quiz.correct||0,
+      wrong    : S.quiz.wrong||0,
+      lives    : S.quiz.lives??3,
+      missed   : S.quiz.missed||[],
+      questions: (S.quiz.questions||[]).map(q=>({...q, word:{id:q.word?.id}}))
+    } : null;
+    localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+  }catch(e){}
 }
 
 /* Làm lại câu vừa sai — reset hoàn toàn trạng thái câu, không tính sai thêm */
@@ -2827,6 +2880,7 @@ function checkMCOpt(btn, selId, correctId){
       S.quiz.missed.push({word:q.word, answer:lbl});
     }
     q._scored = true;
+    _saveQuizPosition();
   }
   const correctEl = document.querySelector(`#tab-quiz .opt[data-id="${correctId}"]`);
   const lbl = correctEl ? [...correctEl.childNodes].filter(n=>n.nodeType===3).map(n=>n.textContent.trim()).join('') : '';
@@ -2858,6 +2912,7 @@ function checkFill(){
       S.quiz.missed.push({word:q.word, answer:q.word.word});
     }
     q._scored = true;
+    _saveQuizPosition();
   }
   showFeedback(isOk, q.word.word);
 }
@@ -2928,6 +2983,7 @@ function checkOrder(){
       S.quiz.missed.push({word: q.word, answer: correct});
     }
     q._scored = true;
+    _saveQuizPosition();
   }
   // Xóa feedback cũ
   document.querySelectorAll('.qz-feedback').forEach(f => f.remove());
@@ -3049,6 +3105,7 @@ function nextBatch(){
     questions:[], current:0, correct:0, wrong:0,
     lives:3, missed:[], batchIdx: ((S.quiz.batchIdx||0) + 1)
   };
+  _saveQuizPosition();
   renderQuiz();
 }
 function restartBatch(){
@@ -3056,10 +3113,12 @@ function restartBatch(){
     questions:[], current:0, correct:0, wrong:0,
     lives:3, missed:[], batchIdx: S.quiz.batchIdx||0
   };
+  _saveQuizPosition();
   renderQuiz();
 }
 function restartQuiz(){
   S.quiz = {questions:[],current:0,correct:0,wrong:0,lives:3,missed:[],batchIdx:0};
+  _saveQuizPosition();
   renderQuiz();
 }
 function confirmExitQuiz(){
@@ -3103,9 +3162,10 @@ function renderSpeaking(){
       <div class="transcript-box" id="transcript-text"></div>
       <div id="score-wrap" style="text-align:center;margin-top:14px"></div>
     </div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px">
-      <span style="font-size:13px;color:var(--ink3)">${S.study.idx+1} / ${words.length}</span>
-      <button class="btn btn-outline btn-sm" onclick="nextSpeak()">Từ tiếp →</button>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:14px;gap:8px">
+      <button class="btn btn-outline btn-sm" onclick="prevSpeak()" ${S.study.idx===0?'disabled style="opacity:.35;cursor:not-allowed"':''}>← Trước</button>
+      <span style="font-size:13px;color:var(--ink3);font-weight:600">${S.study.idx+1} / ${words.length}</span>
+      <button class="btn btn-outline btn-sm" onclick="nextSpeak()">${S.study.idx>=words.length-1?'🔄 Học lại':'Từ tiếp →'}</button>
     </div>`;
 
   // Fetch Pexels cho speaking nếu chưa cache
@@ -3145,9 +3205,40 @@ function scoreRec(){
   const clr=score>=70?'var(--teal)':score>=40?'var(--amber)':'var(--rose)';
   document.getElementById('score-wrap').innerHTML=`<div style="font-family:var(--font-d);font-size:44px;font-weight:900;color:${clr}">${score}%</div><div style="font-size:13px;color:var(--ink3);margin-top:2px">${score>=70?'🌟 Phát âm tốt!':score>=40?'👍 Luyện thêm nhé':'💪 Thử lại!'}</div>`;
   document.getElementById('transcript-result').style.display='block';
-  if(score>=60)gainXP(20);save();
+  if(score>=60)gainXP(20);
+  _saveSpkPosition();
+  save();
 }
-function nextSpeak(){S.study.idx=(S.study.idx+1)%S.study.words.length;renderSpeaking();}
+function nextSpeak(){
+  const words=S.study.words;
+  if(S.study.idx < words.length-1){
+    S.study.idx++;
+  } else {
+    S.study.idx=0; // wrap around
+  }
+  _saveSpkPosition();
+  renderSpeaking();
+}
+function prevSpeak(){
+  if(S.study.idx > 0){
+    S.study.idx--;
+    _saveSpkPosition();
+    renderSpeaking();
+  }
+}
+/* ── Lưu vị trí Speaking ngay lập tức ── */
+function _saveSpkPosition(){
+  try{
+    const raw = localStorage.getItem(SESSION_KEY);
+    const sess = raw ? JSON.parse(raw) : {};
+    sess.currentTopic  = S.currentTopic;
+    sess.panel         = 'study';
+    sess.studyTab      = 'speaking';
+    sess.speakingIdx   = S.study.idx;
+    localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+  }catch(e){}
+  save();
+}
 
 /* ── VOCAB LIST ── */
 let _selectedIds = new Set();
