@@ -6350,10 +6350,13 @@ async function initFirebase(cfg){
     return true;
   }catch(e){
     console.error('[FB] Init error:',e);
-    _fbReady=false;
+    _fbReady=false; _app=null; _auth=null; _db=null;
     return false;
   }
 }
+
+/* Guard: mọi call Firebase đều phải qua hàm này */
+function _fbOk(){ return _fbReady && _app && _auth && _db; }
 
 /* ═══════════════════════════════════════════════
    UI HELPERS
@@ -6456,7 +6459,6 @@ async function appLogin(){
   const errEl    = document.getElementById('li-err');
   const btn      = document.getElementById('li-btn');
 
-  // Reset
   errEl.style.display='none';
   if(!username||!password){
     errEl.textContent='⚠️ Vui lòng nhập tên đăng nhập và mật khẩu.';
@@ -6466,44 +6468,55 @@ async function appLogin(){
   btn.disabled=true; btn.textContent='⏳ Đang đăng nhập...';
 
   try{
-    /* ── ADMIN LOGIN ── */
-    if(username===ADMIN_USERNAME){
-      if(password!==ADMIN_PASSWORD){
+    /* ══ ADMIN — xác thực cục bộ, KHÔNG cần Firebase ══ */
+    if(username === ADMIN_USERNAME){
+      if(password !== ADMIN_PASSWORD){
         errEl.textContent='❌ Sai mật khẩu admin.';
         errEl.style.display='block'; return;
       }
-      // Đăng nhập Firebase với email admin giả
-      if(_fbReady){
-        try{
-          await _auth.signInWithEmailAndPassword(ADMIN_FB_EMAIL, ADMIN_PASSWORD);
-        }catch(e){
-          if(e.code==='auth/user-not-found'){
-            // Tạo account admin lần đầu
-            await _auth.createUserWithEmailAndPassword(ADMIN_FB_EMAIL, ADMIN_PASSWORD);
-            // Lưu profile admin vào Firestore
-            const uid=_auth.currentUser.uid;
-            await _db.collection('users').doc(uid).collection('_meta').doc('profile').set({
-              username:'admin', displayName:'Administrator', role:'admin',
-              createdAt:firebase.firestore.FieldValue.serverTimestamp()
-            });
-          } else if(e.code!=='auth/email-already-in-use'){ throw e; }
-        }
-      }
-      const uid=_fbReady?_auth.currentUser?.uid:`local_admin_${Date.now()}`;
-      _currentUser={ uid, username:'admin', displayName:'Administrator', role:'admin' };
+      // Admin uid cố định để data luôn nhất quán
+      const uid = 'admin_root';
+      _currentUser = { uid, username:'admin', displayName:'Administrator', role:'admin' };
       saveAppSession(_currentUser);
+
+      // Nếu Firebase sẵn sàng thì sync lên cloud (không bắt buộc)
+      if(_fbOk()){
+        _auth.signInWithEmailAndPassword(ADMIN_FB_EMAIL, ADMIN_PASSWORD)
+          .catch(async e=>{
+            if(e.code==='auth/user-not-found'||e.code==='auth/invalid-credential'){
+              try{
+                const cred=await _auth.createUserWithEmailAndPassword(ADMIN_FB_EMAIL, ADMIN_PASSWORD);
+                await _db.collection('users').doc(cred.user.uid).collection('_meta').doc('profile').set({
+                  username:'admin', displayName:'Administrator', role:'admin',
+                  createdAt:firebase.firestore.FieldValue.serverTimestamp()
+                });
+                // Cập nhật uid thật từ Firebase
+                _currentUser.uid = cred.user.uid;
+                saveAppSession(_currentUser);
+              }catch(_){}
+            }
+          });
+      }
+
       await _afterLogin();
       return;
     }
 
-    /* ── USER THƯỜNG LOGIN ── */
-    if(!_fbReady){
-      // Offline mode: check localStorage only
-      const localUsers=JSON.parse(localStorage.getItem('speakup_users')||'{}');
-      const u=localUsers[username];
-      if(!u){ errEl.textContent='❌ Tài khoản không tồn tại.'; errEl.style.display='block'; return; }
-      if(u.passwordHash!==_simpleHash(password)){
-        errEl.textContent='❌ Sai mật khẩu.'; errEl.style.display='block'; return;
+    /* ══ USER THƯỜNG — localStorage trước, Firebase nếu có ══ */
+
+    // Luôn check localStorage trước (offline-first)
+    const localUsers = JSON.parse(localStorage.getItem('speakup_users')||'{}');
+
+    if(!_fbOk()){
+      // === OFFLINE MODE: chỉ dùng localStorage ===
+      const u = localUsers[username];
+      if(!u){
+        errEl.textContent='❌ Tài khoản không tồn tại. Hãy đăng ký trước.';
+        errEl.style.display='block'; return;
+      }
+      if(u.passwordHash !== _simpleHash(password)){
+        errEl.textContent='❌ Sai mật khẩu.';
+        errEl.style.display='block'; return;
       }
       _currentUser={ uid:`local_${username}`, username, displayName:u.displayName||username, role:'user' };
       saveAppSession(_currentUser);
@@ -6511,30 +6524,49 @@ async function appLogin(){
       return;
     }
 
-    // Firebase mode: email = {username}@speakup.user
-    const fbEmail=username+USER_DOMAIN;
+    // === FIREBASE MODE ===
+    const fbEmail = username + USER_DOMAIN;
     try{
       await _auth.signInWithEmailAndPassword(fbEmail, password);
     }catch(e){
-      if(e.code==='auth/user-not-found') errEl.textContent='❌ Tài khoản không tồn tại. Hãy đăng ký trước.';
-      else if(e.code==='auth/wrong-password') errEl.textContent='❌ Sai mật khẩu.';
-      else if(e.code==='auth/invalid-email') errEl.textContent='❌ Tên đăng nhập không hợp lệ.';
-      else if(e.code==='auth/too-many-requests') errEl.textContent='⚠️ Quá nhiều lần thử. Vui lòng chờ.';
-      else errEl.textContent='❌ '+e.message;
-      errEl.style.display='block'; return;
+      // Nếu Firebase lỗi config/network → fallback localStorage
+      if(e.code==='auth/configuration-not-found' || e.code==='auth/network-request-failed' || e.code==='auth/internal-error'){
+        const u = localUsers[username];
+        if(u && u.passwordHash === _simpleHash(password)){
+          _currentUser={ uid:`local_${username}`, username, displayName:u.displayName||username, role:'user' };
+          saveAppSession(_currentUser);
+          await _afterLogin();
+          return;
+        }
+      }
+      const msg = {
+        'auth/user-not-found'        : '❌ Tài khoản không tồn tại. Hãy đăng ký trước.',
+        'auth/wrong-password'        : '❌ Sai mật khẩu.',
+        'auth/invalid-credential'    : '❌ Tên đăng nhập hoặc mật khẩu không đúng.',
+        'auth/invalid-email'         : '❌ Tên đăng nhập không hợp lệ.',
+        'auth/too-many-requests'     : '⚠️ Quá nhiều lần thử. Vui lòng chờ vài phút.',
+        'auth/network-request-failed': '⚠️ Mất kết nối mạng. Vui lòng thử lại.',
+        'auth/configuration-not-found': '⚠️ Firebase chưa được cấu hình. Nhấn ⚙️ Cấu hình Firebase.',
+      }[e.code] || '❌ Đăng nhập thất bại. Hãy thử lại.';
+      errEl.textContent=msg; errEl.style.display='block'; return;
     }
 
-    // Lấy profile từ Firestore
     const uid=_auth.currentUser.uid;
-    const profileSnap=await _db.collection('users').doc(uid).collection('_meta').doc('profile').get();
-    const profile=profileSnap.exists?profileSnap.data():{username,displayName:username,role:'user'};
+    let profile={username, displayName:username, role:'user'};
+    try{
+      const snap=await _db.collection('users').doc(uid).collection('_meta').doc('profile').get();
+      if(snap.exists) profile={...profile,...snap.data()};
+    }catch(_){}
+
     _currentUser={ uid, username:profile.username||username, displayName:profile.displayName||username, role:'user' };
     saveAppSession(_currentUser);
     await _afterLogin();
 
   }catch(e){
     console.error('[Login]',e);
-    errEl.textContent='❌ Lỗi: '+e.message; errEl.style.display='block';
+    // Không hiện lỗi Firebase raw cho user
+    errEl.textContent='❌ Đăng nhập thất bại. Kiểm tra lại thông tin.';
+    errEl.style.display='block';
   }finally{
     btn.disabled=false; btn.textContent='🔐 Đăng nhập';
   }
@@ -6554,58 +6586,89 @@ async function appRegister(){
 
   errEl.style.display='none'; okEl.style.display='none';
 
-  // Validate
-  if(!username){ errEl.textContent='⚠️ Tên đăng nhập không được để trống.'; errEl.style.display='block'; return; }
-  if(!/^[a-zA-Z0-9_]{3,30}$/.test(username)){ errEl.textContent='⚠️ Tên đăng nhập chỉ dùng chữ cái, số, _ (3-30 ký tự).'; errEl.style.display='block'; return; }
-  if(username===ADMIN_USERNAME){ errEl.textContent='❌ Tên đăng nhập này đã được sử dụng.'; errEl.style.display='block'; return; }
-  if(!pass||pass.length<6){ errEl.textContent='⚠️ Mật khẩu phải có ít nhất 6 ký tự.'; errEl.style.display='block'; return; }
-  if(pass!==pass2){ errEl.textContent='❌ Xác nhận mật khẩu không khớp.'; errEl.style.display='block'; return; }
+  // Validate input
+  if(!username){
+    errEl.textContent='⚠️ Tên đăng nhập không được để trống.';
+    errEl.style.display='block'; return;
+  }
+  if(!/^[a-zA-Z0-9_]{3,30}$/.test(username)){
+    errEl.textContent='⚠️ Tên đăng nhập: chỉ dùng chữ cái, số, _ (3-30 ký tự).';
+    errEl.style.display='block'; return;
+  }
+  if(username === ADMIN_USERNAME){
+    errEl.textContent='❌ Tên đăng nhập này đã được sử dụng.';
+    errEl.style.display='block'; return;
+  }
+  if(!pass || pass.length < 6){
+    errEl.textContent='⚠️ Mật khẩu phải có ít nhất 6 ký tự.';
+    errEl.style.display='block'; return;
+  }
+  if(pass !== pass2){
+    errEl.textContent='❌ Xác nhận mật khẩu không khớp.';
+    errEl.style.display='block'; return;
+  }
 
   btn.disabled=true; btn.textContent='⏳ Đang tạo tài khoản...';
 
   try{
-    if(!_fbReady){
-      // Offline: lưu vào localStorage
-      const localUsers=JSON.parse(localStorage.getItem('speakup_users')||'{}');
-      if(localUsers[username]){ errEl.textContent='❌ Tên đăng nhập đã tồn tại.'; errEl.style.display='block'; return; }
-      localUsers[username]={ displayName:displayName||username, passwordHash:_simpleHash(pass), createdAt:Date.now() };
-      localStorage.setItem('speakup_users',JSON.stringify(localUsers));
-      _currentUser={ uid:`local_${username}`, username, displayName:displayName||username, role:'user' };
-      saveAppSession(_currentUser);
-      await _afterLogin();
-      return;
-    }
-
-    // Firebase: tạo email ảo
-    const fbEmail=username+USER_DOMAIN;
-    let cred;
-    try{
-      cred=await _auth.createUserWithEmailAndPassword(fbEmail, pass);
-    }catch(e){
-      if(e.code==='auth/email-already-in-use') errEl.textContent='❌ Tên đăng nhập đã tồn tại.';
-      else errEl.textContent='❌ '+e.message;
+    /* ══ LUÔN lưu vào localStorage trước (offline-first) ══ */
+    const localUsers = JSON.parse(localStorage.getItem('speakup_users')||'{}');
+    if(localUsers[username]){
+      errEl.textContent='❌ Tên đăng nhập đã tồn tại. Hãy chọn tên khác.';
       errEl.style.display='block'; return;
     }
 
-    // Lưu displayName vào Firebase Auth profile
-    if(displayName) await cred.user.updateProfile({displayName});
+    // Lưu local ngay
+    const dName = displayName || username;
+    localUsers[username]={
+      displayName: dName,
+      passwordHash: _simpleHash(pass),
+      createdAt: Date.now()
+    };
+    localStorage.setItem('speakup_users', JSON.stringify(localUsers));
 
-    // Lưu profile vào Firestore
-    const uid=cred.user.uid;
-    await _db.collection('users').doc(uid).collection('_meta').doc('profile').set({
-      username, displayName:displayName||username, role:'user',
-      createdAt:firebase.firestore.FieldValue.serverTimestamp()
-    });
+    // Uid local để dùng ngay
+    let uid = `local_${username}`;
 
-    _currentUser={ uid, username, displayName:displayName||username, role:'user' };
+    /* ══ Nếu có Firebase → sync lên cloud song song ══ */
+    if(_fbOk()){
+      try{
+        const fbEmail = username + USER_DOMAIN;
+        const cred = await _auth.createUserWithEmailAndPassword(fbEmail, pass);
+        uid = cred.user.uid; // dùng uid thật từ Firebase
+
+        if(dName) await cred.user.updateProfile({displayName: dName}).catch(()=>{});
+
+        await _db.collection('users').doc(uid).collection('_meta').doc('profile').set({
+          username, displayName: dName, role:'user',
+          createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }catch(e){
+        // Firebase lỗi không sao — đã có localStorage
+        if(e.code==='auth/email-already-in-use'){
+          errEl.textContent='❌ Tên đăng nhập đã tồn tại trên hệ thống.';
+          errEl.style.display='block';
+          // Rollback local
+          delete localUsers[username];
+          localStorage.setItem('speakup_users', JSON.stringify(localUsers));
+          return;
+        }
+        console.warn('[Register] Firebase sync failed (using local):', e.code);
+        // Tiếp tục với local uid
+      }
+    }
+
+    _currentUser = { uid, username, displayName: dName, role:'user' };
     saveAppSession(_currentUser);
-    okEl.textContent='🎉 Tạo tài khoản thành công!';
+
+    okEl.textContent = '🎉 Tạo tài khoản thành công! Đang vào app...';
     okEl.style.display='block';
-    setTimeout(()=>_afterLogin(), 800);
+    setTimeout(()=>_afterLogin(), 700);
 
   }catch(e){
     console.error('[Register]',e);
-    errEl.textContent='❌ '+e.message; errEl.style.display='block';
+    errEl.textContent='❌ Có lỗi xảy ra. Vui lòng thử lại.';
+    errEl.style.display='block';
   }finally{
     btn.disabled=false; btn.textContent='🚀 Tạo tài khoản';
   }
@@ -6629,7 +6692,7 @@ async function _afterLogin(){
   // Đặt lại S.vocab về rỗng để tránh trộn data cũ
   S.vocab=[];S.topics={};S.stats={streak:0,xp:0,lastDate:''};
 
-  if(_fbReady && _db){
+  if(_fbOk()){
     await _loadUserDataFromFirestore(_currentUser.uid);
     _startListeners(_currentUser.uid);
   } else {
@@ -6740,7 +6803,7 @@ function _scheduleSave(){
     const uid=_currentUser.uid;
     // Luôn lưu localStorage trước (offline backup)
     _saveLocalData(uid);
-    if(_fbReady&&_db){
+    if(_fbOk()){
       try{
         await _cloudSaveMeta(uid);
         setSyncBadge('ok','✅ Đã lưu');
@@ -6821,7 +6884,7 @@ async function appSignOut(){
   if(_currentUser){ _saveLocalData(_currentUser.uid); }
   clearAppSession();
   _currentUser=null;
-  if(_fbReady&&_auth){ try{ await _auth.signOut(); }catch(_){} }
+  if(_fbOk()){ try{ await _auth.signOut(); }catch(_){} }
   // Reset state
   S.vocab=[];S.topics={};S.stats={streak:0,xp:0,lastDate:''};
   updStats(); renderTopics(); renderVocabList(); renderWeekCal();
@@ -6837,7 +6900,7 @@ async function fbManualSync(){
   if(!_currentUser){ showToast('⚠️ Chưa đăng nhập','warn'); return; }
   setSyncBadge('busy','🔄 Đang sync...');
   try{
-    if(_fbReady&&_db){
+    if(_fbOk()){
       await _cloudSaveMeta(_currentUser.uid);
       await _migrateToCloud(_currentUser.uid);
     }
@@ -6872,7 +6935,7 @@ window.addV=function(d){
 const _origConfirmImport=window.confirmImport;
 window.confirmImport=async function(){
   _origConfirmImport&&_origConfirmImport();
-  if(_currentUser&&_fbReady&&_db){
+  if(_currentUser&&_fbOk()){
     setSyncBadge('busy','⬆️ Uploading...');
     try{ await _migrateToCloud(_currentUser.uid); setSyncBadge('ok','✅ Upload xong'); }
     catch(e){ setSyncBadge('err','❌ Upload lỗi'); }
@@ -6939,7 +7002,7 @@ window.confirmDeleteSelected=function(){
 const _origSTM=window.saveTopicModal;
 window.saveTopicModal=function(){
   _origSTM&&_origSTM();
-  if(_currentUser&&_fbReady&&_db){
+  if(_currentUser&&_fbOk()){
     setTimeout(async()=>{
       try{
         await _cloudSaveMeta(_currentUser.uid);
@@ -7042,9 +7105,12 @@ document.addEventListener('click',e=>{
   // 3. Kiểm tra session còn hiệu lực
   const session=loadAppSession();
   if(session && session.uid){
-    // Nếu có Firebase và user không phải local → xác minh với Firebase Auth
-    if(_fbReady && _auth && !session.uid.startsWith('local_')){
-      // Chờ Firebase auth state
+    const isLocalSession = session.uid.startsWith('local_')
+                        || session.uid === 'admin_root'
+                        || session.role === 'admin';
+
+    if(_fbOk() && !isLocalSession){
+      // Firebase có → xác minh token còn hợp lệ không
       await new Promise(resolve=>{
         const unsub=_auth.onAuthStateChanged(fbUser=>{
           unsub();
@@ -7052,16 +7118,15 @@ document.addEventListener('click',e=>{
             _currentUser=session;
             _afterLogin();
           } else {
-            // Session không còn hợp lệ
+            // Token hết hạn → yêu cầu đăng nhập lại
             clearAppSession();
-            _renderLoggedOutUI();
             showLoginWall();
           }
           resolve();
         });
       });
     } else {
-      // Offline session hoặc local session
+      // Admin, offline, hoặc local session → tin tưởng ngay
       _currentUser=session;
       await _afterLogin();
     }
