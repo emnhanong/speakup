@@ -6,6 +6,10 @@
 <title>SpeakUp — English Learning</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Firebase v10 compat -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <style>
 :root {
   --bg:        #f5f3ef;
@@ -688,6 +692,69 @@ tr.row-selected{outline:none;}
   .main{margin-left:210px;}
   .page-wrap{padding:22px 18px;}
 }
+
+/* ═══════════════════════════════
+   FIREBASE AUTH & SYNC STYLES
+═══════════════════════════════ */
+.sidebar{padding-bottom:0 !important;}
+.auth-zone{border-top:1px solid var(--border);padding:12px 14px 14px;background:var(--surface2);}
+
+/* --- Logged OUT --- */
+.auth-login-wrap{text-align:center;}
+.auth-tagline{font-size:11px;color:var(--ink4);font-weight:600;margin-bottom:8px;letter-spacing:.03em;}
+.btn-google{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:9px 12px;background:#fff;border:1.5px solid #dadce0;border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-b);font-size:13px;font-weight:600;color:#3c4043;transition:all .15s;box-shadow:0 1px 3px rgba(0,0,0,.08);}
+.btn-google:hover{box-shadow:0 2px 8px rgba(66,133,244,.2);border-color:#4285f4;}
+.btn-google:active{transform:scale(.98);}
+.btn-google svg{width:16px;height:16px;flex-shrink:0;}
+.btn-email-auth{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;padding:8px 12px;background:transparent;border:1.5px solid var(--border2);border-radius:var(--radius-sm);cursor:pointer;font-family:var(--font-b);font-size:12px;font-weight:600;color:var(--ink3);margin-top:6px;transition:all .15s;}
+.btn-email-auth:hover{border-color:var(--teal);color:var(--teal);}
+.auth-divider{display:flex;align-items:center;gap:8px;margin:8px 0;font-size:11px;color:var(--ink4);}
+.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* --- Logged IN --- */
+.auth-user-card{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius-sm);margin-bottom:8px;cursor:default;}
+.auth-avatar{width:30px;height:30px;border-radius:50%;object-fit:cover;border:2px solid var(--teal);flex-shrink:0;}
+.auth-avatar-ph{width:30px;height:30px;border-radius:50%;background:var(--teal);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:800;flex-shrink:0;}
+.auth-info{flex:1;min-width:0;}
+.auth-name{font-size:12px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.auth-email-lbl{font-size:10px;color:var(--ink4);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sync-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.sync-badge{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:20px;}
+.sync-badge.ok{background:var(--teal-light);color:var(--teal);}
+.sync-badge.busy{background:var(--amber-light);color:var(--amber);}
+.sync-badge.err{background:var(--rose-light);color:var(--rose);}
+.sync-badge.offline{background:var(--bg2);color:var(--ink3);}
+.spin{display:inline-block;width:9px;height:9px;border:2px solid rgba(217,119,6,.3);border-top-color:var(--amber);border-radius:50%;animation:_spin .7s linear infinite;}
+@keyframes _spin{to{transform:rotate(360deg)}}
+.btn-signout{width:100%;padding:7px;background:transparent;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:11px;font-weight:600;color:var(--ink4);font-family:var(--font-b);transition:all .15s;}
+.btn-signout:hover{border-color:var(--rose);color:var(--rose);}
+
+/* ─ MODALS ─ */
+.fb-modal-overlay{display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center;padding:16px;}
+.fb-modal-overlay.open{display:flex;}
+.fb-modal{background:var(--surface);border-radius:var(--radius);padding:22px 22px 18px;width:100%;max-width:400px;box-shadow:var(--shadow-lg);max-height:92vh;overflow-y:auto;}
+.fb-modal-title{font-family:var(--font-d);font-weight:800;font-size:17px;color:var(--ink);margin-bottom:3px;}
+.fb-modal-sub{font-size:12px;color:var(--ink3);margin-bottom:16px;line-height:1.5;}
+.fb-field{margin-bottom:10px;}
+.fb-field label{display:block;font-size:11px;font-weight:700;color:var(--ink3);margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em;}
+.fb-field input{width:100%;padding:9px 12px;border:1.5px solid var(--border2);border-radius:var(--radius-sm);font-size:13px;font-family:var(--font-b);color:var(--ink);background:var(--surface2);outline:none;transition:border-color .15s;}
+.fb-field input:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.1);}
+.fb-field input.err-inp{border-color:var(--rose);}
+.fb-modal-actions{display:flex;gap:8px;margin-top:14px;}
+.fb-info-box{background:var(--amber-light);border:1.5px solid #fde68a;border-radius:var(--radius-sm);padding:10px 12px;font-size:12px;color:#78350f;margin-bottom:14px;line-height:1.7;}
+.fb-info-box a{color:#92400e;font-weight:700;}
+.fb-err-msg{font-size:12px;color:var(--rose);margin-top:4px;font-weight:600;}
+.fb-config-link{text-align:center;margin-top:8px;}
+.fb-config-link button{background:none;border:none;cursor:pointer;font-size:11px;color:var(--ink4);text-decoration:underline;font-family:var(--font-b);}
+.fb-config-link button:hover{color:var(--teal);}
+.fb-tabs{display:flex;background:var(--bg2);border-radius:6px;padding:3px;margin-bottom:14px;}
+.fb-tab{flex:1;padding:7px;border-radius:4px;border:none;background:transparent;cursor:pointer;font-family:var(--font-b);font-size:12px;font-weight:600;color:var(--ink3);transition:all .15s;}
+.fb-tab.active{background:var(--surface);color:var(--teal);box-shadow:var(--shadow-sm);}
+
+/* ─ SETUP GUIDE in Config Modal ─ */
+.fb-steps{counter-reset:fb-step;list-style:none;padding:0;}
+.fb-steps li{counter-increment:fb-step;display:flex;gap:8px;margin-bottom:8px;font-size:12px;line-height:1.5;color:var(--ink2);}
+.fb-steps li::before{content:counter(fb-step);display:flex;align-items:center;justify-content:center;min-width:20px;height:20px;background:var(--teal);color:#fff;border-radius:50%;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px;}
 </style>
 </head>
 <body>
@@ -716,7 +783,127 @@ tr.row-selected{outline:none;}
     <div class="nav-item" onclick="showPanel('writing')"><span class="ni">✍️</span>Writing</div>
     <div class="nav-item" onclick="showPanel('progress')"><span class="ni">📊</span>Tiến độ</div>
   </nav>
+
+  <!-- ══ AUTH ZONE ══ -->
+  <div class="auth-zone" id="auth-zone">
+
+    <!-- LOGGED OUT -->
+    <div id="ui-logged-out" class="auth-login-wrap">
+      <div class="auth-tagline">☁️ Đồng bộ đám mây miễn phí</div>
+      <button class="btn-google" onclick="fbSignInGoogle()">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+          <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+          <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+          <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+        </svg>
+        Đăng nhập với Google
+      </button>
+      <div class="auth-divider">hoặc</div>
+      <button class="btn-email-auth" onclick="openEmailAuthModal()">✉️ Email / Mật khẩu</button>
+      <div class="fb-config-link">
+        <button onclick="openConfigModal()">⚙️ Cấu hình Firebase</button>
+      </div>
+    </div>
+
+    <!-- LOGGED IN -->
+    <div id="ui-logged-in" style="display:none">
+      <div class="auth-user-card">
+        <img id="auth-av-img" class="auth-avatar" src="" alt="" style="display:none" onerror="this.style.display='none';document.getElementById('auth-av-ph').style.display='flex'">
+        <div id="auth-av-ph" class="auth-avatar-ph">👤</div>
+        <div class="auth-info">
+          <div class="auth-name" id="auth-name-lbl">—</div>
+          <div class="auth-email-lbl" id="auth-email-lbl">—</div>
+        </div>
+      </div>
+      <div class="sync-row">
+        <div class="sync-badge ok" id="sync-badge">✅ Đã đồng bộ</div>
+        <button onclick="fbManualSync()" title="Đồng bộ ngay" style="background:none;border:none;cursor:pointer;font-size:16px;color:var(--ink3)">🔄</button>
+      </div>
+      <button class="btn-signout" onclick="fbSignOut()">Đăng xuất</button>
+    </div>
+
+  </div>
 </aside>
+
+<!-- ════════════════════════════════
+     FIREBASE CONFIG MODAL
+════════════════════════════════ -->
+<div class="fb-modal-overlay" id="modal-config">
+  <div class="fb-modal">
+    <div class="fb-modal-title">🔥 Cấu hình Firebase</div>
+    <div class="fb-modal-sub">Dán config từ Firebase Console để bật đồng bộ đám mây.</div>
+    <div class="fb-info-box">
+      <strong>📋 Hướng dẫn tạo project (miễn phí, ~3 phút):</strong>
+      <ol class="fb-steps" style="margin-top:6px">
+        <li>Vào <a href="https://console.firebase.google.com" target="_blank">console.firebase.google.com</a> → <strong>Add project</strong></li>
+        <li><strong>Build → Authentication</strong> → Sign-in method → bật <strong>Google</strong> và/hoặc <strong>Email/Password</strong></li>
+        <li><strong>Build → Firestore Database</strong> → Create database → chọn region</li>
+        <li>Project Settings ⚙️ → <strong>Add app</strong> (Web) → Copy <code>firebaseConfig</code></li>
+      </ol>
+    </div>
+    <div class="fb-field"><label>API Key *</label><input id="cfg-apiKey" placeholder="AIzaSy..."></div>
+    <div class="fb-field"><label>Auth Domain *</label><input id="cfg-authDomain" placeholder="your-app.firebaseapp.com"></div>
+    <div class="fb-field"><label>Project ID *</label><input id="cfg-projectId" placeholder="your-app-123"></div>
+    <div class="fb-field"><label>Storage Bucket</label><input id="cfg-storageBucket" placeholder="your-app.appspot.com"></div>
+    <div class="fb-field"><label>Messaging Sender ID</label><input id="cfg-messagingSenderId" placeholder="123456789012"></div>
+    <div class="fb-field"><label>App ID</label><input id="cfg-appId" placeholder="1:123:web:abc..."></div>
+    <div id="cfg-err" class="fb-err-msg" style="display:none"></div>
+    <div class="fb-modal-actions">
+      <button class="btn btn-outline" style="flex:1" onclick="closeConfigModal()">Hủy</button>
+      <button class="btn btn-primary" style="flex:2" onclick="saveAndConnectFirebase()">💾 Lưu & Kết nối</button>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:10px">
+      <button onclick="pasteFbConfig()" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--teal);font-family:var(--font-b)">📋 Dán JSON config</button>
+      <button onclick="clearFbConfig()" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--rose);font-family:var(--font-b)">🗑 Xóa config</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     EMAIL AUTH MODAL
+════════════════════════════════ -->
+<div class="fb-modal-overlay" id="modal-email-auth">
+  <div class="fb-modal">
+    <div class="fb-modal-title">✉️ Đăng nhập / Đăng ký</div>
+    <div class="fb-modal-sub">Dùng email & mật khẩu để đồng bộ dữ liệu.</div>
+    <div class="fb-tabs">
+      <button class="fb-tab active" id="tab-signin-btn" onclick="switchEmailTab('signin')">Đăng nhập</button>
+      <button class="fb-tab" id="tab-signup-btn" onclick="switchEmailTab('signup')">Đăng ký</button>
+      <button class="fb-tab" id="tab-reset-btn" onclick="switchEmailTab('reset')">Quên mật khẩu</button>
+    </div>
+    <!-- Sign In -->
+    <div id="tab-signin">
+      <div class="fb-field"><label>Email</label><input id="si-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="fb-field"><label>Mật khẩu</label><input id="si-pass" type="password" placeholder="••••••••" autocomplete="current-password" onkeydown="if(event.key==='Enter')fbSignInEmail()"></div>
+      <div id="si-err" class="fb-err-msg" style="display:none"></div>
+      <div class="fb-modal-actions">
+        <button class="btn btn-outline" style="flex:1" onclick="closeEmailAuthModal()">Hủy</button>
+        <button class="btn btn-primary" style="flex:2" id="si-btn" onclick="fbSignInEmail()">Đăng nhập →</button>
+      </div>
+    </div>
+    <!-- Sign Up -->
+    <div id="tab-signup" style="display:none">
+      <div class="fb-field"><label>Tên hiển thị</label><input id="su-name" placeholder="Nguyễn Văn A"></div>
+      <div class="fb-field"><label>Email</label><input id="su-email" type="email" placeholder="you@example.com" autocomplete="email"></div>
+      <div class="fb-field"><label>Mật khẩu (≥6 ký tự)</label><input id="su-pass" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter')fbSignUp()"></div>
+      <div id="su-err" class="fb-err-msg" style="display:none"></div>
+      <div class="fb-modal-actions">
+        <button class="btn btn-outline" style="flex:1" onclick="closeEmailAuthModal()">Hủy</button>
+        <button class="btn btn-primary" style="flex:2" id="su-btn" onclick="fbSignUp()">Tạo tài khoản →</button>
+      </div>
+    </div>
+    <!-- Reset -->
+    <div id="tab-reset" style="display:none">
+      <div class="fb-field"><label>Email đã đăng ký</label><input id="rs-email" type="email" placeholder="you@example.com"></div>
+      <div id="rs-msg" class="fb-err-msg" style="display:none"></div>
+      <div class="fb-modal-actions">
+        <button class="btn btn-outline" style="flex:1" onclick="closeEmailAuthModal()">Hủy</button>
+        <button class="btn btn-primary" style="flex:2" onclick="fbResetPassword()">Gửi email reset →</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- MOBILE NAV -->
 <nav class="mob-nav">
@@ -6056,6 +6243,659 @@ function saveWrGeminiKey(){ saveWrKey(); }
 function buildWritingEvalHtml(r){ return buildEvalCard(r); }
 function wrErrorHtml(msg,st){ return wrErrCard({message:msg,status:st}); }
 
+
+/* ╔══════════════════════════════════════════════════════════════╗
+   ║            FIREBASE ENGINE — SpeakUp v40                    ║
+   ║  • Config mẫu sẵn, user chỉ cần thay bằng project thật     ║
+   ║  • Auth: Google + Email/Password                            ║
+   ║  • Firestore: primary storage, localStorage là backup       ║
+   ║  • Realtime sync đa thiết bị                               ║
+   ║  • Offline persistence (Firestore cache)                    ║
+   ║  • Auto-migrate localStorage → Firebase lần đầu đăng nhập  ║
+   ╚══════════════════════════════════════════════════════════════╝ */
+
+/* ─────────────────────────────────────────────
+   CONFIG — Thay bằng config Firebase thật của bạn
+   Hoặc user nhập qua modal ⚙️ Cấu hình Firebase
+───────────────────────────────────────────── */
+const FB_DEMO_CONFIG = {
+  // ⚠️  ĐÂY LÀ CONFIG MẪU — CHƯA HẠT ĐỘNG
+  // Thay bằng config thật từ Firebase Console của bạn:
+  //   Project Settings → Add app (Web) → Copy firebaseConfig
+  apiKey:            "YOUR_API_KEY",
+  authDomain:        "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId:         "YOUR_PROJECT_ID",
+  storageBucket:     "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId:             "YOUR_APP_ID",
+};
+
+const FB_CFG_LS_KEY = 'speakup_fb_cfg_v1'; // key lưu config vào localStorage
+
+/* ─── Lấy config: ưu tiên localStorage, fallback demo ─── */
+function getFbConfig(){
+  try{
+    const s = localStorage.getItem(FB_CFG_LS_KEY);
+    if(s){
+      const c = JSON.parse(s);
+      if(c && c.apiKey && !c.apiKey.startsWith('YOUR_') && c.projectId && !c.projectId.startsWith('YOUR_')) return c;
+    }
+  }catch(_){}
+  return null; // null = chưa có config thật
+}
+
+function isRealConfig(cfg){ return cfg && cfg.apiKey && !cfg.apiKey.startsWith('YOUR_'); }
+
+/* ─── FIREBASE instances ─── */
+let _app=null, _auth=null, _db=null, _user=null, _fbReady=false;
+let _unsubVocab=null, _unsubMeta=null;
+let _syncTimer=null, _syncPending=false;
+
+/* ─────────────────────────────────────────────
+   INIT FIREBASE
+───────────────────────────────────────────── */
+async function initFirebase(cfg){
+  if(!isRealConfig(cfg)){
+    console.info('[FB] Chưa có config thật — chạy offline mode.');
+    return;
+  }
+  try{
+    // Xóa app cũ nếu đã khởi tạo
+    if(_app){ try{ await _app.delete(); }catch(_){} }
+
+    _app  = firebase.initializeApp(cfg, 'speakup');
+    _auth = _app.auth();
+    _db   = _app.firestore();
+
+    // Bật persistence (offline cache) — ignore lỗi multi-tab
+    try{ await _db.enablePersistence({ synchronizeTabs: true }); }
+    catch(e){ if(e.code !== 'failed-precondition' && e.code !== 'unimplemented') throw e; }
+
+    _fbReady = true;
+
+    // Nghe trạng thái auth
+    _auth.onAuthStateChanged(_onAuthChange);
+
+    // Nghe online/offline để cập nhật badge
+    window.addEventListener('online',  ()=>{ if(_user) setSyncBadge('ok','✅ Online'); });
+    window.addEventListener('offline', ()=>setSyncBadge('offline','📶 Offline'));
+
+    console.log('[FB] Init ✅', cfg.projectId);
+  }catch(e){
+    console.error('[FB] Init error:', e);
+    showToast('❌ Firebase lỗi: ' + e.message, 'error');
+    _fbReady = false;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   AUTH STATE HANDLER
+───────────────────────────────────────────── */
+async function _onAuthChange(user){
+  _user = user;
+  if(user){
+    _renderLoggedIn(user);
+    setSyncBadge('busy','🔄 Đang tải...');
+    await _loadFromFirestore();
+    _startListeners();
+  } else {
+    _renderLoggedOut();
+    _stopListeners();
+  }
+}
+
+/* ─── UI helpers ─── */
+function _renderLoggedIn(u){
+  document.getElementById('ui-logged-out').style.display='none';
+  document.getElementById('ui-logged-in').style.display='block';
+  document.getElementById('auth-name-lbl').textContent  = u.displayName || u.email || 'Người dùng';
+  document.getElementById('auth-email-lbl').textContent = u.email || '';
+  const img=document.getElementById('auth-av-img'), ph=document.getElementById('auth-av-ph');
+  if(u.photoURL){ img.src=u.photoURL; img.style.display='block'; ph.style.display='none'; }
+  else { img.style.display='none'; ph.style.display='flex'; ph.textContent=(u.displayName||u.email||'U')[0].toUpperCase(); }
+}
+function _renderLoggedOut(){
+  document.getElementById('ui-logged-out').style.display='block';
+  document.getElementById('ui-logged-in').style.display='none';
+}
+function setSyncBadge(state, text){
+  const b=document.getElementById('sync-badge'); if(!b)return;
+  b.className='sync-badge '+state;
+  b.innerHTML = state==='busy'?`<span class="spin"></span> ${text}`:text;
+}
+
+/* ─────────────────────────────────────────────
+   FIRESTORE PATHS
+───────────────────────────────────────────── */
+const _col = {
+  vocab : uid => _db.collection('users').doc(uid).collection('vocab'),
+  meta  : uid => _db.collection('users').doc(uid).collection('_meta'),
+};
+const _doc = {
+  stats  : uid => _col.meta(uid).doc('stats'),
+  topics : uid => _col.meta(uid).doc('topics'),
+  rdp    : uid => _col.meta(uid).doc('rdpState'),
+};
+
+/* ─────────────────────────────────────────────
+   LOAD DATA FROM FIRESTORE (lần đăng nhập đầu)
+───────────────────────────────────────────── */
+async function _loadFromFirestore(){
+  if(!_user || !_db) return;
+  const uid = _user.uid;
+  try{
+    const [statsSnap, topicsSnap, vocabSnap] = await Promise.all([
+      _doc.stats(uid).get(),
+      _doc.topics(uid).get(),
+      _col.vocab(uid).orderBy('_createdAt','asc').get(),
+    ]);
+
+    const hasCloudData = !vocabSnap.empty || statsSnap.exists;
+
+    if(hasCloudData){
+      // ── Cloud có data → load về ──
+      if(statsSnap.exists)  S.stats  = {...S.stats, ...statsSnap.data()};
+      if(topicsSnap.exists) S.topics = topicsSnap.data().topics || S.topics;
+      if(!vocabSnap.empty){
+        S.vocab = vocabSnap.docs.map(d=>{ const r={id:d.id,...d.data()}; delete r._createdAt; delete r._updatedAt; return r; });
+        S.vocab.forEach(v=>{ if(v.topic&&!S.topics[v.topic]) S.topics[v.topic]={desc:''}; });
+      }
+      updStats(); renderTopics(); renderVocabList(); renderWeekCal();
+      setSyncBadge('ok','✅ Đồng bộ xong');
+      showToast('☁️ Đã tải dữ liệu từ Firebase!');
+    } else {
+      // ── Cloud rỗng → migrate localStorage lên ──
+      if(S.vocab.length > 0){
+        setSyncBadge('busy','⬆️ Đang upload...');
+        await _migrateToCloud(uid);
+        showToast('☁️ Đã đồng bộ '+S.vocab.length+' từ lên Firebase!');
+      } else {
+        setSyncBadge('ok','✅ Sẵn sàng');
+      }
+    }
+  }catch(e){
+    console.error('[FB] Load error:',e);
+    setSyncBadge('err','❌ Lỗi tải');
+    showToast('❌ Lỗi tải dữ liệu: '+e.message,'error');
+  }
+}
+
+/* ─────────────────────────────────────────────
+   MIGRATE localStorage → FIRESTORE
+───────────────────────────────────────────── */
+async function _migrateToCloud(uid){
+  try{
+    // Lưu meta
+    const mb = _db.batch();
+    mb.set(_doc.stats(uid),  {...S.stats, _migratedAt: firebase.firestore.FieldValue.serverTimestamp()});
+    mb.set(_doc.topics(uid), {topics: S.topics});
+    await mb.commit();
+
+    // Lưu vocab theo chunks 400
+    const CHUNK=400;
+    for(let i=0;i<S.vocab.length;i+=CHUNK){
+      const b=_db.batch();
+      S.vocab.slice(i,i+CHUNK).forEach(v=>{
+        const ref=_col.vocab(uid).doc(String(v.id));
+        b.set(ref,{...v, _createdAt:firebase.firestore.FieldValue.serverTimestamp(), _updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      });
+      await b.commit();
+    }
+    setSyncBadge('ok','✅ Upload xong');
+  }catch(e){
+    setSyncBadge('err','❌ Lỗi upload');
+    throw e;
+  }
+}
+
+/* ─────────────────────────────────────────────
+   REALTIME LISTENERS
+───────────────────────────────────────────── */
+function _startListeners(){
+  if(!_user||!_db) return;
+  _stopListeners();
+  const uid=_user.uid;
+
+  // Vocab listener
+  _unsubVocab = _col.vocab(uid).orderBy('_createdAt','asc').onSnapshot(snap=>{
+    // Chỉ cập nhật khi có thay đổi thực sự từ server (không phải local write pending)
+    const serverChanges = snap.docChanges().filter(ch=> !ch.doc.metadata.hasPendingWrites && !ch.doc.metadata.fromCache);
+    if(serverChanges.length){
+      S.vocab = snap.docs.map(d=>{ const r={id:d.id,...d.data()}; delete r._createdAt; delete r._updatedAt; return r; });
+      updStats(); renderTopics(); renderVocabList();
+      setSyncBadge('ok','✅ Đã cập nhật');
+    }
+  }, e=>{ console.warn('[FB] vocab listener:',e); setSyncBadge('err','⚠️ Mất kết nối'); });
+
+  // Meta (stats, topics) listener
+  _unsubMeta = _doc.stats(uid).onSnapshot(snap=>{
+    if(snap.exists && !snap.metadata.hasPendingWrites){
+      const d=snap.data(); delete d._migratedAt; delete d._updatedAt;
+      S.stats={...S.stats,...d};
+      updStats();
+    }
+  }, e=>console.warn('[FB] meta listener:',e));
+}
+
+function _stopListeners(){
+  if(_unsubVocab){ _unsubVocab(); _unsubVocab=null; }
+  if(_unsubMeta){  _unsubMeta();  _unsubMeta=null; }
+}
+
+/* ─────────────────────────────────────────────
+   DEBOUNCED SAVE (tránh write storm)
+───────────────────────────────────────────── */
+function _scheduleCloudSave(){
+  if(!_user||!_fbReady) return;
+  _syncPending=true;
+  clearTimeout(_syncTimer);
+  setSyncBadge('busy','💾 Đang lưu...');
+  _syncTimer=setTimeout(async ()=>{
+    try{
+      await _cloudSaveMeta(_user.uid);
+      _syncPending=false;
+      setSyncBadge('ok','✅ Đã lưu');
+    }catch(e){
+      console.error('[FB] Scheduled save error:',e);
+      setSyncBadge('err','❌ Lỗi lưu');
+    }
+  }, 1500);
+}
+
+async function _cloudSaveMeta(uid){
+  const b=_db.batch();
+  b.set(_doc.stats(uid),  {...S.stats, _updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+  b.set(_doc.topics(uid), {topics:S.topics, _updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+  await b.commit();
+}
+
+/* ─────────────────────────────────────────────
+   FIRESTORE WORD OPS
+───────────────────────────────────────────── */
+async function _cloudAddWord(v){
+  if(!_user||!_db) return;
+  try{
+    await _col.vocab(_user.uid).doc(String(v.id)).set({
+      ...v,
+      _createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+      _updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+    });
+  }catch(e){ console.error('[FB] addWord:',e); }
+}
+
+async function _cloudUpdateWord(v){
+  if(!_user||!_db) return;
+  try{
+    await _col.vocab(_user.uid).doc(String(v.id)).set(
+      {...v, _updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true}
+    );
+  }catch(e){ console.error('[FB] updateWord:',e); }
+}
+
+async function _cloudDeleteWord(id){
+  if(!_user||!_db) return;
+  try{ await _col.vocab(_user.uid).doc(String(id)).delete(); }
+  catch(e){ console.error('[FB] deleteWord:',e); }
+}
+
+async function _cloudDeleteWords(ids){
+  if(!_user||!_db||!ids.length) return;
+  try{
+    const CHUNK=400;
+    for(let i=0;i<ids.length;i+=CHUNK){
+      const b=_db.batch();
+      ids.slice(i,i+CHUNK).forEach(id=>b.delete(_col.vocab(_user.uid).doc(String(id))));
+      await b.commit();
+    }
+  }catch(e){ console.error('[FB] deleteWords:',e); }
+}
+
+/* ─────────────────────────────────────────────
+   MONKEY-PATCH APP FUNCTIONS → thêm cloud sync
+───────────────────────────────────────────── */
+
+/* save() — gọi localStorage save + schedule cloud save */
+const _origSave = save;
+window.save = function(){
+  _origSave();
+  _scheduleCloudSave();
+};
+
+/* addV() — thêm từ mới vào Firestore */
+const _origAddV = addV;
+window.addV = function(d){
+  _origAddV(d);
+  const v = S.vocab[S.vocab.length-1];
+  if(v) _cloudAddWord(v);
+};
+
+/* confirmImport() — sau import bulk, upload toàn bộ lên cloud */
+const _origConfirmImport = window.confirmImport;
+window.confirmImport = async function(){
+  _origConfirmImport && _origConfirmImport();
+  if(_user && _fbReady){
+    setSyncBadge('busy','⬆️ Uploading...');
+    try{ await _migrateToCloud(_user.uid); }
+    catch(e){ setSyncBadge('err','❌ Upload lỗi'); }
+  }
+};
+
+/* saveWord() — edit từ → update Firestore */
+const _origSaveWord = window.saveWord;
+window.saveWord = function(){
+  _origSaveWord && _origSaveWord();
+  const id = document.getElementById('edit-word-id')?.value;
+  if(id){
+    const v=S.vocab.find(x=>String(x.id)===String(id));
+    if(v) _cloudUpdateWord(v);
+  }
+};
+
+/* toggleStar / toggleStarDetail → update Firestore */
+function _patchStar(fnName){
+  const orig=window[fnName];
+  window[fnName]=function(id){
+    orig&&orig(id);
+    const v=S.vocab.find(x=>String(x.id)===String(id));
+    if(v) _cloudUpdateWord(v);
+  };
+}
+_patchStar('toggleStar');
+_patchStar('toggleStarDetail');
+
+/* openConfirm wrapper factory — inject cloud delete after confirm callback */
+function _wrapConfirmForDelete(mainFn, getIdsBeforeCall){
+  const orig=window[mainFn];
+  window[mainFn]=function(...args){
+    const ids = getIdsBeforeCall ? getIdsBeforeCall(...args) : [];
+    const _origOC=window.openConfirm;
+    window.openConfirm=function(icon,title,msg,cb){
+      _origOC(icon,title,msg,async function(){
+        await cb();
+        if(_user&&_fbReady&&ids.length) await _cloudDeleteWords(ids);
+        else if(_user&&_fbReady&&args[0]) await _cloudDeleteWord(args[0]);
+        _scheduleCloudSave();
+      });
+      window.openConfirm=_origOC;
+    };
+    orig&&orig(...args);
+  };
+}
+
+// Delete single word
+_wrapConfirmForDelete('confirmDeleteWord', id=>[ id ]);
+
+// Delete selected (bulk)
+const _origCDS=window.confirmDeleteSelected;
+window.confirmDeleteSelected=function(){
+  const ids=[...document.querySelectorAll('.vocab-check:checked')].map(cb=>cb.dataset.id);
+  const _origOC=window.openConfirm;
+  window.openConfirm=function(icon,title,msg,cb){
+    _origOC(icon,title,msg,async function(){
+      await cb();
+      if(_user&&_fbReady&&ids.length) await _cloudDeleteWords(ids);
+    });
+    window.openConfirm=_origOC;
+  };
+  _origCDS&&_origCDS();
+};
+
+// Delete topic (xóa toàn bộ vocab trong topic)
+function _wrapDeleteTopic(fnName){
+  const orig=window[fnName];
+  window[fnName]=function(name){
+    const topicName=name||S.currentTopic;
+    const ids=S.vocab.filter(v=>v.topic===topicName).map(v=>v.id);
+    const _origOC=window.openConfirm;
+    window.openConfirm=function(icon,title,msg,cb){
+      _origOC(icon,title,msg,async function(){
+        await cb();
+        if(_user&&_fbReady){
+          await _cloudDeleteWords(ids);
+          _scheduleCloudSave();
+        }
+      });
+      window.openConfirm=_origOC;
+    };
+    orig&&orig(name);
+  };
+}
+_wrapDeleteTopic('confirmDeleteTopicByName');
+_wrapDeleteTopic('confirmDeleteTopic');
+
+/* saveTopicModal() — rename topic → update tất cả vocab docs + topics meta */
+const _origSTM=window.saveTopicModal;
+window.saveTopicModal=function(){
+  _origSTM&&_origSTM();
+  if(_user&&_fbReady){
+    setTimeout(async()=>{
+      try{
+        await _cloudSaveMeta(_user.uid);
+        // Cập nhật topic field trong tất cả vocab docs
+        const CHUNK=400;
+        for(let i=0;i<S.vocab.length;i+=CHUNK){
+          const b=_db.batch();
+          S.vocab.slice(i,i+CHUNK).forEach(v=>{
+            b.set(_col.vocab(_user.uid).doc(String(v.id)),
+              {topic:v.topic,_updatedAt:firebase.firestore.FieldValue.serverTimestamp()}, {merge:true});
+          });
+          await b.commit();
+        }
+        setSyncBadge('ok','✅ Đồng bộ');
+      }catch(e){ console.error('[FB] rename topic:',e); }
+    },300);
+  }
+};
+
+/* saveRdpState() — lưu roadmap state lên Firestore */
+const _origSRdp=window.saveRdpState;
+window.saveRdpState=function(state){
+  _origSRdp&&_origSRdp(state);
+  if(_user&&_db){
+    _doc.rdp(_user.uid)
+      .set({state,_updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true})
+      .catch(e=>console.warn('[FB] rdp save:',e));
+  }
+};
+
+/* ─────────────────────────────────────────────
+   MANUAL SYNC BUTTON
+───────────────────────────────────────────── */
+async function fbManualSync(){
+  if(!_user||!_fbReady){ showToast('⚠️ Chưa đăng nhập','warn'); return; }
+  setSyncBadge('busy','🔄 Đang sync...');
+  try{
+    await _cloudSaveMeta(_user.uid);
+    // Re-upload tất cả vocab (force sync)
+    await _migrateToCloud(_user.uid);
+    showToast('✅ Đồng bộ hoàn tất!');
+  }catch(e){
+    setSyncBadge('err','❌ Sync lỗi');
+    showToast('❌ Sync lỗi: '+e.message,'error');
+  }
+}
+
+/* ─────────────────────────────────────────────
+   SIGN IN / OUT
+───────────────────────────────────────────── */
+async function fbSignInGoogle(){
+  if(!_fbReady){ openConfigModal(); showToast('⚙️ Nhập Firebase config trước','warn'); return; }
+  try{
+    const p=new firebase.auth.GoogleAuthProvider();
+    p.setCustomParameters({prompt:'select_account'});
+    await _auth.signInWithPopup(p);
+  }catch(e){
+    if(e.code!=='auth/popup-closed-by-user')
+      showToast('❌ Đăng nhập lỗi: '+e.message,'error');
+  }
+}
+
+async function fbSignInEmail(){
+  if(!_fbReady){ openConfigModal(); return; }
+  const email=document.getElementById('si-email').value.trim();
+  const pass =document.getElementById('si-pass').value;
+  const errEl=document.getElementById('si-err');
+  errEl.style.display='none';
+  if(!email||!pass){ errEl.textContent='Vui lòng nhập email và mật khẩu.'; errEl.style.display='block'; return; }
+  const btn=document.getElementById('si-btn');
+  btn.disabled=true; btn.textContent='⏳ Đang đăng nhập...';
+  try{
+    await _auth.signInWithEmailAndPassword(email,pass);
+    closeEmailAuthModal();
+  }catch(e){
+    const msg={
+      'auth/user-not-found':'Email chưa đăng ký.',
+      'auth/wrong-password':'Mật khẩu không đúng.',
+      'auth/invalid-email':'Email không hợp lệ.',
+      'auth/too-many-requests':'Quá nhiều lần thử. Vui lòng chờ.',
+    }[e.code]||e.message;
+    errEl.textContent=msg; errEl.style.display='block';
+  }finally{ btn.disabled=false; btn.textContent='Đăng nhập →'; }
+}
+
+async function fbSignUp(){
+  if(!_fbReady){ openConfigModal(); return; }
+  const name =document.getElementById('su-name').value.trim();
+  const email=document.getElementById('su-email').value.trim();
+  const pass =document.getElementById('su-pass').value;
+  const errEl=document.getElementById('su-err');
+  errEl.style.display='none';
+  if(!email||!pass){ errEl.textContent='Vui lòng nhập email và mật khẩu.'; errEl.style.display='block'; return; }
+  if(pass.length<6){ errEl.textContent='Mật khẩu phải có ít nhất 6 ký tự.'; errEl.style.display='block'; return; }
+  const btn=document.getElementById('su-btn');
+  btn.disabled=true; btn.textContent='⏳ Đang tạo...';
+  try{
+    const cred=await _auth.createUserWithEmailAndPassword(email,pass);
+    if(name) await cred.user.updateProfile({displayName:name});
+    closeEmailAuthModal();
+    showToast('🎉 Tạo tài khoản thành công!');
+  }catch(e){
+    const msg={
+      'auth/email-already-in-use':'Email này đã được đăng ký.',
+      'auth/invalid-email':'Email không hợp lệ.',
+      'auth/weak-password':'Mật khẩu quá yếu.',
+    }[e.code]||e.message;
+    errEl.textContent=msg; errEl.style.display='block';
+  }finally{ btn.disabled=false; btn.textContent='Tạo tài khoản →'; }
+}
+
+async function fbResetPassword(){
+  const email=document.getElementById('rs-email').value.trim();
+  const msg=document.getElementById('rs-msg');
+  msg.style.display='none';
+  if(!email){ msg.textContent='Nhập email của bạn.'; msg.style.color='var(--rose)'; msg.style.display='block'; return; }
+  try{
+    await _auth.sendPasswordResetEmail(email);
+    msg.textContent='✅ Đã gửi email reset! Kiểm tra hộp thư của bạn.';
+    msg.style.color='var(--teal)'; msg.style.display='block';
+  }catch(e){
+    msg.textContent='❌ '+e.message; msg.style.color='var(--rose)'; msg.style.display='block';
+  }
+}
+
+async function fbSignOut(){
+  if(!_auth) return;
+  try{ await _auth.signOut(); showToast('👋 Đã đăng xuất'); }
+  catch(e){ showToast('❌ Lỗi đăng xuất','error'); }
+}
+
+/* ─────────────────────────────────────────────
+   CONFIG MODAL
+───────────────────────────────────────────── */
+function openConfigModal(){
+  const cfg=getFbConfig()||{};
+  ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{
+    const el=document.getElementById('cfg-'+k);
+    if(el) el.value=cfg[k]||'';
+  });
+  document.getElementById('cfg-err').style.display='none';
+  document.getElementById('modal-config').classList.add('open');
+}
+function closeConfigModal(){ document.getElementById('modal-config').classList.remove('open'); }
+
+async function saveAndConnectFirebase(){
+  const fields=['apiKey','authDomain','projectId'];
+  const cfg={};
+  let ok=true;
+  ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{
+    const val=document.getElementById('cfg-'+k).value.trim();
+    cfg[k]=val;
+    if(fields.includes(k)&&!val){ document.getElementById('cfg-'+k).classList.add('err-inp'); ok=false; }
+    else document.getElementById('cfg-'+k).classList.remove('err-inp');
+  });
+  const errEl=document.getElementById('cfg-err');
+  if(!ok){ errEl.textContent='❌ API Key, Auth Domain và Project ID là bắt buộc.'; errEl.style.display='block'; return; }
+  try{
+    localStorage.setItem(FB_CFG_LS_KEY, JSON.stringify(cfg));
+    closeConfigModal();
+    showToast('✅ Đã lưu config — Đang kết nối...');
+    await initFirebase(cfg);
+    if(_fbReady) showToast('🔥 Firebase kết nối thành công!');
+  }catch(e){
+    errEl.textContent='❌ Config không hợp lệ: '+e.message; errEl.style.display='block';
+  }
+}
+
+function clearFbConfig(){
+  localStorage.removeItem(FB_CFG_LS_KEY);
+  closeConfigModal();
+  showToast('🗑 Đã xóa config. Tải lại trang để áp dụng.','warn');
+}
+
+/* Dán JSON config từ clipboard */
+async function pasteFbConfig(){
+  try{
+    const text=await navigator.clipboard.readText();
+    // Tìm object config trong text (có thể bao bởi const firebaseConfig = {...})
+    const m=text.match(/\{[^{}]*apiKey[^{}]*\}/s);
+    if(!m){ showToast('❌ Không tìm thấy config hợp lệ trong clipboard','error'); return; }
+    // Chuyển property: "key": "val" → parse safe
+    const json=m[0].replace(/(\w+)\s*:/g,'"$1":').replace(/'/g,'"');
+    const parsed=JSON.parse(json);
+    ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{
+      const el=document.getElementById('cfg-'+k);
+      if(el&&parsed[k]) el.value=parsed[k];
+    });
+    showToast('📋 Đã dán config thành công!');
+  }catch(e){ showToast('❌ Không đọc được clipboard. Vui lòng dán tay.','error'); }
+}
+
+/* ─────────────────────────────────────────────
+   EMAIL AUTH MODAL
+───────────────────────────────────────────── */
+function openEmailAuthModal(){
+  if(!_fbReady){ openConfigModal(); showToast('⚙️ Nhập Firebase config trước','warn'); return; }
+  switchEmailTab('signin');
+  document.getElementById('modal-email-auth').classList.add('open');
+}
+function closeEmailAuthModal(){ document.getElementById('modal-email-auth').classList.remove('open'); }
+function switchEmailTab(tab){
+  ['signin','signup','reset'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display=t===tab?'block':'none';
+    document.getElementById('tab-'+t+'-btn').classList.toggle('active',t===tab);
+  });
+}
+
+/* Close modals when clicking overlay */
+document.addEventListener('click', e=>{
+  if(e.target.id==='modal-config') closeConfigModal();
+  if(e.target.id==='modal-email-auth') closeEmailAuthModal();
+});
+
+/* ─────────────────────────────────────────────
+   AUTO-BOOT FIREBASE ON PAGE LOAD
+───────────────────────────────────────────── */
+(function bootFirebase(){
+  const cfg=getFbConfig();
+  if(isRealConfig(cfg)){
+    // Có config thật → init ngay sau app bootstrap
+    document.addEventListener('DOMContentLoaded', ()=>{ initFirebase(cfg); });
+    // Fallback nếu DOMContentLoaded đã fired
+    if(document.readyState!=='loading') initFirebase(cfg);
+  }
+})();
+
+/* ══════════════════════════════════════════════ */
 
 init();
 </script>
