@@ -1388,9 +1388,14 @@ const DLGS={
 
 /* ══════════════════════════════════════════════════════════════
    SESSION PERSISTENCE — lưu/khôi phục đúng màn hình & bước đang làm
-   Key: speakup_session_v1
+   Key: speakup_session_v2_{uid} — riêng mỗi user, không bị ghi đè khi đổi tài khoản
 ══════════════════════════════════════════════════════════════ */
-const SESSION_KEY = 'speakup_session_v1';
+const SESSION_KEY = 'speakup_session_v1'; // legacy fallback — KHÔNG dùng trực tiếp nữa
+/* Trả về session key riêng theo uid — gọi thay cho SESSION_KEY ở mọi nơi */
+function _sessionKey(){
+  const uid = (typeof _currentUser !== 'undefined' && _currentUser && _currentUser.uid) ? _currentUser.uid : null;
+  return uid ? ('speakup_session_v2_' + uid) : SESSION_KEY;
+}
 
 function saveSession(){
   try{
@@ -1452,13 +1457,13 @@ function saveSession(){
       } : null,
       ts: Date.now() // dùng để hiển thị thời gian lưu nếu cần, không dùng để hết hạn
     };
-    localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    localStorage.setItem(_sessionKey(), JSON.stringify(session));
   }catch(e){ console.warn('saveSession error',e); }
 }
 
 function restoreSession(){
   try{
-    const raw = localStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(_sessionKey());
     if(!raw) return false;
     const sess = JSON.parse(raw);
 
@@ -1582,9 +1587,9 @@ function init(){
   if(!S.vocab.length){SAMPLES.forEach(addV);S.topics={'Daily Conversation':{desc:'Giao tiếp hàng ngày'},'Work & Office':{desc:'Môi trường công sở'}};}
   S.vocab.forEach(v=>{if(!S.topics[v.topic])S.topics[v.topic]={desc:''};});
   updStats(); renderTopics(); renderVocabList(); renderWeekCal();
-  // Khôi phục session — nếu không có thì ở home
-  const restored = restoreSession();
-  if(!restored) showPanel('home');
+  // init() KHÔNG tự khôi phục session vì chưa biết user là ai.
+  // Session sẽ được khôi phục trong _afterLogin() sau khi xác thực xong.
+  showPanel('home'); // hiển thị home tạm, login wall sẽ đè lên
   // Tự động lưu mỗi 5 giây và khi thoát trang
   setInterval(saveSession, 5000);
   window.addEventListener('beforeunload', saveSession);
@@ -2023,13 +2028,13 @@ function startStudy(topic,mode){
 
   // Đọc session đã lưu
   let sess = null;
-  try{ const raw=localStorage.getItem(SESSION_KEY); if(raw) sess=JSON.parse(raw); }catch(e){}
+  try{ const raw=localStorage.getItem(_sessionKey()); if(raw) sess=JSON.parse(raw); }catch(e){}
   const hasSavedSession = sess && sess.currentTopic === topic;
 
   if(isRestart){
     // "Học lại" → xóa sạch vị trí cũ
     if(sess){ sess.studyIdx=0; sess.speakingIdx=0; sess.topicQuiz=null;
-      try{localStorage.setItem(SESSION_KEY,JSON.stringify(sess));}catch(e){} }
+      try{localStorage.setItem(_sessionKey(),JSON.stringify(sess));}catch(e){} }
   }
 
   S.currentTopic = topic;
@@ -2217,13 +2222,13 @@ function fcNext(){
 /* ── Lưu vị trí flashcard vào localStorage ngay lập tức ── */
 function _saveFcPosition(){
   try{
-    const raw = localStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(_sessionKey());
     const sess = raw ? JSON.parse(raw) : {};
     sess.studyIdx     = S.study.idx;
     sess.currentTopic = S.currentTopic;
     sess.panel        = 'study';
     sess.studyTab     = 'flashcard';
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+    localStorage.setItem(_sessionKey(), JSON.stringify(sess));
   }catch(e){}
   save(); // cũng sync vào speakup4 để firebase biết
 }
@@ -2831,7 +2836,7 @@ function skipQ(){
 /* ── Lưu vị trí quiz ngay lập tức ── */
 function _saveQuizPosition(){
   try{
-    const raw = localStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(_sessionKey());
     const sess = raw ? JSON.parse(raw) : {};
     sess.currentTopic = S.currentTopic;
     sess.panel        = 'study';
@@ -2845,7 +2850,7 @@ function _saveQuizPosition(){
       missed   : S.quiz.missed||[],
       questions: (S.quiz.questions||[]).map(q=>({...q, word:{id:q.word?.id}}))
     } : null;
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+    localStorage.setItem(_sessionKey(), JSON.stringify(sess));
   }catch(e){}
 }
 
@@ -3229,13 +3234,13 @@ function prevSpeak(){
 /* ── Lưu vị trí Speaking ngay lập tức ── */
 function _saveSpkPosition(){
   try{
-    const raw = localStorage.getItem(SESSION_KEY);
+    const raw = localStorage.getItem(_sessionKey());
     const sess = raw ? JSON.parse(raw) : {};
     sess.currentTopic  = S.currentTopic;
     sess.panel         = 'study';
     sess.studyTab      = 'speaking';
     sess.speakingIdx   = S.study.idx;
-    localStorage.setItem(SESSION_KEY, JSON.stringify(sess));
+    localStorage.setItem(_sessionKey(), JSON.stringify(sess));
   }catch(e){}
   save();
 }
@@ -6865,18 +6870,28 @@ async function _afterLogin(){
 
   // Đặt lại S về rỗng để tránh trộn data cũ
   S.vocab=[];S.topics={};S.stats={streak:0,xp:0,lastDate:''};
+  S.currentTopic=null; S.study={words:[],idx:0};
+  S.quiz={questions:[],current:0,correct:0,wrong:0,lives:3,missed:[],batchIdx:0};
 
-  // ── Bước 1: Hiển thị data local NGAY LẬP TỨC (không chờ cloud) ──
+  // ── Bước 1: Load data local NGAY LẬP TỨC ──
   _loadLocalData(_currentUser.uid);
   updStats(); renderTopics(); renderVocabList(); renderWeekCal();
+
+  // ── Bước 2: Khôi phục session học dở của user này ──
+  const sessionRestored = _restoreUserSession(_currentUser.uid);
+  if(!sessionRestored) showPanel('home');
   showToast('👋 Chào mừng, '+(_currentUser.displayName||_currentUser.username)+'!');
 
-  // ── Bước 2: Load Firestore nền, cập nhật UI khi xong ──
+  // ── Bước 3: Sync Firestore nền (không block UI) ──
   if(_fbOk()){
     setSyncBadge('busy','☁️ Đang đồng bộ...');
-    // Không await — chạy nền, không block UI
     _loadUserDataFromFirestore(_currentUser.uid).then(()=>{
       _startListeners(_currentUser.uid);
+      // Sau khi có data cloud: cập nhật study.words theo topic hiện tại
+      if(S.currentTopic){
+        const updated = S.vocab.filter(v=>v.topic===S.currentTopic);
+        if(updated.length) S.study.words = updated;
+      }
     });
   } else {
     setSyncBadge('offline','💾 Dữ liệu cục bộ');
@@ -6906,6 +6921,114 @@ function _saveLocalData(uid){
       vocab:S.vocab, topics:S.topics, stats:S.stats
     }));
   }catch(_){}
+}
+
+/* ════════════════════════════════════════════════
+   RESTORE USER SESSION — khôi phục vị trí học dở
+   Đọc từ key riêng của user: speakup_session_v2_{uid}
+════════════════════════════════════════════════ */
+function _restoreUserSession(uid){
+  try{
+    const key = 'speakup_session_v2_' + uid;
+    const raw = localStorage.getItem(key);
+    if(!raw) return false;
+    const sess = JSON.parse(raw);
+
+    if(sess.currentTopic) S.currentTopic = sess.currentTopic;
+
+    // ── Khôi phục Study ──
+    if(sess.currentTopic){
+      const topicWords = S.vocab.filter(v=>v.topic===sess.currentTopic);
+      let studyIdx = Math.min(sess.studyIdx||0, Math.max(topicWords.length-1,0));
+      if(sess.studyTab==='speaking' && typeof sess.speakingIdx==='number'){
+        studyIdx = Math.min(sess.speakingIdx, Math.max(topicWords.length-1,0));
+      }
+      S.study = { words: topicWords, idx: studyIdx };
+
+      // ── Khôi phục Quiz state ──
+      if(sess.topicQuiz && sess.topicQuiz.questions && sess.topicQuiz.questions.length){
+        const tq = sess.topicQuiz;
+        const questions = tq.questions.map(sq=>{
+          const word = S.vocab.find(v=>String(v.id)===String(sq.word && sq.word.id));
+          return word ? Object.assign({},sq,{word}) : null;
+        }).filter(Boolean);
+        if(questions.length) S.quiz = Object.assign({},tq,{questions});
+      }
+    }
+
+    // ── Khôi phục Roadmap Quiz ──
+    if(sess.rdpSession && sess.rdpSession.wordIds && sess.rdpSession.wordIds.length){
+      const rs = sess.rdpSession;
+      const words = rs.wordIds.map(id=>S.vocab.find(v=>String(v.id)===String(id))).filter(Boolean);
+      if(words.length){
+        const questions = (rs.questions||[]).map(sq=>{
+          const word = S.vocab.find(v=>String(v.id)===String(sq.wordId));
+          return word ? Object.assign({},sq,{word}) : null;
+        }).filter(Boolean);
+        if(questions.length){
+          _rdpSession = {
+            words, questions,
+            current:rs.current||0, correct:rs.correct||0,
+            wrong:rs.wrong||0, lives:(rs.lives!=null?rs.lives:3),
+            extraMode:rs.extraMode||false, savedToLog:rs.savedToLog||false,
+            missed:(rs.missed||[]).map(m=>({
+              word:S.vocab.find(v=>String(v.id)===String(m.wordId)), answer:m.answer
+            })).filter(m=>m.word),
+          };
+        }
+      }
+    }
+
+    // ── Khôi phục Review ──
+    if(sess.reviewSession && sess.reviewSession.questions && sess.reviewSession.questions.length){
+      const rv = sess.reviewSession;
+      const questions = rv.questions.map(sq=>{
+        const word = S.vocab.find(v=>String(v.id)===String(sq.wordId));
+        return word ? Object.assign({},sq,{word}) : null;
+      }).filter(Boolean);
+      if(questions.length){
+        _reviewSession = {
+          questions, current:rv.current||0, correct:rv.correct||0,
+          wrong:rv.wrong||0, total:rv.total||questions.length,
+          missed:(rv.missed||[]).map(m=>({
+            word:S.vocab.find(v=>String(v.id)===String(m.wordId)), answer:m.answer
+          })).filter(m=>m.word),
+        };
+      }
+    }
+
+    // ── Điều hướng đúng panel & tab ──
+    const panel = sess.panel || 'home';
+    showPanel(panel);
+
+    if(panel==='study'){
+      const tab = sess.studyTab || 'flashcard';
+      const tabSel = '#panel-study .tabs .tab-btn[onclick*="\'' + tab + '\'"]';
+      const btn = document.querySelector(tabSel);
+      switchTab(tab, btn);
+    }
+    if(panel==='roadmap'){
+      const rdpTab = sess.rdpTab || 'plan';
+      const tabMap = ['plan','stats','quiz10','review'];
+      const tabIdx = tabMap.indexOf(rdpTab);
+      const tabBtns = document.querySelectorAll('.rdp-tab');
+      const tabBtn = tabBtns[tabIdx>=0?tabIdx:0];
+      document.querySelectorAll('.rdp-tab').forEach(b=>b.classList.remove('active'));
+      if(tabBtn) tabBtn.classList.add('active');
+      tabMap.forEach(t=>{
+        const el=document.getElementById('rdp-'+t+'-view');
+        if(el) el.style.display=t===rdpTab?'block':'none';
+      });
+      if(rdpTab==='plan') renderRdpPlan();
+      else if(rdpTab==='stats') renderRdpStats();
+      else if(rdpTab==='quiz10'){ if(_rdpSession) showRdpQuestion(); else renderRdpQuiz10(); }
+      else if(rdpTab==='review'){ if(_reviewSession) showReviewQuestion(); else renderReviewSetup(); }
+      renderRdpTopStats();
+    }
+
+    console.log('[Session] Restored for uid:', uid, '| panel:', panel, '| tab:', sess.studyTab||'-');
+    return true;
+  }catch(e){ console.warn('[Session] restore error:',e); return false; }
 }
 
 /* ── Firestore paths ── */
@@ -7080,13 +7203,18 @@ async function _cloudDeleteWords(ids){
 async function appSignOut(){
   _stopListeners();
   clearTimeout(_syncTimer);
-  // Save final state
-  if(_currentUser){ _saveLocalData(_currentUser.uid); }
+  // Lưu data + session trước khi logout (dùng đúng key của user này)
+  if(_currentUser){
+    _saveLocalData(_currentUser.uid);
+    saveSession(); // lưu session với key riêng của user
+  }
   clearAppSession();
-  _currentUser=null;
+  _currentUser=null; // đặt null SAU saveSession để _sessionKey() vẫn đúng uid
   if(_fbOk()){ try{ await _auth.signOut(); }catch(_){} }
-  // Reset state
+  // Reset state UI (KHÔNG xóa session localStorage — giữ lại để login lại khôi phục)
   S.vocab=[];S.topics={};S.stats={streak:0,xp:0,lastDate:''};
+  S.currentTopic=null; S.study={words:[],idx:0};
+  S.quiz={questions:[],current:0,correct:0,wrong:0,lives:3,missed:[],batchIdx:0};
   updStats(); renderTopics(); renderVocabList(); renderWeekCal();
   _renderLoggedOutUI();
   showLoginWall();
