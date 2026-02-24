@@ -787,6 +787,225 @@ tr.row-selected{outline:none;}
 .fb-steps{counter-reset:fb-step;list-style:none;padding:0;margin-top:6px;}
 .fb-steps li{counter-increment:fb-step;display:flex;gap:8px;margin-bottom:8px;font-size:12px;line-height:1.5;color:var(--ink2);}
 .fb-steps li::before{content:counter(fb-step);display:flex;align-items:center;justify-content:center;min-width:20px;height:20px;background:var(--teal);color:#fff;border-radius:50%;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px;}
+
+/* ═══════════════════════════════════════════════════
+   LISTENING MODULE — v45 REDESIGN
+   Màu chủ đạo: Cyan-Teal gradient
+═══════════════════════════════════════════════════ */
+.lt-mode-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+.lt-mode-tab{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:13px 6px;cursor:pointer;transition:all .2s;text-align:center;user-select:none;}
+.lt-mode-tab:hover{border-color:#0891b2;background:#ecfeff;transform:translateY(-2px);box-shadow:0 4px 12px rgba(8,145,178,.12);}
+.lt-mode-tab.active{border-color:#0891b2;background:linear-gradient(135deg,#ecfeff,#cffafe);box-shadow:0 4px 16px rgba(8,145,178,.2);}
+.lt-mode-tab-icon{font-size:22px;margin-bottom:5px;}
+.lt-mode-tab-label{font-size:11px;font-weight:800;color:var(--ink2);line-height:1.3;}
+.lt-mode-tab.active .lt-mode-tab-label{color:#0891b2;}
+.lt-setup-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.lt-topbar{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-sm);}
+.lt-pbar-wrap{flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;}
+.lt-pbar-fill{height:100%;background:linear-gradient(90deg,#0891b2,#0d9488);border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.lt-score-badge{display:flex;align-items:center;gap:5px;background:linear-gradient(135deg,#ecfeff,#cffafe);color:#0891b2;border-radius:20px;padding:4px 12px;font-size:12px;font-weight:700;border:1.5px solid rgba(8,145,178,.25);}
+
+/* Audio player card */
+.lt-audio-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:22px;margin-bottom:14px;box-shadow:var(--shadow);animation:qzIn .25s ease;}
+.lt-audio-player{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,#ecfeff,#ccfbf1);border:2px solid rgba(8,145,178,.25);border-radius:14px;padding:16px 20px;margin-bottom:18px;}
+.lt-play-btn{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#0891b2,var(--teal));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:22px;color:#fff;flex-shrink:0;box-shadow:0 4px 12px rgba(8,145,178,.35);transition:all .15s;}
+.lt-play-btn:hover{transform:scale(1.07);box-shadow:0 6px 18px rgba(8,145,178,.45);}
+.lt-play-btn:active{transform:scale(.95);}
+.lt-play-btn.playing{background:linear-gradient(135deg,var(--amber),#f59e0b);}
+.lt-audio-info{flex:1;min-width:0;}
+.lt-audio-label{font-size:12px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.lt-audio-wave{display:flex;align-items:center;gap:3px;height:28px;}
+.lt-wave-bar{width:4px;border-radius:2px;background:var(--teal);transition:height .1s;}
+.lt-wave-bar.active{animation:waveAnim .6s ease infinite alternate;}
+.lt-wave-bar:nth-child(1){animation-delay:0s;height:8px;}
+.lt-wave-bar:nth-child(2){animation-delay:.1s;height:14px;}
+.lt-wave-bar:nth-child(3){animation-delay:.2s;height:20px;}
+.lt-wave-bar:nth-child(4){animation-delay:.3s;height:12px;}
+.lt-wave-bar:nth-child(5){animation-delay:.15s;height:18px;}
+.lt-wave-bar:nth-child(6){animation-delay:.25s;height:10px;}
+.lt-wave-bar:nth-child(7){animation-delay:.05s;height:16px;}
+@keyframes waveAnim{from{height:4px}to{height:22px}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}
+.lt-speed-row{display:flex;gap:6px;margin-top:10px;}
+.lt-speed-btn{padding:4px 10px;border-radius:20px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;font-size:12px;font-weight:700;color:var(--ink3);transition:all .15s;}
+.lt-speed-btn.active{background:var(--teal);color:#fff;border-color:var(--teal);}
+.lt-speed-btn:hover:not(.active){border-color:var(--teal);color:var(--teal);}
+
+/* Fill blank exercise */
+.lt-fill-sentence{font-size:18px;font-weight:600;color:var(--ink);line-height:1.8;margin-bottom:18px;}
+.lt-fill-input{display:inline-block;border:none;border-bottom:3px solid var(--teal);background:transparent;font-size:18px;font-weight:700;color:var(--teal);text-align:center;min-width:120px;max-width:200px;outline:none;font-family:var(--font-b);padding:0 4px;}
+.lt-fill-input.correct{color:#059669;border-bottom-color:#059669;}
+.lt-fill-input.wrong{color:var(--rose);border-bottom-color:var(--rose);}
+
+/* MC options */
+.lt-opts{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
+.lt-opt{display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid var(--border);border-radius:12px;cursor:pointer;transition:all .2s;background:var(--surface);}
+.lt-opt:hover{border-color:var(--teal);background:var(--teal-light);}
+.lt-opt.correct{background:linear-gradient(135deg,#d1fae5,#ccfbf1);border-color:#6ee7b7;pointer-events:none;}
+.lt-opt.wrong{background:linear-gradient(135deg,#ffe4e6,#fce7f3);border-color:#fda4af;pointer-events:none;}
+.lt-opt-letter{width:30px;height:30px;border-radius:8px;background:var(--bg2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;color:var(--ink3);}
+.lt-opt.correct .lt-opt-letter{background:#059669;color:#fff;}
+.lt-opt.wrong .lt-opt-letter{background:var(--rose);color:#fff;}
+.lt-opt-text{font-size:15px;font-weight:600;color:var(--ink);}
+
+/* Dialogue listening */
+.lt-dlg-line{display:flex;gap:12px;margin-bottom:14px;align-items:flex-start;}
+.lt-dlg-avatar{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:800;flex-shrink:0;margin-top:2px;}
+.lt-dlg-avatar.a{background:var(--teal-light);color:var(--teal);}
+.lt-dlg-avatar.b{background:var(--violet-light);color:var(--violet);}
+.lt-dlg-bubble{flex:1;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:12px 14px;}
+.lt-dlg-bubble.a{border-top-left-radius:4px;}
+.lt-dlg-bubble.b{border-top-right-radius:4px;}
+.lt-dlg-text{font-size:15px;color:var(--ink);margin-bottom:4px;line-height:1.6;}
+.lt-dlg-vi{font-size:12px;color:var(--ink4);font-style:italic;}
+.lt-dlg-play{background:none;border:none;cursor:pointer;font-size:16px;color:var(--ink4);padding:0;margin-left:6px;transition:all .15s;}
+.lt-dlg-play:hover{color:var(--teal);transform:scale(1.2);}
+
+/* Dictation */
+.lt-dict-target{font-size:15px;color:var(--ink3);font-style:italic;line-height:1.7;padding:12px 14px;background:var(--surface2);border-radius:10px;border-left:4px solid var(--teal);margin-bottom:14px;display:none;}
+.lt-dict-input{width:100%;min-height:80px;padding:14px;border:2px solid var(--border2);border-radius:12px;font-size:16px;font-family:var(--font-b);color:var(--ink);background:var(--surface2);outline:none;resize:none;transition:all .2s;}
+.lt-dict-input:focus{border-color:var(--teal);box-shadow:0 0 0 4px rgba(13,148,136,.1);background:var(--surface);}
+
+/* Result feedback */
+.lt-feedback{border-radius:14px;padding:14px 18px;margin-top:14px;animation:fadeUp .3s ease;display:flex;align-items:flex-start;gap:12px;}
+.lt-feedback.ok{background:linear-gradient(135deg,#d1fae5,#ccfbf1);border:2px solid #6ee7b7;}
+.lt-feedback.err{background:linear-gradient(135deg,#ffe4e6,#fce7f3);border:2px solid #fda4af;}
+.lt-fb-icon{font-size:24px;flex-shrink:0;}
+.lt-fb-msg{flex:1;}
+.lt-fb-title{font-weight:800;font-size:15px;margin-bottom:4px;}
+.lt-feedback.ok .lt-fb-title{color:#065f46;}
+.lt-feedback.err .lt-fb-title{color:#9f1239;}
+.lt-fb-correct{font-size:14px;color:var(--teal);font-weight:700;}
+
+/* Results screen */
+.lt-result{text-align:center;padding:24px 16px;}
+.lt-result-emoji{font-size:60px;display:block;margin-bottom:12px;}
+.lt-result-title{font-family:var(--font-d);font-size:26px;font-weight:900;color:var(--ink);margin-bottom:6px;}
+.lt-result-sub{font-size:14px;color:var(--ink3);margin-bottom:24px;}
+.lt-result-stats{display:flex;justify-content:center;gap:20px;flex-wrap:wrap;margin-bottom:24px;}
+.lt-result-stat{text-align:center;}
+.lt-result-stat-val{font-family:var(--font-d);font-size:32px;font-weight:900;display:block;}
+.lt-result-stat-lbl{font-size:12px;color:var(--ink3);}
+
+/* ═══════════════════════════════════════════════════
+   SPEAKING PRO MODULE — v45 REDESIGN
+   Màu chủ đạo: Violet → Teal gradient
+═══════════════════════════════════════════════════ */
+.sp-mode-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:20px;}
+.sp-mode-tab{background:var(--surface);border:2px solid var(--border);border-radius:12px;padding:13px 6px;cursor:pointer;transition:all .2s;text-align:center;user-select:none;}
+.sp-mode-tab:hover{border-color:var(--violet);background:var(--violet-light);transform:translateY(-2px);box-shadow:0 4px 12px rgba(124,58,237,.12);}
+.sp-mode-tab.active{border-color:var(--violet);background:linear-gradient(135deg,var(--violet-light),#f5f3ff);box-shadow:0 4px 16px rgba(124,58,237,.18);}
+.sp-mode-tab-icon{font-size:22px;margin-bottom:5px;}
+.sp-mode-tab-label{font-size:11px;font-weight:800;color:var(--ink2);line-height:1.3;}
+.sp-mode-tab.active .sp-mode-tab-label{color:var(--violet);}
+
+/* Shadowing card */
+.sp-shadow-card{background:var(--surface);border:2px solid var(--border);border-radius:16px;padding:22px;margin-bottom:14px;box-shadow:var(--shadow);animation:qzIn .25s ease;}
+.sp-shadow-text{font-size:22px;font-weight:700;color:var(--ink);line-height:1.6;font-family:var(--font-d);margin-bottom:8px;}
+.sp-shadow-ipa{font-size:14px;color:var(--ink3);font-style:italic;margin-bottom:16px;}
+.sp-shadow-vi{font-size:14px;color:var(--ink4);margin-bottom:20px;padding:10px 14px;background:var(--bg);border-radius:8px;border-left:3px solid var(--violet);}
+
+/* Pronunciation difficulty badges */
+.sp-diff-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.sp-diff-badge{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:20px;font-size:12px;font-weight:700;border:2px solid;cursor:pointer;transition:all .15s;}
+.sp-diff-badge.easy{background:#d1fae5;border-color:#6ee7b7;color:#065f46;}
+.sp-diff-badge.medium{background:var(--amber-light);border-color:#fde68a;color:#78350f;}
+.sp-diff-badge.hard{background:var(--rose-light);border-color:#fecdd3;color:#9f1239;}
+.sp-diff-badge.active{transform:scale(1.08);box-shadow:0 2px 8px rgba(0,0,0,.12);}
+
+/* Pitch/stress indicator */
+.sp-stress-wrap{background:linear-gradient(135deg,var(--violet-light),#f5f3ff);border:2px solid rgba(124,58,237,.2);border-radius:12px;padding:14px 16px;margin-bottom:16px;}
+.sp-stress-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--violet);margin-bottom:10px;}
+.sp-stress-syllables{display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;}
+.sp-syl{display:flex;flex-direction:column;align-items:center;gap:3px;}
+.sp-syl-bar{width:28px;border-radius:4px 4px 0 0;background:var(--violet);opacity:.3;transition:height .3s;}
+.sp-syl-bar.stressed{opacity:1;background:linear-gradient(180deg,var(--violet),#9333ea);}
+.sp-syl-text{font-size:13px;font-weight:800;color:var(--ink2);}
+.sp-syl-text.stressed{color:var(--violet);}
+
+/* Recording button - redesigned */
+.sp-rec-area{text-align:center;padding:16px 0;}
+.sp-rec-btn{width:76px;height:76px;border-radius:50%;border:none;cursor:pointer;font-size:30px;display:inline-flex;align-items:center;justify-content:center;transition:all .2s;box-shadow:0 6px 20px rgba(0,0,0,.12);}
+.sp-rec-btn.idle{background:linear-gradient(135deg,var(--violet),#9333ea);}
+.sp-rec-btn.recording{background:linear-gradient(135deg,var(--rose),#e11d48);animation:recPulse 1.2s ease infinite;}
+.sp-rec-btn:hover{transform:scale(1.06);}
+.sp-rec-btn:active{transform:scale(.94);}
+@keyframes recPulse{0%,100%{box-shadow:0 0 0 0 rgba(225,29,72,.4)}50%{box-shadow:0 0 0 14px rgba(225,29,72,0)}}
+.sp-rec-status{font-size:13px;color:var(--ink3);font-weight:600;margin-top:10px;}
+.sp-rec-hint{font-size:11px;color:var(--ink4);margin-top:4px;}
+
+/* Score ring */
+.sp-score-ring{position:relative;width:96px;height:96px;margin:0 auto 16px;}
+.sp-score-ring svg{transform:rotate(-90deg);}
+.sp-score-ring-val{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--font-d);font-size:26px;font-weight:900;}
+
+/* Phoneme breakdown - enhanced */
+.sp-phoneme-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.sp-phoneme{display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 12px;border-radius:10px;border:2px solid;min-width:48px;}
+.sp-phoneme.good{background:linear-gradient(135deg,#d1fae5,#ccfbf1);border-color:#6ee7b7;}
+.sp-phoneme.ok{background:linear-gradient(135deg,#fef3c7,#fde68a33);border-color:#fde68a;}
+.sp-phoneme.bad{background:linear-gradient(135deg,#ffe4e6,#fce7f3);border-color:#fda4af;}
+.sp-phoneme-sym{font-family:var(--font-d);font-size:17px;font-weight:800;}
+.sp-phoneme.good .sp-phoneme-sym{color:#059669;}
+.sp-phoneme.ok .sp-phoneme-sym{color:var(--amber);}
+.sp-phoneme.bad .sp-phoneme-sym{color:var(--rose);}
+.sp-phoneme-pct{font-size:10px;font-weight:700;color:var(--ink3);}
+
+/* Roleplay chat redesign */
+.sp-rp-chat{display:flex;flex-direction:column;gap:12px;margin-bottom:16px;max-height:380px;overflow-y:auto;padding:4px 2px;scrollbar-width:thin;}
+.sp-rp-msg{display:flex;gap:10px;align-items:flex-end;}
+.sp-rp-msg.user{flex-direction:row-reverse;}
+.sp-rp-bubble{max-width:78%;padding:12px 15px;border-radius:18px;font-size:14px;line-height:1.6;}
+.sp-rp-bubble.ai{background:var(--surface2);border:1.5px solid var(--border);border-bottom-left-radius:4px;color:var(--ink);}
+.sp-rp-bubble.user{background:linear-gradient(135deg,var(--violet),#9333ea);color:#fff;border-bottom-right-radius:4px;}
+.sp-rp-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;}
+.sp-rp-avatar.ai{background:linear-gradient(135deg,var(--violet-light),#f5f3ff);}
+.sp-rp-avatar.user{background:linear-gradient(135deg,var(--teal-light),#ccfbf1);}
+.sp-rp-score-chip{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;margin-top:5px;}
+.sp-rp-score-chip.good{background:linear-gradient(135deg,#d1fae5,#ccfbf1);color:#059669;}
+.sp-rp-score-chip.ok{background:var(--amber-light);color:var(--amber);}
+.sp-rp-score-chip.bad{background:var(--rose-light);color:var(--rose);}
+
+/* Read Aloud word highlighting */
+.sp-ra-text{font-size:19px;line-height:2;color:var(--ink);margin-bottom:20px;padding:20px 22px;background:var(--surface2);border-radius:14px;border:1.5px solid var(--border);}
+.sp-ra-word{display:inline;cursor:default;border-radius:4px;padding:1px 3px;transition:all .25s;}
+.sp-ra-word.current{background:var(--amber-light);color:var(--amber);font-weight:700;box-shadow:0 0 0 2px var(--amber);}
+.sp-ra-word.done-good{background:linear-gradient(135deg,#d1fae5,#ccfbf1);color:#059669;font-weight:600;}
+.sp-ra-word.done-bad{background:linear-gradient(135deg,#ffe4e6,#fce7f3);color:var(--rose);font-weight:600;}
+.sp-ra-word.done-ok{background:var(--amber-light);color:var(--amber);font-weight:600;}
+
+/* Transcript */
+.sp-transcript{background:var(--bg);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;font-size:14px;color:var(--ink4);min-height:44px;font-style:italic;margin-top:12px;transition:all .2s;}
+.sp-transcript.has-text{color:var(--ink);font-style:normal;background:var(--surface2);border-color:var(--violet);}
+
+/* Progress topbar */
+.sp-topbar{display:flex;align-items:center;gap:12px;margin-bottom:18px;padding:12px 16px;background:var(--surface);border:1px solid var(--border);border-radius:12px;box-shadow:var(--shadow-sm);}
+.sp-pbar-wrap{flex:1;height:8px;background:var(--bg2);border-radius:4px;overflow:hidden;}
+.sp-pbar-fill{height:100%;background:linear-gradient(90deg,var(--violet),var(--teal));border-radius:4px;transition:width .5s;}
+
+/* Tip box */
+.sp-tip{background:linear-gradient(135deg,#fefce8,#fef3c7);border:1.5px solid #fde68a;border-radius:10px;padding:10px 14px;font-size:13px;color:#78350f;display:flex;gap:8px;align-items:flex-start;margin-bottom:14px;}
+.sp-tip-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+
+/* Setup card */
+.sp-setup-card{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:20px 22px;margin-bottom:18px;box-shadow:var(--shadow-sm);}
+.sp-mode-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:20px;}
+.sp-mode-card{background:var(--surface);border:2px solid var(--border);border-radius:14px;padding:18px 14px;cursor:pointer;transition:all .2s;text-align:center;}
+.sp-mode-card:hover{border-color:var(--violet);background:var(--violet-light);transform:translateY(-2px);box-shadow:var(--shadow);}
+.sp-mode-card:active{transform:scale(.98);}
+.sp-mode-icon{font-size:34px;margin-bottom:8px;}
+.sp-mode-title{font-weight:800;font-size:14px;color:var(--ink);margin-bottom:3px;}
+.sp-mode-sub{font-size:11px;color:var(--ink3);line-height:1.4;}
+/* ── Mobile responsive for new modules ── */
+@media(max-width:640px){
+  .lt-mode-tabs{grid-template-columns:repeat(2,1fr);}
+  .sp-mode-tabs{grid-template-columns:repeat(2,1fr);}
+  .lt-mode-tab,.sp-mode-tab{padding:10px 4px;}
+  .sp-phoneme-row{gap:5px;}
+  .sp-phoneme{min-width:40px;padding:6px 8px;}
+  .sp-rp-bubble{max-width:88%;}
+  .sp-stress-syllables{gap:4px;}
+}
 </style>
 </head>
 <body>
@@ -813,6 +1032,8 @@ tr.row-selected{outline:none;}
     <div class="nav-item" onclick="showPanel('topics')"><span class="ni">📚</span>Chủ đề</div>
     <div class="nav-item" onclick="showPanel('vocab-list')"><span class="ni">📝</span>Danh sách từ</div>
     <div class="nav-item" onclick="showPanel('writing')"><span class="ni">✍️</span>Writing</div>
+    <div class="nav-item" onclick="showPanel('listening')"><span class="ni">🎧</span>Listening</div>
+    <div class="nav-item" onclick="showPanel('speaking-pro')"><span class="ni">🎤</span>Speaking Pro</div>
     <div class="nav-item" onclick="showPanel('progress')"><span class="ni">📊</span>Tiến độ</div>
   </nav>
 
@@ -962,9 +1183,9 @@ tr.row-selected{outline:none;}
 <nav class="mob-nav">
   <div class="mob-item active" onclick="showPanel('home')"><span class="mi">🏠</span>Trang chủ</div>
   <div class="mob-item" onclick="showPanel('roadmap')"><span class="mi">🗓️</span>Lộ trình</div>
-  <div class="mob-item" onclick="showPanel('writing')"><span class="mi">✍️</span>Writing</div>
+  <div class="mob-item" onclick="showPanel('listening')"><span class="mi">🎧</span>Listening</div>
+  <div class="mob-item" onclick="showPanel('speaking-pro')"><span class="mi">🎤</span>Speaking</div>
   <div class="mob-item" onclick="showPanel('vocab-list')"><span class="mi">📝</span>Từ vựng</div>
-  <div class="mob-item" onclick="showPanel('progress')"><span class="mi">📊</span>Tiến độ</div>
 </nav>
 
 <main class="main">
@@ -981,21 +1202,80 @@ tr.row-selected{outline:none;}
 <!-- HOME -->
 <div id="panel-home" class="panel active">
 <div class="page-wrap">
-  <div class="home-hero">
-    <h2>Xin chào! 👋 Học gì hôm nay?</h2>
-    <p>Hành trình chinh phục tiếng Anh mỗi ngày một bước.</p>
-    <button class="btn" style="background:rgba(255,255,255,.2);color:#fff;border:1.5px solid rgba(255,255,255,.4);margin-top:12px;font-size:13px" onclick="showPanel('roadmap')">🗓️ Xem lộ trình hôm nay →</button>
+
+  <!-- Hero with dynamic greeting -->
+  <div id="home-hero-wrap"></div>
+
+  <!-- Skills grid - 3 rows -->
+  <div style="margin-bottom:22px">
+    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:12px">🎯 Luyện tập theo kỹ năng</div>
+
+    <!-- Row 1: Core skills -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+      <!-- Listening card -->
+      <div onclick="showPanel('listening')" style="background:linear-gradient(135deg,#0c4a6e,#0891b2);border-radius:14px;padding:18px 16px;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s;box-shadow:0 4px 16px rgba(8,145,178,.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        <div style="position:absolute;right:-10px;top:-10px;font-size:56px;opacity:.15;pointer-events:none">🎧</div>
+        <div style="font-size:28px;margin-bottom:8px">🎧</div>
+        <div style="font-family:var(--font-d);font-size:17px;font-weight:900;color:#fff;margin-bottom:3px">Listening</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.75);margin-bottom:10px">Nghe · Chọn đáp án · Chính tả</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#fff">Trắc nghiệm</span>
+          <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#fff">Hội thoại</span>
+          <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#fff">Dictation</span>
+        </div>
+      </div>
+
+      <!-- Speaking Pro card -->
+      <div onclick="showPanel('speaking-pro')" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:14px;padding:18px 16px;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s;box-shadow:0 4px 16px rgba(124,58,237,.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+        <div style="position:absolute;right:-10px;top:-10px;font-size:56px;opacity:.15;pointer-events:none">🎤</div>
+        <div style="font-size:28px;margin-bottom:8px">🎤</div>
+        <div style="font-family:var(--font-d);font-size:17px;font-weight:900;color:#fff;margin-bottom:3px">Speaking Pro</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.75);margin-bottom:10px">Phát âm · Shadowing · Roleplay</div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap">
+          <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#fff">Shadowing</span>
+          <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#fff">AI Roleplay</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Row 2: Other skills (smaller) -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+      <div class="hcard" style="flex-direction:column;align-items:center;text-align:center;padding:14px 8px;gap:6px" onclick="showPanel('topics')">
+        <div class="hcard-icon hci-t" style="width:36px;height:36px;font-size:17px">🃏</div>
+        <div><div class="hcard-title" style="font-size:12px">Flashcard</div></div>
+      </div>
+      <div class="hcard" style="flex-direction:column;align-items:center;text-align:center;padding:14px 8px;gap:6px" onclick="showPanel('writing')">
+        <div class="hcard-icon hci-r" style="width:36px;height:36px;font-size:17px">✍️</div>
+        <div><div class="hcard-title" style="font-size:12px">Writing</div></div>
+      </div>
+      <div class="hcard" style="flex-direction:column;align-items:center;text-align:center;padding:14px 8px;gap:6px" onclick="showPanel('roadmap')">
+        <div class="hcard-icon hci-v" style="width:36px;height:36px;font-size:17px">🗓️</div>
+        <div><div class="hcard-title" style="font-size:12px">Lộ trình</div></div>
+      </div>
+      <div class="hcard" style="flex-direction:column;align-items:center;text-align:center;padding:14px 8px;gap:6px" onclick="showPanel('progress')">
+        <div class="hcard-icon hci-a" style="width:36px;height:36px;font-size:17px">📊</div>
+        <div><div class="hcard-title" style="font-size:12px">Tiến độ</div></div>
+      </div>
+    </div>
   </div>
-  <div class="home-grid">
-    <div class="hcard" onclick="showPanel('topics')"><div class="hcard-icon hci-t">🃏</div><div><div class="hcard-title">Flashcard</div><div class="hcard-sub">Ôn từ vựng bằng thẻ lật</div></div></div>
-    <div class="hcard" onclick="showPanel('roadmap')"><div class="hcard-icon hci-v">🗓️</div><div><div class="hcard-title">Lộ trình</div><div class="hcard-sub">Học 10 từ/ngày theo kế hoạch</div></div></div>
-    <div class="hcard" onclick="showPanel('progress')"><div class="hcard-icon hci-a">📊</div><div><div class="hcard-title">Tiến độ</div><div class="hcard-sub">Xem thống kê học tập</div></div></div>
-    <div class="hcard" onclick="showPanel('import')"><div class="hcard-icon hci-r">📥</div><div><div class="hcard-title">Import Excel</div><div class="hcard-sub">Thêm bộ từ vựng nhanh</div></div></div>
+
+  <!-- Today's stats + calendar -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+    <div class="card" style="padding:16px">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink4);margin-bottom:12px">📅 Tuần này</div>
+      <div class="week-row" id="week-calendar"></div>
+    </div>
+    <div class="card" style="padding:16px" id="home-quick-stats">
+      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink4);margin-bottom:12px">⚡ Hôm nay</div>
+      <div style="display:flex;flex-direction:column;gap:8px" id="home-today-stats">
+        <div style="font-size:13px;color:var(--ink3)">Đang tải...</div>
+      </div>
+    </div>
   </div>
-  <div class="card">
-    <div style="font-family:var(--font-d);font-weight:700;font-size:15px;margin-bottom:14px">📅 Lịch học tuần này</div>
-    <div class="week-row" id="week-calendar"></div>
-  </div>
+
+  <!-- Continue learning strip -->
+  <div id="home-continue-wrap"></div>
+
 </div>
 </div>
 
@@ -1252,6 +1532,96 @@ tr.row-selected{outline:none;}
     <p>Luyện viết câu tiếng Anh từ câu gốc tiếng Việt — AI chấm điểm tức thì</p>
   </div>
   <div id="wr-content"></div>
+</div>
+</div>
+
+<!-- LISTENING MODULE -->
+<div id="panel-listening" class="panel">
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="page-title">Listening <em>Practice</em> 🎧</div>
+    <div class="page-sub">4 dạng bài — chuẩn BBC Learning English & IELTS</div>
+  </div>
+
+  <!-- Redesigned hero banner -->
+  <div style="background:linear-gradient(135deg,#0c4a6e 0%,#0891b2 55%,#0d9488 100%);border-radius:16px;padding:22px 26px;color:#fff;margin-bottom:22px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-30px;right:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
+    <div style="position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:64px;opacity:.16">🎧</div>
+    <div style="font-family:var(--font-d);font-size:20px;font-weight:900;margin-bottom:4px">Luyện nghe từ vựng đã học</div>
+    <div style="font-size:13px;opacity:.82;margin-bottom:14px">Nghe audio → Điền từ / Chọn đáp án / Nghe hội thoại / Chính tả</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700">✅ Web Speech API</span>
+      <span style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700">🐢 0.75x — 1.25x speed</span>
+      <span style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700">📊 Lưu điểm</span>
+    </div>
+  </div>
+
+  <!-- Mode tabs - new grid design -->
+  <div class="lt-mode-tabs" id="lt-tabs">
+    <div class="lt-mode-tab active" onclick="switchLtTab('mc',this)">
+      <div class="lt-mode-tab-icon">🅐</div>
+      <div class="lt-mode-tab-label">Trắc nghiệm</div>
+    </div>
+    <div class="lt-mode-tab" onclick="switchLtTab('dialogue',this)">
+      <div class="lt-mode-tab-icon">💬</div>
+      <div class="lt-mode-tab-label">Hội thoại</div>
+    </div>
+    <div class="lt-mode-tab" onclick="switchLtTab('fill',this)">
+      <div class="lt-mode-tab-icon">✏️</div>
+      <div class="lt-mode-tab-label">Điền từ</div>
+    </div>
+    <div class="lt-mode-tab" onclick="switchLtTab('dictation',this)">
+      <div class="lt-mode-tab-icon">📝</div>
+      <div class="lt-mode-tab-label">Chính tả</div>
+    </div>
+  </div>
+
+  <div id="lt-content"></div>
+</div>
+</div>
+
+<!-- SPEAKING PRO MODULE -->
+<div id="panel-speaking-pro" class="panel">
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="page-title">Speaking <em>Pro</em> 🎤</div>
+    <div class="page-sub">Shadowing · Phát âm · Roleplay AI · Read Aloud</div>
+  </div>
+
+  <!-- Redesigned hero banner -->
+  <div style="background:linear-gradient(135deg,#2e1065 0%,#7c3aed 55%,#0d9488 100%);border-radius:16px;padding:22px 26px;color:#fff;margin-bottom:22px;position:relative;overflow:hidden;">
+    <div style="position:absolute;top:-30px;right:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.06)"></div>
+    <div style="position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:64px;opacity:.16">🗣️</div>
+    <div style="font-family:var(--font-d);font-size:20px;font-weight:900;margin-bottom:4px">Luyện nói như người bản xứ</div>
+    <div style="font-size:13px;opacity:.82;margin-bottom:14px">Shadowing · Phát âm từng âm · AI Roleplay · Đọc to · Pitch & Stress</div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <span style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700">🎙️ Web Speech API</span>
+      <span style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700">📊 Score Ring</span>
+      <span style="background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 11px;font-size:11px;font-weight:700">🤖 AI Feedback</span>
+    </div>
+  </div>
+
+  <!-- Mode tabs - new grid design -->
+  <div class="sp-mode-tabs" id="sp-tabs">
+    <div class="sp-mode-tab active" onclick="switchSpTab('shadow',this)">
+      <div class="sp-mode-tab-icon">🔁</div>
+      <div class="sp-mode-tab-label">Shadowing</div>
+    </div>
+    <div class="sp-mode-tab" onclick="switchSpTab('pronunciation',this)">
+      <div class="sp-mode-tab-icon">🔤</div>
+      <div class="sp-mode-tab-label">Phát âm</div>
+    </div>
+    <div class="sp-mode-tab" onclick="switchSpTab('roleplay',this)">
+      <div class="sp-mode-tab-icon">🎭</div>
+      <div class="sp-mode-tab-label">Roleplay</div>
+    </div>
+    <div class="sp-mode-tab" onclick="switchSpTab('readaloud',this)">
+      <div class="sp-mode-tab-icon">📖</div>
+      <div class="sp-mode-tab-label">Read Aloud</div>
+    </div>
+  </div>
+
+  <div id="sp-content"></div>
 </div>
 </div>
 
@@ -6881,6 +7251,7 @@ async function _afterLogin(){
   const sessionRestored = _restoreUserSession(_currentUser.uid);
   if(!sessionRestored) showPanel('home');
   showToast('👋 Chào mừng, '+(_currentUser.displayName||_currentUser.username)+'!');
+  setTimeout(renderHomeDashboard, 200);
 
   // ── Bước 3: Sync Firestore nền (không block UI) ──
   if(_fbOk()){
@@ -7447,11 +7818,1689 @@ async function pasteFbConfig(){
   }catch(e){ showToast('❌ Không đọc được clipboard.','error'); }
 }
 
-/* Close modal on backdrop click */
-document.addEventListener('click',e=>{
-  if(e.target.id==='modal-config') closeConfigModal();
-});
+/* ═══════════════════════════════════════════════
+   LISTENING MODULE — SpeakUp v44
+   4 modes: fill-blank · multiple-choice · dialogue · dictation
+═══════════════════════════════════════════════ */
 
+let _ltMode = 'mc';
+let _ltSession = null; // { questions, current, correct, wrong, score }
+let _ltCurrentSpeed = 1.0;
+let _ltAudioPlaying = false;
+
+function switchLtTab(mode, el) {
+  document.querySelectorAll('#lt-tabs .lt-mode-tab').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  _ltMode = mode;
+  renderListeningSetup();
+}
+
+function renderListeningSetup() {
+  const el = document.getElementById('lt-content');
+  if (!S.vocab.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Chưa có từ vựng</div><div class="empty-sub">Import Excel hoặc thêm từ trước khi luyện nghe</div><button class="btn btn-primary" onclick="showPanel('import')">📥 Import từ vựng</button></div>`;
+    return;
+  }
+
+  const modeInfo = {
+    mc:   { icon:'🅐', title:'Trắc nghiệm nghe', desc:'Nghe từ/câu → chọn 1 trong 4 nghĩa đúng. Chuẩn IELTS Listening Part 1.', tip:'Đọc 4 đáp án TRƯỚC khi nhấn nghe để biết mình cần tìm thông tin gì.' },
+    dialogue: { icon:'💬', title:'Nghe hội thoại', desc:'Nghe đoạn hội thoại từ vựng đã học → trả lời câu hỏi comprehension.', tip:'Nghe lần 1 để nắm ý chính, lần 2 chú ý chi tiết cụ thể.' },
+    fill: { icon:'✏️', title:'Điền từ vào chỗ trống', desc:'Nghe câu ví dụ → điền từ còn thiếu. Luyện liên kết âm thanh với chính tả.', tip:'Nghe 1-2 lần trước khi điền, chú ý ngữ điệu để đoán nghĩa.' },
+    dictation: { icon:'📝', title:'Chính tả (Dictation)', desc:'Nghe câu và gõ lại chính xác từng từ. Luyện spelling + listening tổng hợp.', tip:'Bắt đầu với tốc độ 0.75x. Chú ý liên âm (linking sounds) khi nghe tự nhiên.' }
+  };
+  const m = modeInfo[_ltMode] || modeInfo.mc;
+  const topics = [...new Set(S.vocab.map(v => v.topic))].sort();
+  const topicOpts = topics.map(t => {
+    const r = TOPIC_RULES.find(x => x.name === t);
+    return `<option value="${t}">${r?.emoji||'📌'} ${t} (${S.vocab.filter(v=>v.topic===t).length} từ)</option>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="lt-setup-card">
+      <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:14px;flex-wrap:wrap">
+        <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#ecfeff,#cffafe);border:2px solid rgba(8,145,178,.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0">${m.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--font-d);font-weight:800;font-size:16px;color:var(--ink);margin-bottom:3px">${m.title}</div>
+          <div style="font-size:13px;color:var(--ink3);line-height:1.5">${m.desc}</div>
+        </div>
+      </div>
+      <div class="sp-tip"><span class="sp-tip-icon">💡</span><span>${m.tip}</span></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:1;min-width:160px">
+          <div style="font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Chủ đề</div>
+          <select class="sel-inp" id="lt-topic-sel" style="width:100%">
+            <option value="">🎲 Ngẫu nhiên tất cả</option>
+            ${topicOpts}
+          </select>
+        </div>
+        <div style="flex:1;min-width:100px">
+          <div style="font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Số câu</div>
+          <select class="sel-inp" id="lt-count-sel" style="width:100%">
+            <option value="5">5 câu</option>
+            <option value="10" selected>10 câu</option>
+            <option value="15">15 câu</option>
+            <option value="20">20 câu</option>
+          </select>
+        </div>
+        <button class="btn" style="padding:11px 22px;font-size:15px;font-weight:800;background:linear-gradient(135deg,#0891b2,#0d9488);color:#fff;border:none" onclick="startListening()">🎧 Bắt đầu →</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-family:var(--font-d);font-weight:700;font-size:15px;margin-bottom:12px">📊 Thống kê Listening</div>
+      <div id="lt-stats-wrap">${renderLtStats()}</div>
+    </div>`;
+}
+
+function renderLtStats() {
+  try {
+    const logs = JSON.parse(localStorage.getItem('speakup_lt_logs') || '[]');
+    if (!logs.length) return '<div style="font-size:13px;color:var(--ink4);text-align:center;padding:12px">Chưa có lần luyện nào. Hãy bắt đầu!</div>';
+    const recent = logs.slice(-5).reverse();
+    const avgScore = Math.round(logs.reduce((s,l)=>s+(l.score||0),0)/logs.length);
+    return `<div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px">
+      <div style="flex:1;text-align:center;background:var(--teal-light);border-radius:10px;padding:12px;border:1px solid rgba(13,148,136,.2)">
+        <div style="font-family:var(--font-d);font-size:26px;font-weight:900;color:var(--teal)">${logs.length}</div>
+        <div style="font-size:11px;color:var(--ink4);margin-top:2px">Lần luyện</div>
+      </div>
+      <div style="flex:1;text-align:center;background:var(--violet-light);border-radius:10px;padding:12px;border:1px solid rgba(124,58,237,.15)">
+        <div style="font-family:var(--font-d);font-size:26px;font-weight:900;color:var(--violet)">${avgScore}%</div>
+        <div style="font-size:11px;color:var(--ink4);margin-top:2px">Điểm TB</div>
+      </div>
+    </div>
+    <div style="font-size:12px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Gần đây</div>
+    ${recent.map(l=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--ink4);min-width:70px">${new Date(l.ts).toLocaleDateString('vi-VN')}</span>
+      <span style="font-size:12px;font-weight:600;flex:1">${{fill:'✏️ Điền từ',mc:'🅐 Trắc nghiệm',dialogue:'💬 Hội thoại',dictation:'📝 Chính tả'}[l.mode]||l.mode}</span>
+      <span style="font-family:var(--font-d);font-weight:800;color:${l.score>=70?'var(--teal)':l.score>=40?'var(--amber)':'var(--rose)'}">${l.score}%</span>
+    </div>`).join('')}`;
+  } catch(e) { return ''; }
+}
+
+function startListening() {
+  const topic = document.getElementById('lt-topic-sel').value;
+  const count = parseInt(document.getElementById('lt-count-sel').value) || 10;
+  let pool = topic ? S.vocab.filter(v => v.topic === topic) : [...S.vocab];
+  if (pool.length < 3) { showToast('Cần ít nhất 3 từ vựng để luyện nghe!', 'error'); return; }
+
+  pool = shuffle(pool).slice(0, Math.min(count, pool.length));
+
+  const questions = pool.map(w => {
+    if (_ltMode === 'fill') {
+      const sent = w.example || `I use the word ${w.word} every day.`;
+      return { word: w, sentence: sent, type: 'fill' };
+    } else if (_ltMode === 'mc') {
+      const distractors = shuffle(S.vocab.filter(v => v.id !== w.id)).slice(0, 3);
+      const opts = shuffle([
+        { id: w.id, label: w.meaning },
+        ...distractors.map(d => ({ id: d.id, label: d.meaning }))
+      ]);
+      return { word: w, opts, correct: w.id, type: 'mc' };
+    } else if (_ltMode === 'dialogue') {
+      return { word: w, type: 'dialogue' };
+    } else {
+      const sent = w.example || `${w.word} is a very useful English word.`;
+      return { word: w, sentence: sent, type: 'dictation' };
+    }
+  });
+
+  // Tạo sessionId duy nhất để cache dialogue riêng mỗi session, không bị trùng
+  const sessionId = Date.now().toString(36);
+  _ltSession = { questions, current: 0, correct: 0, wrong: 0, score: 0, mode: _ltMode, topic, sessionId };
+  showLtQuestion();
+}
+
+function showLtQuestion() {
+  const { questions, current } = _ltSession;
+  if (current >= questions.length) { showLtResult(); return; }
+
+  const q = questions[current];
+  const pct = Math.round(current / questions.length * 100);
+  const el = document.getElementById('lt-content');
+
+  let body = '';
+  if (q.type === 'fill') body = renderLtFill(q);
+  else if (q.type === 'mc') body = renderLtMC(q);
+  else if (q.type === 'dialogue') body = renderLtDialogue(q);
+  else body = renderLtDictation(q);
+
+  el.innerHTML = `
+    <div class="lt-topbar">
+      <button class="btn btn-ghost btn-sm" onclick="endLtSession()" style="padding:6px 10px;flex-shrink:0">✕</button>
+      <div class="lt-pbar-wrap"><div class="lt-pbar-fill" id="lt-pbar" style="width:${pct}%"></div></div>
+      <div class="lt-score-badge">✓ ${_ltSession.correct}</div>
+      <span style="font-size:12px;font-weight:700;color:var(--ink4);white-space:nowrap">${current+1}/${questions.length}</span>
+    </div>
+    ${body}`;
+
+  // Auto-play audio after render (skip for dialogue — dialogue handles its own playback)
+  if (q.type !== 'dialogue') {
+    setTimeout(() => ltPlayAudio(q.word.word, q.word.example || q.word.word), 400);
+  }
+}
+
+/* ── Render: Fill blank ── */
+function renderLtFill(q) {
+  const w = q.word;
+  const blankSent = q.sentence.replace(new RegExp('\\b' + w.word + '\\b', 'i'), `<input class="lt-fill-input" id="lt-fill-inp" placeholder="?" autocomplete="off" autocorrect="off" autocapitalize="off" onkeydown="if(event.key==='Enter')checkLtFill()">`);
+  return `
+    <div class="lt-audio-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="background:var(--teal-light);color:var(--teal);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em">✏️ Điền từ còn thiếu</span>
+        <span style="font-size:12px;color:var(--ink4)">${w.topic}</span>
+      </div>
+      ${renderLtPlayer(w)}
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:10px;font-weight:600">💡 Gợi ý: <strong>${w.meaning}</strong> <em style="font-style:italic">${w.ipa||''}</em></div>
+      <div class="lt-fill-sentence">${blankSent}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn btn-primary" onclick="checkLtFill()">Kiểm tra ✓</button>
+        <button class="btn btn-outline btn-sm" onclick="ltPlayAudio('${esc(w.word)}','${esc(q.sentence)}')">🔊 Nghe lại</button>
+        <button class="btn btn-ghost btn-sm" onclick="showLtHint()">💡 Gợi ý chữ cái</button>
+      </div>
+      <div id="lt-feedback-wrap"></div>
+    </div>`;
+}
+
+/* ── Render: MC ── */
+function renderLtMC(q) {
+  const w = q.word;
+  const LETS = ['A','B','C','D'];
+  return `
+    <div class="lt-audio-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="background:var(--violet-light);color:var(--violet);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em">🅐 Chọn nghĩa đúng</span>
+      </div>
+      ${renderLtPlayer(w)}
+      <div style="font-size:14px;color:var(--ink2);margin-bottom:16px;font-weight:600">Từ vừa nghe có nghĩa là gì?</div>
+      <div class="lt-opts" id="lt-opts">
+        ${q.opts.map((o,i)=>`
+          <div class="lt-opt" onclick="checkLtMC(this,'${o.id}','${q.correct}')">
+            <div class="lt-opt-letter">${LETS[i]}</div>
+            <div class="lt-opt-text">${o.label}</div>
+          </div>`).join('')}
+      </div>
+      <div id="lt-feedback-wrap"></div>
+    </div>`;
+}
+
+/* ── Render: Dialogue ── */
+function renderLtDialogue(q) {
+  const w = q.word;
+  const sid = _ltSession?.sessionId || 'def';
+  // Session-scoped cache key: unique per word per session → luôn tạo hội thoại mới mỗi session
+  const ltDlgKey = `lt_dlg_${sid}_${w.id}`;
+
+  const LETS = ['A','B','C','D'];
+  const compQuestion = `Từ "${w.word}" trong hội thoại mang nghĩa gì?`;
+  const distractors = shuffle(S.vocab.filter(v=>v.id!==w.id)).slice(0,3);
+  const opts = shuffle([
+    {id:w.id, label:w.meaning},
+    ...distractors.map(d=>({id:d.id, label:d.meaning}))
+  ]);
+
+  // Check session-scoped in-memory cache
+  const cachedLines = _ltDlgSessionCache && _ltDlgSessionCache[ltDlgKey];
+
+  // Build placeholder card first, then async fill dialogue
+  const optHtml = opts.map((o,i)=>`
+    <div class="lt-opt" onclick="checkLtMC(this,'${o.id}','${w.id}')">
+      <div class="lt-opt-letter">${LETS[i]}</div>
+      <div class="lt-opt-text">${o.label}</div>
+    </div>`).join('');
+
+  const buildCard = (lines) => {
+    return `
+    <div class="lt-audio-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="background:var(--amber-light);color:var(--amber);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em">&#x1F4AC; Nghe h&#7897;i tho&#7841;i</span>
+        <span style="font-size:12px;color:var(--ink4)">${w.topic}</span>
+      </div>
+      <div style="background:var(--bg);border-radius:12px;padding:14px;margin-bottom:16px" id="lt-dlg-lines">
+        ${lines ? lines.map((ln,i)=>`
+          <div class="lt-dlg-line">
+            <div class="lt-dlg-avatar ${ln.s==='A'?'a':'b'}">${ln.s==='A'?'&#x1F469;':'&#x1F468;'}</div>
+            <div class="lt-dlg-bubble ${ln.s==='A'?'a':'b'}">
+              <div class="lt-dlg-text">${ln.t} <button class="lt-dlg-play" onclick="speak('${esc(ln.t)}')">&#x1F50A;</button></div>
+              <div class="lt-dlg-vi" id="dlg-vi-${i}" style="display:none">${ln.vi}</div>
+            </div>
+          </div>`).join('')
+        : `<div style="text-align:center;padding:20px;color:var(--ink3)">
+             <div style="font-size:22px;margin-bottom:8px">&#x23F3;</div>
+             <div style="font-size:13px;font-weight:600">&#x0110;ang t&#7841;o h&#7897;i tho&#7841;i...</div>
+           </div>`}
+      </div>
+      <button class="btn btn-outline btn-sm" onclick="document.querySelectorAll('[id^=dlg-vi]').forEach(e=>e.style.display='block')" style="margin-bottom:14px">&#x1F1FB;&#x1F1F3; Xem d&#7883;ch ngh&#297;a</button>
+      ${lines ? `<div style="margin-bottom:14px"><button class="btn btn-outline btn-sm" onclick="ltPlayDialogue(${JSON.stringify(lines).replace(/"/g,'&quot;')})">&#x1F50A; Nghe l&#7841;i h&#7897;i tho&#7841;i</button></div>` : ''}
+      <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:12px">&#x2753; ${compQuestion}</div>
+      <div class="lt-opts" id="lt-opts">
+        ${optHtml}
+      </div>
+      <div id="lt-feedback-wrap"></div>
+    </div>`;
+  };
+
+  if (cachedLines) {
+    return buildCard(cachedLines);
+  }
+
+  // Will render skeleton first, then load async
+  // Store opts for async rendering
+  q._ltOpts = opts;
+  q._ltBuildCard = buildCard;
+
+  // Async load dialogue after render
+  setTimeout(async () => {
+    const el = document.getElementById('lt-dlg-lines');
+    if (!el) return;
+    // Build a unique fallback that's different each time (shuffled template variants)
+    const lines = await generateLtSessionDialogue(w, sid);
+    if (!_ltDlgSessionCache) window._ltDlgSessionCache = {};
+    _ltDlgSessionCache[ltDlgKey] = lines;
+    if (!el) return;
+    // Update dialogue area only (don't re-render whole card to preserve opts state)
+    el.innerHTML = lines.map((ln,i)=>`
+      <div class="lt-dlg-line">
+        <div class="lt-dlg-avatar ${ln.s==='A'?'a':'b'}">${ln.s==='A'?'&#x1F469;':'&#x1F468;'}</div>
+        <div class="lt-dlg-bubble ${ln.s==='A'?'a':'b'}">
+          <div class="lt-dlg-text">${ln.t} <button class="lt-dlg-play" onclick="speak('${esc(ln.t)}')">&#x1F50A;</button></div>
+          <div class="lt-dlg-vi" id="dlg-vi-${i}" style="display:none">${ln.vi}</div>
+        </div>
+      </div>`).join('');
+    // Add play button after lines loaded
+    const existingPlayBtn = document.getElementById('lt-dlg-play-btn');
+    if (!existingPlayBtn) {
+      const playWrap = document.createElement('div');
+      playWrap.style.marginBottom = '14px';
+      playWrap.innerHTML = `<button id="lt-dlg-play-btn" class="btn btn-outline btn-sm" onclick="ltPlayDialogue(${JSON.stringify(lines).replace(/"/g,'&quot;')})">&#x1F50A; Nghe l&#7841;i h&#7897;i tho&#7841;i</button>`;
+      el.parentNode.insertBefore(playWrap, el.nextSibling);
+    }
+    // Auto-play
+    ltPlayDialogue(lines);
+  }, 200);
+
+  return buildCard(null);
+}
+
+// Session-scoped in-memory cache for lt dialogues
+if (typeof _ltDlgSessionCache === 'undefined') window._ltDlgSessionCache = {};
+
+// Generate unique dialogue per word per session (không cache vào localStorage để luôn fresh)
+async function generateLtSessionDialogue(w, sessionId) {
+  const apiKey = getAnthropicKey();
+
+  // Offline fallback: 8 bối cảnh đời thực khác nhau, KHÔNG có tiếng Việt trong câu tiếng Anh
+  // Mỗi bối cảnh xây câu tự nhiên quanh từ, KHÔNG đặt câu hỏi "what does it mean?"
+  const ex = w.example || `It was a ${w.word} moment that I will never forget.`;
+  const variantTemplates = [
+    // 1. Buổi sáng tại quán cà phê
+    [
+      {s:'A', t:`Hey, you look tired. Did something ${w.word} happen last night?`, h:w.word, vi:`Này, trông bạn có vẻ mệt. Tối qua có chuyện gì ${w.meaning} xảy ra không?`},
+      {s:'B', t:`Yeah, it was a pretty ${w.word} situation with my boss at work.`, h:w.word, vi:`Ừ, có một tình huống khá ${w.meaning} với sếp tôi ở chỗ làm.`},
+      {s:'A', t:`Oh no, that sounds stressful. How did you handle it?`, h:'', vi:`Ồ không, nghe có vẻ căng thẳng đấy. Bạn xử lý thế nào?`},
+      {s:'B', t:`I just stayed calm. Being ${w.word} about it helped me respond better.`, h:w.word, vi:`Tôi cố bình tĩnh. Thái độ ${w.meaning} giúp tôi phản ứng tốt hơn.`},
+    ],
+    // 2. Tại siêu thị
+    [
+      {s:'A', t:`Excuse me, could you help me find something? I'm a bit ${w.word} today.`, h:w.word, vi:`Xin lỗi, bạn có thể giúp tôi tìm thứ gì không? Hôm nay tôi hơi ${w.meaning}.`},
+      {s:'B', t:`Of course! I felt ${w.word} here too on my first visit.`, h:w.word, vi:`Tất nhiên! Lần đầu đến đây tôi cũng thấy ${w.meaning}.`},
+      {s:'A', t:`Thanks, that's reassuring. Where are the fresh vegetables?`, h:'', vi:`Cảm ơn, vậy là tốt rồi. Rau tươi ở đâu vậy?`},
+      {s:'B', t:`Just follow me! It's normal to feel ${w.word} in a new place.`, h:w.word, vi:`Đi theo tôi nhé! Cảm thấy ${w.meaning} ở nơi mới là chuyện bình thường.`},
+    ],
+    // 3. Tại công sở
+    [
+      {s:'A', t:`Did you see the news this morning? I was completely ${w.word}.`, h:w.word, vi:`Bạn có xem tin tức sáng nay không? Tôi hoàn toàn ${w.meaning}.`},
+      {s:'B', t:`Yes, the whole team was ${w.word} by the announcement.`, h:w.word, vi:`Có, cả nhóm đều ${w.meaning} trước thông báo đó.`},
+      {s:'A', t:`I know, right? Nobody expected that to happen so quickly.`, h:'', vi:`Tôi biết mà! Không ai nghĩ chuyện đó xảy ra nhanh như vậy.`},
+      {s:'B', t:`Well, at least the manager seemed less ${w.word} than the rest of us.`, h:w.word, vi:`Ít nhất thì trưởng nhóm có vẻ ít ${w.meaning} hơn chúng ta.`},
+    ],
+    // 4. Cuối tuần ngoài công viên
+    [
+      {s:'A', t:`Wow, this park is so ${w.word}! I didn't expect it to be this beautiful.`, h:w.word, vi:`Ôi, công viên này thật ${w.meaning}! Tôi không ngờ lại đẹp vậy.`},
+      {s:'B', t:`Right? I feel ${w.word} every time I come here after a long week.`, h:w.word, vi:`Đúng không? Tôi luôn cảm thấy ${w.meaning} mỗi khi đến đây sau một tuần dài.`},
+      {s:'A', t:`Let's sit by the lake. I could use some fresh air.`, h:'', vi:`Mình ngồi cạnh hồ đi. Tôi cần hít thở không khí trong lành.`},
+      {s:'B', t:`Great idea. Being here always makes me feel ${w.word} and happy.`, h:w.word, vi:`Hay đấy. Ở đây luôn khiến tôi cảm thấy ${w.meaning} và vui vẻ.`},
+    ],
+    // 5. Trên xe buýt / đang đi đường
+    [
+      {s:'A', t:`Oh no, the traffic is so bad. I'm starting to feel ${w.word}.`, h:w.word, vi:`Ôi không, kẹt xe quá. Tôi bắt đầu cảm thấy ${w.meaning} rồi.`},
+      {s:'B', t:`I know. Situations like this always make me ${w.word} too.`, h:w.word, vi:`Tôi biết. Những tình huống như này cũng làm tôi ${w.meaning}.`},
+      {s:'A', t:`Let's listen to some music. It might help us relax.`, h:'', vi:`Mình nghe nhạc đi. Có thể giúp chúng ta thư giãn hơn.`},
+      {s:'B', t:`Good call. I try not to get too ${w.word} over things I can't control.`, h:w.word, vi:`Đúng rồi. Tôi cố không quá ${w.meaning} vì những thứ không kiểm soát được.`},
+    ],
+    // 6. Tại nhà hàng, đặt món
+    [
+      {s:'A', t:`The menu here is huge. I'm a little ${w.word} about what to order.`, h:w.word, vi:`Thực đơn ở đây rất nhiều. Tôi hơi ${w.meaning} không biết gọi món gì.`},
+      {s:'B', t:`Same! Their dishes all look ${w.word}. I want to try everything.`, h:w.word, vi:`Tôi cũng vậy! Các món ở đây trông đều ${w.meaning}. Tôi muốn thử hết.`},
+      {s:'A', t:`Maybe we can share a few dishes and taste more variety.`, h:'', vi:`Mình chia sẻ vài món để thử nhiều hơn đi.`},
+      {s:'B', t:`Perfect. That way nothing ${w.word} goes to waste either.`, h:w.word, vi:`Tuyệt. Vừa ${w.meaning} lại không lãng phí.`},
+    ],
+    // 7. Tập gym / thể dục
+    [
+      {s:'A', t:`Man, today's workout was absolutely ${w.word}. I can barely walk.`, h:w.word, vi:`Bạn ơi, buổi tập hôm nay thật sự ${w.meaning}. Tôi gần như không đi nổi.`},
+      {s:'B', t:`I agree! That new trainer is ${w.word} — best session in months.`, h:w.word, vi:`Tôi đồng ý! Huấn luyện viên mới thật ${w.meaning} — buổi tập hay nhất trong nhiều tháng.`},
+      {s:'A', t:`My legs are going to be sore tomorrow for sure.`, h:'', vi:`Chân tôi chắc sẽ đau nhức ngày mai mất.`},
+      {s:'B', t:`Worth it though. Feeling ${w.word} after a hard workout is the best feeling.`, h:w.word, vi:`Nhưng xứng đáng. Cảm giác ${w.meaning} sau buổi tập nặng thật tuyệt.`},
+    ],
+    // 8. Xem phim / tối ở nhà
+    [
+      {s:'A', t:`That movie ending was so ${w.word}! I did not see it coming at all.`, h:w.word, vi:`Cái kết phim đó thật ${w.meaning}! Tôi hoàn toàn không đoán được.`},
+      {s:'B', t:`Same here. The whole story was ${w.word} from the very beginning.`, h:w.word, vi:`Tôi cũng vậy. Toàn bộ câu chuyện thật ${w.meaning} từ đầu đến cuối.`},
+      {s:'A', t:`We should watch the sequel next weekend. Are you free?`, h:'', vi:`Tuần sau mình xem phần tiếp theo nhé. Bạn rảnh không?`},
+      {s:'B', t:`Absolutely! Any movie this ${w.word} deserves a follow-up.`, h:w.word, vi:`Nhất định rồi! Bộ phim ${w.meaning} như vậy xứng đáng được xem tiếp.`},
+    ],
+  ];
+
+  // Chọn variant dựa trên cả wordId lẫn sessionId → mỗi từ trong session có bối cảnh khác nhau
+  const wordHash = String(w.id || w.word).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const sessHash = sessionId.split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const variantIdx = (wordHash + sessHash) % variantTemplates.length;
+
+  if (!apiKey) {
+    // Offline: pick variant based on sessionId hash so different sessions get different dialogues
+    return variantTemplates[variantIdx];
+  }
+
+  // With API: generate fully unique dialogue with real-life context
+  const realLifeContexts = [
+    'two friends at a coffee shop on a Monday morning',
+    'two coworkers chatting during a lunch break',
+    'two neighbors talking outside their apartment',
+    'two friends shopping at a supermarket',
+    'two gym buddies resting after a workout',
+    'two classmates walking home from school',
+    'two colleagues discussing weekend plans',
+    'a customer and a friendly shop assistant',
+    'two friends watching a movie at home',
+    'two people sharing a taxi',
+  ];
+  // Pick a real-life context based on word hash to ensure variety across words
+  const wordHash2 = String(w.id || w.word).split('').reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  const context = realLifeContexts[wordHash2 % realLifeContexts.length];
+
+  const prompt = `You are writing a short English conversation script for a Vietnamese English-learning app.
+
+WORD TO FEATURE: "${w.word}"
+SCENE: ${context}
+SESSION SEED: ${sessionId.slice(-6)}
+
+STRICT RULES — follow every rule or the output will be rejected:
+1. Return ONLY a valid JSON array with exactly 4 objects. No markdown, no explanation, no extra text.
+2. Field "t" (spoken text): ENGLISH ONLY — absolutely ZERO Vietnamese characters. No meaning in parentheses. No translations inline. Just natural English speech (8-14 words).
+3. Field "vi": Vietnamese translation of that English line (this is the ONLY place for Vietnamese).
+4. Use "${w.word}" naturally in at least 2 of the 4 turns (mark in "h" field).
+5. The scene must feel like a REAL everyday conversation — NOT a language class, NOT "what does X mean?", NOT vocabulary discussion.
+6. Characters talk about something happening in their lives. The word arises naturally in context.
+
+JSON format (copy exactly):
+[{"s":"A","t":"ENGLISH ONLY","h":"","vi":"Vietnamese here"},{"s":"B","t":"ENGLISH ONLY using ${w.word}","h":"${w.word}","vi":"Vietnamese here"},{"s":"A","t":"ENGLISH ONLY","h":"","vi":"Vietnamese here"},{"s":"B","t":"ENGLISH ONLY using ${w.word}","h":"${w.word}","vi":"Vietnamese here"}]
+JSON:`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':apiKey,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:700, messages:[{role:'user',content:prompt}] })
+    });
+    if (res.ok) {
+      const d = await res.json();
+      const raw = (d?.content?.[0]?.text||'').trim();
+      const cleaned = raw.replace(/^```(?:json)?\n?/,'').replace(/\n?```$/,'').trim();
+      const parsed = JSON.parse(cleaned);
+      if (Array.isArray(parsed) && parsed.length >= 4) {
+        const lines = parsed.slice(0,4).map(ln => ({
+          s: ln.s==='B'?'B':'A',
+          t: String(ln.t||''),
+          h: String(ln.h||''),
+          vi: String(ln.vi||'')
+        }));
+        // Validate: field "t" must not contain Vietnamese characters (à á ả ã ạ ă â đ ê ô ơ ư...)
+        const vietnameseRegex = /[àáảãạăắằẳẵặâấầẩẫậèéẻẽẹêếềểễệìíỉĩịòóỏõọôốồổỗộơớờởỡợùúủũụưứừửữựỳýỷỹỵđ]/i;
+        const hasVietnamese = lines.some(ln => vietnameseRegex.test(ln.t));
+        if (!hasVietnamese) {
+          return lines;
+        }
+        // If Vietnamese leaked into "t" field, strip it and keep the line anyway (best effort)
+        return lines.map(ln => ({
+          ...ln,
+          // Remove anything inside parentheses that looks like Vietnamese translation
+          t: ln.t.replace(/\s*[\(\["][^)\]"]*[\)\]"]/g, '').trim()
+        }));
+      }
+    }
+  } catch(e) { console.warn('generateLtSessionDialogue error:', e); }
+
+  return variantTemplates[variantIdx];
+}
+
+/* ── Render: Dictation ── */
+function renderLtDictation(q) {
+  const w = q.word;
+  return `
+    <div class="lt-audio-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="background:var(--rose-light);color:var(--rose);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em">📝 Gõ lại những gì nghe được</span>
+      </div>
+      ${renderLtPlayer(w)}
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:12px">Hãy gõ lại <strong>chính xác</strong> câu vừa nghe (không phân biệt hoa thường).</div>
+      <textarea class="lt-dict-input" id="lt-dict-inp" placeholder="Gõ câu bạn vừa nghe..."></textarea>
+      <div id="lt-dict-target" class="lt-dict-target"><strong>Đáp án:</strong> ${q.sentence}</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+        <button class="btn btn-primary" onclick="checkLtDictation('${esc(q.sentence)}')">Kiểm tra ✓</button>
+        <button class="btn btn-outline btn-sm" onclick="ltPlayAudio('${esc(w.word)}','${esc(q.sentence)}')">🔊 Nghe lại</button>
+      </div>
+      <div id="lt-feedback-wrap"></div>
+    </div>`;
+}
+
+/* ── Audio player HTML ── */
+function renderLtPlayer(w) {
+  return `
+    <div class="lt-audio-player">
+      <button class="lt-play-btn" id="lt-play-btn" onclick="ltPlayAudio('${esc(w.word)}','${esc(w.example||w.word)}')">▶</button>
+      <div class="lt-audio-info">
+        <div class="lt-audio-label">Nhấn ▶ để nghe</div>
+        <div class="lt-audio-wave" id="lt-wave">
+          ${[1,2,3,4,5,6,7].map(i=>`<div class="lt-wave-bar" id="wb${i}"></div>`).join('')}
+        </div>
+      </div>
+      <div>
+        <div style="font-size:10px;font-weight:700;color:var(--ink4);text-transform:uppercase;margin-bottom:5px">Tốc độ</div>
+        <div class="lt-speed-row">
+          ${[0.75,1,1.25].map(s=>`<button class="lt-speed-btn ${_ltCurrentSpeed===s?'active':''}" onclick="setLtSpeed(${s})">${s}x</button>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+function setLtSpeed(s) {
+  _ltCurrentSpeed = s;
+  document.querySelectorAll('.lt-speed-btn').forEach(b => {
+    b.classList.toggle('active', parseFloat(b.textContent) === s);
+  });
+}
+
+function ltPlayAudio(word, sentence) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const btn = document.getElementById('lt-play-btn');
+  const waves = document.querySelectorAll('.lt-wave-bar');
+  if (btn) { btn.textContent = '⏹'; btn.classList.add('playing'); }
+  waves.forEach(w => w.classList.add('active'));
+
+  const text = sentence || word;
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = _ltCurrentSpeed;
+  const v = getFemaleUSVoice(); if (v) u.voice = v;
+  u.onend = u.onerror = () => {
+    if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
+    waves.forEach(w => w.classList.remove('active'));
+  };
+  window.speechSynthesis.speak(u);
+}
+
+function ltPlayDialogue(lines) {
+  if (!lines || !lines.length) return;
+  let i = 0;
+  const playNext = () => {
+    if (i >= lines.length) return;
+    const u = new SpeechSynthesisUtterance(lines[i].t);
+    u.lang = 'en-US'; u.rate = _ltCurrentSpeed;
+    const v = getFemaleUSVoice(); if(v) u.voice = v;
+    u.pitch = lines[i].s === 'B' ? 0.85 : 1.1;
+    u.onend = () => { i++; setTimeout(playNext, 300); };
+    window.speechSynthesis.speak(u);
+  };
+  window.speechSynthesis.cancel();
+  setTimeout(playNext, 200);
+}
+
+/* ── Check answers ── */
+function checkLtFill() {
+  const inp = document.getElementById('lt-fill-inp');
+  if (!inp) return;
+  const q = _ltSession.questions[_ltSession.current];
+  const w = q.word;
+  const answer = inp.value.trim().toLowerCase();
+  const correct = w.word.toLowerCase();
+  const isOk = answer === correct || (correct.startsWith(answer.slice(0,-1)) && answer.length >= correct.length - 1);
+  inp.classList.add(isOk ? 'correct' : 'wrong');
+  inp.value = isOk ? w.word : inp.value;
+
+  if (isOk) {
+    _ltSession.correct++;
+    gainXP(15);
+    // Lock all action buttons except audio
+    document.querySelectorAll('.lt-audio-card button:not(#lt-play-btn):not(.lt-speed-btn)').forEach(b => b.disabled = true);
+    inp.disabled = true;
+    // Show full result with correct word, meaning, example + Next button
+    const wrap = document.getElementById('lt-feedback-wrap');
+    if (wrap) {
+      const escapedWord = w.word.replace(/'/g,"\\'");
+      const escapedEx   = (w.example||'').replace(/'/g,"\\'");
+      const exampleHtml = w.example
+        ? `<div style="margin-top:8px;padding:10px 12px;background:rgba(255,255,255,.7);border-radius:8px;border-left:3px solid var(--teal)">
+             <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4);margin-bottom:4px">&#x1F4AC; C&#226;u v&#237; d&#7909;</div>
+             <div style="font-size:14px;color:var(--ink);font-style:italic;">"${esc(w.example)}"</div>
+             <button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:12px;padding:4px 10px" onclick="ltPlayAudio('${escapedWord}','${escapedEx}')">&#x1F50A; Nghe c&#226;u</button>
+           </div>`
+        : '';
+      wrap.innerHTML = `
+        <div class="lt-feedback ok">
+          <div class="lt-fb-icon">&#x1F389;</div>
+          <div class="lt-fb-msg" style="flex:1">
+            <div class="lt-fb-title">Ch&#237;nh x&#225;c! &#x1F31F;</div>
+            <div style="font-size:13px;color:var(--ink2);margin-top:3px"><strong>${w.word}</strong> ${w.ipa?`<em style="color:var(--ink3)">${w.ipa}</em>`:''} = ${w.meaning}</div>
+            ${exampleHtml}
+            <div style="margin-top:10px">
+              <button class="btn btn-primary btn-sm" style="font-size:13px;padding:8px 18px;font-weight:700" onclick="nextLtQuestion()">Ti&#7871;p theo &#x2192;</button>
+            </div>
+          </div>
+        </div>`;
+    }
+  } else {
+    gainXP(2);
+    showLtFeedback(false, w.word, w.meaning);
+    // Unlock retry: reset input after short delay
+    setTimeout(() => {
+      inp.classList.remove('wrong');
+      inp.value = '';
+      inp.disabled = false;
+      inp.focus();
+      const wrap = document.getElementById('lt-feedback-wrap');
+      if (wrap) wrap.innerHTML = '';
+    }, 1800);
+  }
+}
+
+function checkLtMC(el, selectedId, correctId) {
+  if (el.classList.contains('correct') || el.classList.contains('wrong') || el.classList.contains('locked')) return;
+  const isOk = selectedId === correctId;
+  const q = _ltSession.questions[_ltSession.current];
+  const w = q.word;
+
+  if (isOk) {
+    // Mark correct & lock all
+    document.querySelectorAll('.lt-opt').forEach(o => {
+      const oid = o.getAttribute('onclick')?.match(/'([^']+)'/)?.[1];
+      if (oid === correctId) o.classList.add('correct');
+      o.style.pointerEvents = 'none';
+    });
+    _ltSession.correct++;
+    gainXP(12);
+    // Show answer details + example sentence + Next button (no auto-advance)
+    const exampleHtml = w.example
+      ? `<div style="margin-top:8px;padding:10px 12px;background:rgba(255,255,255,.7);border-radius:8px;border-left:3px solid var(--teal)">
+           <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--ink4);margin-bottom:4px">💬 Câu ví dụ</div>
+           <div style="font-size:14px;color:var(--ink);font-style:italic;">"${w.example}"</div>
+           <button class="btn btn-ghost btn-sm" style="margin-top:6px;font-size:12px;padding:4px 10px" onclick="ltPlayAudio('${esc(w.word)}','${esc(w.example)}')">🔊 Nghe câu</button>
+         </div>`
+      : '';
+    const wrap = document.getElementById('lt-feedback-wrap');
+    if (wrap) {
+      wrap.innerHTML = `
+        <div class="lt-feedback ok">
+          <div class="lt-fb-icon">🎉</div>
+          <div class="lt-fb-msg" style="flex:1">
+            <div class="lt-fb-title">Chính xác! 🌟</div>
+            <div style="font-size:13px;color:var(--ink2);margin-top:3px"><strong>${w.word}</strong> = ${w.meaning} <em style="color:var(--ink3)">${w.ipa||''}</em></div>
+            ${exampleHtml}
+            <div style="margin-top:10px">
+              <button class="btn btn-primary btn-sm" style="font-size:13px;padding:8px 18px;font-weight:700" onclick="nextLtQuestion()">Tiếp theo →</button>
+            </div>
+          </div>
+        </div>`;
+    }
+  } else {
+    // Only highlight this wrong choice — keep others clickable for retry
+    el.classList.add('wrong');
+    el.style.pointerEvents = 'none';
+    gainXP(1);
+    showLtFeedback(false, w.word + ' = ' + w.meaning, '❌ Sai rồi — thử lại đáp án khác!');
+    // Shake the wrong option
+    el.style.animation = 'shake .35s ease';
+    setTimeout(() => el.style.animation = '', 400);
+  }
+}
+
+function checkLtDictation(correctSent) {
+  const inp = document.getElementById('lt-dict-inp');
+  if (!inp) return;
+  const answer = inp.value.trim().toLowerCase().replace(/[.,!?]/g,'');
+  const correct = correctSent.toLowerCase().replace(/[.,!?]/g,'');
+  const aWords = answer.split(/\s+/); const cWords = correct.split(/\s+/);
+  const matched = cWords.filter((w,i) => aWords[i] && (aWords[i]===w || aWords[i].slice(0,-1)===w.slice(0,-1)));
+  const score = Math.round(matched.length / cWords.length * 100);
+  const isOk = score >= 75;
+  document.getElementById('lt-dict-target').style.display = 'block';
+
+  if (isOk) {
+    _ltSession.correct++;
+    gainXP(20);
+    inp.disabled = true;
+    // Disable action buttons
+    document.querySelectorAll('.lt-audio-card button:not(#lt-play-btn):not(.lt-speed-btn)').forEach(b => b.disabled = true);
+    // Show success feedback + Next button (no auto-advance)
+    const wrap = document.getElementById('lt-feedback-wrap');
+    if (wrap) {
+      wrap.innerHTML = `
+        <div class="lt-feedback ok">
+          <div class="lt-fb-icon">&#x1F389;</div>
+          <div class="lt-fb-msg" style="flex:1">
+            <div class="lt-fb-title">Ch&#237;nh x&#225;c! &#x1F31F;</div>
+            <div style="font-size:12px;color:var(--ink3);margin-top:3px">&#x0110;&#x1EE9; ch&#237;nh x&#225;c: <strong>${score}%</strong></div>
+            <div style="margin-top:10px">
+              <button class="btn btn-primary btn-sm" style="font-size:13px;padding:8px 18px;font-weight:700" onclick="nextLtQuestion()">Ti&#7871;p theo &#x2192;</button>
+            </div>
+          </div>
+        </div>`;
+    }
+  } else {
+    gainXP(3);
+    showLtFeedback(false, correctSent, `&#x0110;&#x1EE9; ch&#237;nh x&#225;c: ${score}%`);
+    // Allow retry: re-enable textarea after showing answer
+    setTimeout(() => {
+      inp.value = '';
+      inp.disabled = false;
+      inp.focus();
+      document.getElementById('lt-dict-target').style.display = 'none';
+      const wrap = document.getElementById('lt-feedback-wrap');
+      if (wrap) wrap.innerHTML = '';
+    }, 2500);
+  }
+}
+
+function showLtFeedback(isOk, correctLabel, sub = '') {
+  const wrap = document.getElementById('lt-feedback-wrap');
+  if (!wrap) return;
+  // For wrong MC: show inline tip without skip button (user retries by clicking another option)
+  const isMC = _ltMode === 'mc' || _ltMode === 'dialogue';
+  const retryNote = (!isOk && isMC)
+    ? `<div style="font-size:12px;font-weight:700;color:#9f1239;margin-top:6px">&#x1F446; Nh&#7845;n &#x111;&#225;p &#225;n kh&#225;c &#x111;&#x1EC3; th&#7917; l&#7841;i</div>`
+    : (!isOk
+      ? `<div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+           <button class="btn btn-outline btn-sm" onclick="retryLtQuestion()" style="font-size:12px">&#x1F504; L&#xE0;m l&#7841;i</button>
+           <button class="btn btn-sm" style="background:var(--ink4);color:#fff;border:none;font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer" onclick="skipLtQuestion()">&#x2192; B&#x1EFD; qua</button>
+         </div>`
+      : '');
+
+  wrap.innerHTML = `
+    <div class="lt-feedback ${isOk?'ok':'err'}">
+      <div class="lt-fb-icon">${isOk?'&#x1F389;':'&#x1F4A1;'}</div>
+      <div class="lt-fb-msg" style="flex:1">
+        <div class="lt-fb-title">${isOk?'Ch&#237;nh x&#225;c! &#x1F31F;':'Ch&#432;a &#x111;&#250;ng!'}</div>
+        ${!isOk?`<div class="lt-fb-correct">&#x0110;&#225;p &#225;n &#x111;&#250;ng: <strong>${correctLabel}</strong>${sub?` &mdash; <em>${sub}</em>`:''}</div>`:''}
+        ${isOk&&sub?`<div style="font-size:12px;color:var(--ink3);margin-top:3px">${sub}</div>`:''}
+        ${retryNote}
+      </div>
+    </div>`;
+}
+
+function retryLtQuestion() {
+  // Reset current question without advancing counter
+  const wrap = document.getElementById('lt-feedback-wrap');
+  if (wrap) wrap.innerHTML = '';
+
+  // Reset fill input
+  const fillInp = document.getElementById('lt-fill-inp');
+  if (fillInp) {
+    fillInp.classList.remove('wrong', 'correct');
+    fillInp.disabled = false;
+    fillInp.value = '';
+    fillInp.focus();
+  }
+  // Reset dict input
+  const dictInp = document.getElementById('lt-dict-inp');
+  if (dictInp) {
+    dictInp.value = '';
+    dictInp.disabled = false;
+    dictInp.focus();
+    const target = document.getElementById('lt-dict-target');
+    if (target) target.style.display = 'none';
+  }
+  // Re-enable action buttons
+  document.querySelectorAll('.lt-audio-card button:not(#lt-play-btn):not(.lt-speed-btn)').forEach(b => b.disabled = false);
+  // Auto-replay audio
+  const q = _ltSession.questions[_ltSession.current];
+  if (q) setTimeout(() => ltPlayAudio(q.word.word, q.word.example || q.word.word), 300);
+}
+
+function skipLtQuestion() {
+  _ltSession.wrong++;
+  nextLtQuestion();
+}
+
+function showLtHint() {
+  const inp = document.getElementById('lt-fill-inp');
+  if (!inp) return;
+  const q = _ltSession.questions[_ltSession.current];
+  const w = q.word.word;
+  inp.classList.remove('wrong');
+  inp.value = w[0] + '_'.repeat(w.length - 1);
+  inp.focus();
+}
+
+function nextLtQuestion() {
+  _ltSession.current++;
+  showLtQuestion();
+}
+
+function endLtSession() {
+  _ltSession = null;
+  renderListeningSetup();
+}
+
+function showLtResult() {
+  const { correct, wrong, questions, mode } = _ltSession;
+  const total = questions.length;
+  const score = Math.round(correct / total * 100);
+  _ltSession.score = score;
+
+  // Save log
+  try {
+    const logs = JSON.parse(localStorage.getItem('speakup_lt_logs') || '[]');
+    logs.push({ ts: Date.now(), mode, score, correct, wrong, total });
+    if (logs.length > 50) logs.splice(0, logs.length - 50);
+    localStorage.setItem('speakup_lt_logs', JSON.stringify(logs));
+  } catch(e) {}
+
+  gainXP(score >= 80 ? 50 : score >= 60 ? 30 : 10);
+
+  const emoji = score >= 90?'🏆':score >= 70?'🌟':score >= 50?'👍':'💪';
+  const msg = score >= 90?'Xuất sắc!':score >= 70?'Tốt lắm!':score >= 50?'Khá ổn!':'Luyện thêm nhé!';
+
+  document.getElementById('lt-content').innerHTML = `
+    <div class="lt-result">
+      <span class="lt-result-emoji">${emoji}</span>
+      <div class="lt-result-title">${msg}</div>
+      <div class="lt-result-sub">Hoàn thành ${total} câu luyện nghe</div>
+      <div class="lt-result-stats">
+        <div class="lt-result-stat">
+          <span class="lt-result-stat-val" style="color:var(--teal)">${score}%</span>
+          <div class="lt-result-stat-lbl">Điểm số</div>
+        </div>
+        <div class="lt-result-stat">
+          <span class="lt-result-stat-val" style="color:#059669">${correct}</span>
+          <div class="lt-result-stat-lbl">✅ Đúng</div>
+        </div>
+        <div class="lt-result-stat">
+          <span class="lt-result-stat-val" style="color:var(--rose)">${wrong}</span>
+          <div class="lt-result-stat-lbl">❌ Sai</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="startListening()">🔄 Luyện tiếp</button>
+        <button class="btn btn-outline" onclick="renderListeningSetup()">⚙️ Thay đổi bài</button>
+        <button class="btn btn-outline" onclick="showPanel('speaking-pro')">🎤 Luyện Speaking →</button>
+      </div>
+    </div>`;
+}
+
+// Init listening panel on show
+const _origShowPanel = window.showPanel;
+
+/* ═══════════════════════════════════════════════
+   SPEAKING PRO MODULE — SpeakUp v44
+   4 modes: shadowing · pronunciation · roleplay · read-aloud
+═══════════════════════════════════════════════ */
+
+let _spMode = 'shadow';
+let _spSession = null;
+let _spRecognition = null;
+let _spIsRecording = false;
+let _spRoleplayHistory = [];
+let _spRoleplayContext = null;
+let _spRAWords = [];
+let _spRATranscript = '';
+
+function switchSpTab(mode, el) {
+  document.querySelectorAll('#sp-tabs .sp-mode-tab').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  _spMode = mode;
+  renderSpSetup();
+}
+
+function renderSpSetup() {
+  const el = document.getElementById('sp-content');
+  if (!S.vocab.length) {
+    el.innerHTML = `<div class="empty-state"><div class="empty-icon">📭</div><div class="empty-title">Chưa có từ vựng</div><button class="btn btn-primary" onclick="showPanel('import')">📥 Import từ vựng</button></div>`;
+    return;
+  }
+
+  const modeInfo = {
+    shadow: { icon:'🔁', title:'Shadowing', desc:'Nghe native speaker nói, lặp lại ngay lập tức cùng âm thanh. Kỹ thuật luyện nói hiệu quả nhất từ ELSA Speak.' },
+    pronunciation: { icon:'🔤', title:'Pronunciation Score', desc:'Phát âm từng từ/câu, AI chấm điểm từng âm, chỉ ra âm sai cụ thể.' },
+    roleplay: { icon:'🎭', title:'Roleplay hội thoại', desc:'Nhập vai trong tình huống thực tế với AI. Luyện phản xạ nói tự nhiên.' },
+    readaloud: { icon:'📖', title:'Read Aloud', desc:'Đọc to đoạn văn/câu ví dụ từ vựng đã học. Chấm điểm từng từ theo màu sắc.' }
+  };
+  const m = modeInfo[_spMode];
+  const topics = [...new Set(S.vocab.map(v => v.topic))].sort();
+  const topicOpts = topics.map(t => `<option value="${t}">${t}</option>`).join('');
+
+  el.innerHTML = `
+    <div class="sp-setup-card">
+      <div style="display:flex;align-items:flex-start;gap:14px;margin-bottom:16px;flex-wrap:wrap">
+        <div style="width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--violet-light),#ede9fe);border:2px solid rgba(124,58,237,.2);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0">${m.icon}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-family:var(--font-d);font-weight:700;font-size:17px;color:var(--ink);margin-bottom:3px">${m.title}</div>
+          <div style="font-size:13px;color:var(--ink3);line-height:1.5">${m.desc}</div>
+        </div>
+      </div>
+      ${_spMode === 'roleplay' ? renderRoleplaySetup() : `
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:1;min-width:160px">
+          <div style="font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Chủ đề</div>
+          <select class="sel-inp" id="sp-topic-sel" style="width:100%">
+            <option value="">🎲 Tất cả chủ đề</option>
+            ${topicOpts}
+          </select>
+        </div>
+        <div style="flex:1;min-width:100px">
+          <div style="font-size:11px;font-weight:700;color:var(--ink4);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px">Số từ/câu</div>
+          <select class="sel-inp" id="sp-count-sel" style="width:100%">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="15">15</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" style="padding:11px 22px;font-size:15px;background:linear-gradient(135deg,var(--violet),var(--teal))" onclick="startSpeakingPro()">🎤 Bắt đầu →</button>
+      </div>`}
+    </div>
+    <div id="sp-session-wrap"></div>`;
+}
+
+function renderRoleplaySetup() {
+  const scenarios = [
+    { id:'cafe', icon:'☕', title:'Gọi đồ uống', sub:'Tại quán cà phê', prompt:'You are a barista at a coffee shop. Help the customer order.' },
+    { id:'hotel', icon:'🏨', title:'Check-in khách sạn', sub:'Tại quầy lễ tân', prompt:'You are a hotel receptionist. Help the guest check in.' },
+    { id:'job', icon:'💼', title:'Phỏng vấn xin việc', sub:'Văn phòng công ty', prompt:'You are a job interviewer. Ask about experience and skills.' },
+    { id:'doctor', icon:'👨‍⚕️', title:'Khám bệnh', sub:'Tại phòng khám', prompt:'You are a friendly doctor. Ask about symptoms and give advice.' },
+    { id:'shop', icon:'🛒', title:'Mua sắm', sub:'Cửa hàng thời trang', prompt:'You are a shop assistant. Help the customer find clothes.' },
+    { id:'direction', icon:'🗺️', title:'Hỏi đường', sub:'Trên đường phố', prompt:'You are a local. Give directions to a tourist who is lost.' },
+  ];
+  return `
+    <div style="font-size:13px;font-weight:700;color:var(--ink2);margin-bottom:12px">Chọn tình huống luyện tập:</div>
+    <div class="sp-mode-grid">
+      ${scenarios.map(s=>`
+        <div class="sp-mode-card" onclick="startRoleplay('${s.id}','${esc(s.prompt)}','${esc(s.title)}')">
+          <div class="sp-mode-icon">${s.icon}</div>
+          <div class="sp-mode-title">${s.title}</div>
+          <div class="sp-mode-sub">${s.sub}</div>
+        </div>`).join('')}
+    </div>`;
+}
+
+function startSpeakingPro() {
+  const topic = document.getElementById('sp-topic-sel')?.value || '';
+  const count = parseInt(document.getElementById('sp-count-sel')?.value) || 10;
+  let pool = topic ? S.vocab.filter(v => v.topic === topic) : [...S.vocab];
+  if (!pool.length) { showToast('Không có từ vựng!', 'error'); return; }
+  pool = shuffle(pool).slice(0, count);
+  _spSession = { words: pool, current: 0, scores: [], mode: _spMode };
+  showSpQuestion();
+}
+
+function showSpQuestion() {
+  const { words, current } = _spSession;
+  if (current >= words.length) { showSpResult(); return; }
+  const w = words[current];
+  const pct = Math.round(current / words.length * 100);
+  const el = document.getElementById('sp-session-wrap');
+
+  let body = '';
+  if (_spMode === 'shadow') body = renderSpShadow(w, current, words.length, pct);
+  else if (_spMode === 'pronunciation') body = renderSpPronunciation(w, current, words.length, pct);
+  else body = renderSpReadAloud(w, current, words.length, pct);
+  el.innerHTML = body;
+  setTimeout(() => speak(w.example || w.word), 600);
+}
+
+/* ── Shadowing ── */
+function renderSpShadow(w, cur, total, pct) {
+  const sent = w.example || w.word;
+  return `
+    <div class="sp-topbar">
+      <button class="btn btn-ghost btn-sm" onclick="endSpSession()" style="padding:6px 10px">✕</button>
+      <div class="sp-pbar-wrap"><div class="sp-pbar-fill" style="width:${pct}%"></div></div>
+      <span style="font-size:12px;font-weight:700;color:var(--ink4);white-space:nowrap">${cur+1}/${total}</span>
+    </div>
+    <div class="sp-shadow-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="background:var(--violet-light);color:var(--violet);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:800;text-transform:uppercase">🔁 Shadowing</span>
+        <span style="font-size:12px;color:var(--ink4)">${w.topic}</span>
+      </div>
+      <div class="sp-shadow-text">${sent}</div>
+      ${w.ipa ? `<div class="sp-shadow-ipa">${w.word} ${w.ipa}</div>` : ''}
+      <div class="sp-shadow-vi">${w.meaning}${w.example?` — "${w.example}"`:''}</div>
+      <div class="sp-tip">
+        <span class="sp-tip-icon">💡</span>
+        <span>Nghe → Lặp lại <strong>ngay lập tức</strong> cùng lúc với audio. Đừng đợi đến khi nghe xong! Đây là kỹ thuật shadowing thật sự.</span>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:16px">
+        <button class="btn btn-outline" onclick="speak('${esc(sent)}')">🔊 Nghe gốc</button>
+        <button class="btn btn-outline" onclick="spSlowSpeak('${esc(sent)}')">🐢 Nghe chậm (0.7x)</button>
+      </div>
+      <div class="sp-rec-area">
+        <button class="sp-rec-btn idle" id="sp-rec-btn" onclick="toggleSpRec('${esc(sent)}','${esc(w.word)}')">🎙️</button>
+        <div class="sp-rec-status" id="sp-rec-status">Nhấn để ghi âm khi bắt chước</div>
+        <div class="sp-rec-hint">Ghi âm trong khi audio đang phát — đó là shadowing!</div>
+      </div>
+      <div id="sp-score-wrap"></div>
+      <div id="sp-next-wrap"></div>
+    </div>`;
+}
+
+/* ── Pronunciation ── */
+function renderSpPronunciation(w, cur, total, pct) {
+  return `
+    <div class="sp-topbar">
+      <button class="btn btn-ghost btn-sm" onclick="endSpSession()" style="padding:6px 10px">✕</button>
+      <div class="sp-pbar-wrap"><div class="sp-pbar-fill" style="width:${pct}%"></div></div>
+      <span style="font-size:12px;font-weight:700;color:var(--ink4);white-space:nowrap">${cur+1}/${total}</span>
+    </div>
+    <div class="sp-shadow-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <span style="background:var(--teal-light);color:var(--teal);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:800;text-transform:uppercase">🔤 Phát âm</span>
+      </div>
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-family:var(--font-d);font-size:40px;font-weight:900;color:var(--ink);margin-bottom:6px">${w.word}</div>
+        <div style="font-size:16px;color:var(--ink3);font-style:italic;margin-bottom:8px">${w.ipa||''}</div>
+        <div style="font-size:14px;color:var(--ink2);margin-bottom:16px">${w.meaning}</div>
+        <button class="btn btn-outline" onclick="speak('${esc(w.word)}')">🔊 Nghe mẫu</button>
+      </div>
+      ${w.example ? `<div style="font-size:14px;color:var(--ink3);font-style:italic;text-align:center;margin-bottom:16px;padding:10px;background:var(--bg);border-radius:8px">"${w.example}"</div>` : ''}
+      <div class="sp-rec-area">
+        <button class="sp-rec-btn idle" id="sp-rec-btn" onclick="toggleSpRec('${esc(w.example||w.word)}','${esc(w.word)}')">🎙️</button>
+        <div class="sp-rec-status" id="sp-rec-status">Nhấn để phát âm từ "${w.word}"</div>
+      </div>
+      <div id="sp-score-wrap"></div>
+      <div id="sp-next-wrap"></div>
+    </div>`;
+}
+
+/* ── Read Aloud ── */
+function renderSpReadAloud(w, cur, total, pct) {
+  const sent = w.example || `${w.word} is a very useful English word.`;
+  _spRAWords = sent.split(' ');
+  return `
+    <div class="sp-topbar">
+      <button class="btn btn-ghost btn-sm" onclick="endSpSession()" style="padding:6px 10px">✕</button>
+      <div class="sp-pbar-wrap"><div class="sp-pbar-fill" style="width:${pct}%"></div></div>
+      <span style="font-size:12px;font-weight:700;color:var(--ink4);white-space:nowrap">${cur+1}/${total}</span>
+    </div>
+    <div class="sp-shadow-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:16px">
+        <span style="background:var(--amber-light);color:var(--amber);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:800;text-transform:uppercase">📖 Read Aloud</span>
+      </div>
+      <div class="sp-ra-text" id="sp-ra-text">
+        ${_spRAWords.map((word,i)=>`<span class="sp-ra-word" id="ra-w-${i}">${word}</span> `).join('')}
+      </div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:16px">Đọc to câu trên bằng tiếng Anh rõ ràng, chú ý từ được highlight.</div>
+      <button class="btn btn-outline btn-sm" onclick="speak('${esc(sent)}')" style="margin-bottom:16px">🔊 Nghe mẫu trước</button>
+      <div class="sp-rec-area">
+        <button class="sp-rec-btn idle" id="sp-rec-btn" onclick="toggleSpRec('${esc(sent)}','${esc(w.word)}')">🎙️</button>
+        <div class="sp-rec-status" id="sp-rec-status">Nhấn → Đọc to câu trên</div>
+      </div>
+      <div class="sp-transcript" id="sp-transcript">Transcript sẽ hiển thị ở đây...</div>
+      <div id="sp-score-wrap"></div>
+      <div id="sp-next-wrap"></div>
+    </div>`;
+}
+
+/* ── Recording Logic ── */
+function spSlowSpeak(text) {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = 0.7;
+  const v = getFemaleUSVoice(); if(v) u.voice = v;
+  window.speechSynthesis.speak(u);
+}
+
+function toggleSpRec(targetSent, targetWord) {
+  if (_spIsRecording) { stopSpRec(); return; }
+
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    showToast('Trình duyệt không hỗ trợ ghi âm. Dùng Chrome!', 'error');
+    return;
+  }
+
+  _spIsRecording = true;
+  const btn = document.getElementById('sp-rec-btn');
+  const status = document.getElementById('sp-rec-status');
+  if (btn) { btn.className = 'sp-rec-btn recording'; btn.textContent = '⏹'; }
+  if (status) status.textContent = '🔴 Đang ghi âm... Nhấn để dừng';
+
+  _spRecognition = new SpeechRec();
+  _spRecognition.lang = 'en-US';
+  _spRecognition.continuous = false;
+  _spRecognition.interimResults = true;
+
+  let finalTranscript = '';
+
+  _spRecognition.onresult = (e) => {
+    let interim = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    const transcEl = document.getElementById('sp-transcript');
+    if (transcEl) { transcEl.textContent = (finalTranscript || interim) || '...'; transcEl.className = 'sp-transcript has-text'; }
+  };
+
+  _spRecognition.onend = () => {
+    _spIsRecording = false;
+    const btn = document.getElementById('sp-rec-btn');
+    if (btn) { btn.className = 'sp-rec-btn idle'; btn.textContent = '🎙️'; }
+    if (status) status.textContent = 'Đang phân tích...';
+    const wordIpa = _spSession?.words?.[_spSession?.current]?.ipa || '';
+    scoreSpSpeechEnhanced(finalTranscript || '', targetSent, targetWord, wordIpa);
+  };
+
+  _spRecognition.onerror = (e) => {
+    _spIsRecording = false;
+    const btn = document.getElementById('sp-rec-btn');
+    if (btn) { btn.className = 'sp-rec-btn idle'; btn.textContent = '🎙️'; }
+    if (status) status.textContent = 'Không nghe được — thử lại!';
+  };
+
+  _spRecognition.start();
+}
+
+function stopSpRec() {
+  if (_spRecognition) _spRecognition.stop();
+}
+
+function scoreSpSpeech(transcript, targetSent, targetWord) {
+  const status = document.getElementById('sp-rec-status');
+  if (!transcript.trim()) {
+    if (status) status.textContent = 'Không nghe được rõ. Thử lại!';
+    return;
+  }
+  if (status) status.textContent = 'Hoàn tất!';
+
+  const tWords = targetSent.toLowerCase().replace(/[.,!?]/g,'').split(/\s+/);
+  const sWords = transcript.toLowerCase().replace(/[.,!?]/g,'').split(/\s+/);
+
+  // Word-by-word comparison for phoneme approximation
+  const wordScores = tWords.map((tw, i) => {
+    const sw = sWords[i] || '';
+    if (!sw) return { word: tw, score: 0 };
+    // Levenshtein-like similarity
+    const maxLen = Math.max(tw.length, sw.length);
+    let matches = 0;
+    for (let j = 0; j < Math.min(tw.length, sw.length); j++) {
+      if (tw[j] === sw[j]) matches++;
+    }
+    return { word: tw, score: Math.round(matches / maxLen * 100) };
+  });
+
+  const overallScore = wordScores.length
+    ? Math.round(wordScores.reduce((s,w)=>s+w.score,0) / wordScores.length)
+    : 0;
+
+  // Highlight read-aloud words
+  if (_spMode === 'readaloud') {
+    wordScores.forEach((ws, i) => {
+      const el = document.getElementById(`ra-w-${i}`);
+      if (!el) return;
+      el.className = 'sp-ra-word ' + (ws.score >= 80 ? 'done-good' : ws.score >= 50 ? 'done-ok' : 'done-bad');
+    });
+  }
+
+  _spSession.scores.push(overallScore);
+  gainXP(overallScore >= 70 ? 25 : overallScore >= 40 ? 10 : 5);
+
+  showSpScore(overallScore, transcript, wordScores, targetWord);
+}
+
+function showSpScore(score, transcript, wordScores, targetWord) {
+  const wrap = document.getElementById('sp-score-wrap');
+  if (!wrap) return;
+
+  const clr = score >= 70 ? 'var(--teal)' : score >= 40 ? 'var(--amber)' : 'var(--rose)';
+  const msg = score >= 90 ? '🌟 Xuất sắc! Phát âm chuẩn!' : score >= 70 ? '👍 Tốt! Luyện thêm nhé' : score >= 40 ? '💪 Khá ổn, cải thiện được!' : '🔄 Thử lại, cần luyện thêm';
+
+  // Show phoneme-like breakdown (top 5 words)
+  const topWords = wordScores.slice(0, 6);
+  const phonemeHTML = topWords.map(ws =>
+    `<div class="sp-phoneme ${ws.score>=80?'good':ws.score>=50?'ok':'bad'}">
+      <div class="sp-phoneme-sym">${ws.word}</div>
+      <div class="sp-phoneme-pct">${ws.score}%</div>
+    </div>`
+  ).join('');
+
+  wrap.innerHTML = `
+    <div style="margin-top:16px;padding:16px;background:var(--surface2);border-radius:14px;border:1.5px solid var(--border)">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:12px">
+        <div class="sp-score-ring">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle cx="48" cy="48" r="38" fill="none" stroke="var(--bg2)" stroke-width="8"/>
+            <circle cx="48" cy="48" r="38" fill="none" stroke="${clr}" stroke-width="8"
+              stroke-dasharray="${2*Math.PI*38}" stroke-dashoffset="${2*Math.PI*38*(1-score/100)}"
+              stroke-linecap="round" style="transition:stroke-dashoffset .8s"/>
+          </svg>
+          <div class="sp-score-ring-val" style="color:${clr}">${score}%</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:15px;color:var(--ink);margin-bottom:4px">${msg}</div>
+          <div style="font-size:13px;color:var(--ink3)">Bạn nói: "<em>${transcript}</em>"</div>
+        </div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink4);text-transform:uppercase;margin-bottom:8px">Từng từ:</div>
+      <div class="sp-phoneme-row">${phonemeHTML}</div>
+    </div>`;
+
+  // Show next button
+  const nextWrap = document.getElementById('sp-next-wrap');
+  if (nextWrap) {
+    nextWrap.innerHTML = `
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="showSpQuestion()">→ Thử lại không tính điểm</button>
+        <button class="btn btn-primary" style="flex:1;justify-content:center;background:linear-gradient(135deg,var(--violet),var(--teal))" onclick="advanceSpQuestion()">Tiếp theo →</button>
+      </div>`;
+  }
+}
+
+function advanceSpQuestion() {
+  _spSession.current++;
+  showSpQuestion();
+}
+
+function endSpSession() {
+  _spSession = null;
+  if (_spRecognition) { _spRecognition.stop(); _spRecognition = null; }
+  _spIsRecording = false;
+  renderSpSetup();
+}
+
+function showSpResult() {
+  const { scores, words, mode } = _spSession;
+  const avg = scores.length ? Math.round(scores.reduce((s,x)=>s+x,0)/scores.length) : 0;
+  gainXP(avg >= 80 ? 60 : avg >= 60 ? 40 : 20);
+
+  const emoji = avg>=90?'🏆':avg>=70?'🌟':avg>=50?'👍':'💪';
+  document.getElementById('sp-session-wrap').innerHTML = `
+    <div class="lt-result">
+      <span class="lt-result-emoji">${emoji}</span>
+      <div class="lt-result-title">${avg>=80?'Phát âm tuyệt vời!':avg>=60?'Tiến bộ rõ rệt!':'Hãy luyện thêm!'}</div>
+      <div class="lt-result-sub">Hoàn thành ${words.length} ${mode==='shadow'?'câu Shadowing':mode==='pronunciation'?'từ Pronunciation':'câu Read Aloud'}</div>
+      <div class="lt-result-stats">
+        <div class="lt-result-stat"><span class="lt-result-stat-val" style="color:var(--violet)">${avg}%</span><div class="lt-result-stat-lbl">Điểm TB</div></div>
+        <div class="lt-result-stat"><span class="lt-result-stat-val" style="color:#059669">${scores.filter(s=>s>=70).length}</span><div class="lt-result-stat-lbl">✅ Tốt</div></div>
+        <div class="lt-result-stat"><span class="lt-result-stat-val" style="color:var(--rose)">${scores.filter(s=>s<50).length}</span><div class="lt-result-stat-lbl">🔄 Cần luyện</div></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap">
+        <button class="btn btn-primary" style="background:linear-gradient(135deg,var(--violet),var(--teal))" onclick="startSpeakingPro()">🔄 Luyện tiếp</button>
+        <button class="btn btn-outline" onclick="renderSpSetup()">⚙️ Đổi mode</button>
+        <button class="btn btn-outline" onclick="showPanel('listening')">🎧 Luyện Listening →</button>
+      </div>
+    </div>`;
+}
+
+/* ── Roleplay ── */
+async function startRoleplay(id, prompt, title) {
+  _spRoleplayHistory = [];
+  _spRoleplayContext = { id, prompt, title };
+  const el = document.getElementById('sp-session-wrap');
+  el.innerHTML = `
+    <div class="sp-shadow-card">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+        <span style="background:var(--violet-light);color:var(--violet);border-radius:20px;padding:3px 12px;font-size:11px;font-weight:800;text-transform:uppercase">🎭 ${title}</span>
+        <button class="btn btn-ghost btn-sm" onclick="renderSpSetup()" style="margin-left:auto">✕ Kết thúc</button>
+      </div>
+      <div class="sp-rp-chat" id="sp-rp-chat"></div>
+      <div style="display:flex;gap:8px;margin-top:12px">
+        <button class="sp-rec-btn idle" id="sp-rp-rec-btn" onclick="toggleRpRec()" style="width:48px;height:48px;font-size:20px;flex-shrink:0">🎙️</button>
+        <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+          <input class="finp" id="sp-rp-inp" placeholder="Gõ hoặc nói câu trả lời..." onkeydown="if(event.key==='Enter')sendRpMessage()" style="margin:0">
+          <div style="display:flex;gap:6px">
+            <button class="btn btn-primary btn-sm" style="flex:1;justify-content:center" onclick="sendRpMessage()">Gửi →</button>
+            <button class="btn btn-outline btn-sm" onclick="getRpHint()">💡 Gợi ý</button>
+          </div>
+        </div>
+      </div>
+      <div id="sp-rp-status" style="font-size:12px;color:var(--ink4);margin-top:8px;text-align:center"></div>
+    </div>`;
+
+  // Kick off with AI greeting
+  await sendRpAIMessage(`You are starting this roleplay: ${prompt} Greet the user in English in 1-2 short sentences to begin the scenario. Be friendly and natural.`);
+}
+
+async function sendRpMessage() {
+  const inp = document.getElementById('sp-rp-inp');
+  const text = inp?.value?.trim();
+  if (!text) return;
+  inp.value = '';
+
+  // Score the user's message
+  const userScore = scoreRpMessage(text);
+  addRpMessage('user', text, userScore);
+
+  _spRoleplayHistory.push({ role: 'user', content: text });
+
+  // Get AI response
+  await sendRpAIMessage(null);
+}
+
+function scoreRpMessage(text) {
+  const words = text.split(/\s+/).length;
+  const hasQuestion = /\?$/.test(text.trim());
+  const hasPolite = /please|thank|sorry|excuse|would|could/i.test(text);
+  let score = Math.min(100, words * 8 + (hasQuestion ? 10 : 0) + (hasPolite ? 15 : 0));
+  return Math.max(40, score);
+}
+
+async function sendRpAIMessage(overridePrompt) {
+  const statusEl = document.getElementById('sp-rp-status');
+  if (statusEl) statusEl.textContent = '🤔 AI đang trả lời...';
+
+  const apiKey = getAnthropicKey();
+  let aiText = '';
+
+  if (!apiKey) {
+    // Fallback responses
+    const fallbacks = [
+      "Sure, I'd be happy to help you with that!",
+      "That's a great point. What else can I do for you?",
+      "Of course! Let me assist you right away.",
+      "Excellent choice! Anything else you'd like?",
+      "I understand. Please let me know how I can help."
+    ];
+    aiText = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+  } else {
+    try {
+      const msgs = overridePrompt
+        ? [{ role: 'user', content: overridePrompt }]
+        : [
+          { role: 'user', content: `Roleplay context: ${_spRoleplayContext.prompt}\n\nConversation so far:\n${_spRoleplayHistory.map(m=>`${m.role==='user'?'Customer':'You'}: ${m.content}`).join('\n')}\n\nRespond in 1-2 short natural English sentences as the character. Keep it conversational.` }
+        ];
+      const res = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:150, messages: msgs })
+      });
+      if (res.ok) {
+        const d = await res.json();
+        aiText = d?.content?.[0]?.text?.trim() || 'Let me help you with that!';
+      }
+    } catch(e) { aiText = "I'm here to help! What would you like?"; }
+  }
+
+  _spRoleplayHistory.push({ role: 'assistant', content: aiText });
+  addRpMessage('ai', aiText);
+  if (statusEl) statusEl.textContent = '🎤 Đến lượt bạn nói';
+  speak(aiText);
+}
+
+function addRpMessage(role, text, score = null) {
+  const chat = document.getElementById('sp-rp-chat');
+  if (!chat) return;
+  const isUser = role === 'user';
+  const scoreHTML = score && isUser
+    ? `<div class="sp-rp-score-chip ${score>=80?'good':score>=60?'ok':'bad'}">${score>=80?'🌟':score>=60?'👍':'💪'} ${score >= 80?'Tốt!':score>=60?'Ổn!':'Luyện thêm'}</div>`
+    : '';
+  const div = document.createElement('div');
+  div.className = `sp-rp-msg ${isUser?'user':''}`;
+  div.innerHTML = `
+    <div class="sp-rp-avatar ${isUser?'user':'ai'}">${isUser?'👤':'🤖'}</div>
+    <div>
+      <div class="sp-rp-bubble ${isUser?'user':'ai'}">${text}</div>
+      ${!isUser?`<button onclick="speak('${esc(text)}')" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--ink4);margin-top:3px">🔊 Nghe lại</button>`:''}
+      ${scoreHTML}
+    </div>`;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function toggleRpRec() {
+  if (_spIsRecording) { if (_spRecognition) _spRecognition.stop(); return; }
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) { showToast('Chrome cần thiết để dùng ghi âm!', 'error'); return; }
+  _spIsRecording = true;
+  const btn = document.getElementById('sp-rp-rec-btn');
+  if (btn) { btn.className = 'sp-rec-btn recording'; btn.style.cssText='width:48px;height:48px;font-size:20px;flex-shrink:0'; btn.textContent = '⏹'; }
+
+  _spRecognition = new SpeechRec();
+  _spRecognition.lang = 'en-US'; _spRecognition.continuous = false; _spRecognition.interimResults = false;
+  _spRecognition.onresult = (e) => {
+    const text = e.results[0][0].transcript;
+    const inp = document.getElementById('sp-rp-inp');
+    if (inp) inp.value = text;
+  };
+  _spRecognition.onend = () => {
+    _spIsRecording = false;
+    const btn = document.getElementById('sp-rp-rec-btn');
+    if (btn) { btn.className = 'sp-rec-btn idle'; btn.style.cssText='width:48px;height:48px;font-size:20px;flex-shrink:0'; btn.textContent = '🎙️'; }
+    const inp = document.getElementById('sp-rp-inp');
+    if (inp?.value) sendRpMessage();
+  };
+  _spRecognition.onerror = () => { _spIsRecording = false; };
+  _spRecognition.start();
+}
+
+async function getRpHint() {
+  const apiKey = getAnthropicKey();
+  let hint = '';
+  if (!apiKey || !_spRoleplayHistory.length) {
+    const h = _spRoleplayHistory;
+    hint = h.length ? `Bạn có thể nói: "Could you help me with...?" hoặc "I would like to..."` : 'Hãy chào và nói điều bạn muốn!';
+  } else {
+    try {
+      const res = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:80,messages:[{role:'user',content:`Roleplay: ${_spRoleplayContext.prompt}. Last AI said: "${_spRoleplayHistory[_spRoleplayHistory.length-1]?.content}". Give a short Vietnamese hint (1 sentence) for what the learner could say in English.`}]})
+      });
+      if(res.ok){ const d=await res.json(); hint=d?.content?.[0]?.text?.trim()||''; }
+    } catch(e) {}
+  }
+  showToast('💡 ' + (hint || 'Thử nói một câu ngắn!'), 'success');
+}
+
+/* ── Panel init hooks ── */
+window.showPanel = function(name) {
+  _origShowPanel && _origShowPanel(name);
+  if (name === 'listening') {
+    setTimeout(renderListeningSetup, 50);
+  } else if (name === 'speaking-pro') {
+    setTimeout(renderSpSetup, 50);
+  } else if (name === 'home') {
+    setTimeout(renderHomeDashboard, 50);
+  }
+};
+
+/* ═══════════════════════════════════════════════
+   HOME DASHBOARD RENDERER
+═══════════════════════════════════════════════ */
+function renderHomeDashboard() {
+  // Hero greeting
+  const heroWrap = document.getElementById('home-hero-wrap');
+  if (heroWrap) {
+    const h = new Date().getHours();
+    const greeting = h < 12 ? 'Chào buổi sáng' : h < 18 ? 'Chào buổi chiều' : 'Chào buổi tối';
+    const emoji = h < 12 ? '☀️' : h < 18 ? '🌤️' : '🌙';
+    const name = (typeof _currentUser !== 'undefined' && _currentUser)
+      ? (_currentUser.displayName || _currentUser.username || '') : '';
+    const totalWords = S.vocab.length;
+    const learnedWords = S.vocab.filter(v => v.learned).length;
+    const pct = totalWords ? Math.round(learnedWords / totalWords * 100) : 0;
+
+    heroWrap.innerHTML = `
+      <div style="background:linear-gradient(135deg,#0d9488 0%,#0891b2 60%,#7c3aed 100%);border-radius:16px;padding:22px 26px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden;">
+        <div style="position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:72px;opacity:.12;pointer-events:none">🗣️</div>
+        <div style="font-size:13px;opacity:.8;margin-bottom:4px;font-weight:600">${emoji} ${greeting}${name ? ', '+name : ''}!</div>
+        <div style="font-family:var(--font-d);font-size:22px;font-weight:900;margin-bottom:12px;letter-spacing:-.3px">Học gì hôm nay? 🚀</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+          <div style="flex:1;height:8px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:rgba(255,255,255,.85);border-radius:4px;transition:width .6s"></div>
+          </div>
+          <span style="font-size:12px;font-weight:800;white-space:nowrap">${learnedWords}/${totalWords} từ</span>
+        </div>
+        <div style="font-size:12px;opacity:.75">Tiến độ tổng thể: ${pct}% — ${
+          pct === 0 ? 'Bắt đầu hành trình ngay!' :
+          pct < 30 ? 'Bạn đang làm tốt, tiếp tục nhé!' :
+          pct < 70 ? 'Tuyệt vời, giữ momentum!' : 'Gần đến đích rồi! 🏆'
+        }</div>
+      </div>`;
+  }
+
+  // Today stats
+  const todayEl = document.getElementById('home-today-stats');
+  if (todayEl) {
+    const ltLogs = JSON.parse(localStorage.getItem('speakup_lt_logs') || '[]');
+    const todayStr = new Date().toLocaleDateString('vi-VN');
+    const todayLt = ltLogs.filter(l => new Date(l.ts).toLocaleDateString('vi-VN') === todayStr);
+    const rdp = (typeof getRdpState === 'function') ? getRdpState() : null;
+    const todayKey = (typeof getDateKey === 'function') ? getDateKey() : new Date().toISOString().slice(0,10);
+    const todayRdp = rdp?.logs?.[todayKey];
+    const xp = S.stats?.xp || 0;
+    const streak = S.stats?.streak || 0;
+
+    todayEl.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px;color:var(--ink2)">🔥 Streak</span>
+        <span style="font-family:var(--font-d);font-weight:800;color:var(--teal)">${streak} ngày</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px;color:var(--ink2)">⚡ XP hôm nay</span>
+        <span style="font-family:var(--font-d);font-weight:800;color:var(--violet)">${xp} XP</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+        <span style="font-size:13px;color:var(--ink2)">🎧 Listening</span>
+        <span style="font-size:13px;font-weight:700;color:${todayLt.length?'var(--teal)':'var(--ink4)'}">${todayLt.length ? todayLt.length+' lần' : 'Chưa luyện'}</span>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0">
+        <span style="font-size:13px;color:var(--ink2)">📖 Từ hôm nay</span>
+        <span style="font-size:13px;font-weight:700;color:${todayRdp?.results?.length?'var(--teal)':'var(--ink4)'}">${todayRdp?.results?.length || 0} từ</span>
+      </div>`;
+  }
+
+  // Continue learning strip
+  const contWrap = document.getElementById('home-continue-wrap');
+  if (contWrap && S.currentTopic) {
+    const topicWords = S.vocab.filter(v => v.topic === S.currentTopic);
+    const learned = topicWords.filter(v => v.learned).length;
+    const pct = topicWords.length ? Math.round(learned / topicWords.length * 100) : 0;
+    const rule = TOPIC_RULES.find(r => r.name === S.currentTopic);
+    contWrap.innerHTML = `
+      <div style="background:var(--surface);border:2px solid var(--teal);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 2px 12px rgba(13,148,136,.12)">
+        <div style="font-size:28px">${rule?.emoji||'📌'}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">▶ Tiếp tục học</div>
+          <div style="font-family:var(--font-d);font-weight:800;font-size:16px;color:var(--ink);margin-bottom:6px">${S.currentTopic}</div>
+          <div style="height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;max-width:200px">
+            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--teal),var(--teal-mid));border-radius:3px"></div>
+          </div>
+          <div style="font-size:11px;color:var(--ink4);margin-top:3px">${learned}/${topicWords.length} từ đã học (${pct}%)</div>
+        </div>
+        <div style="display:flex;gap:7px;flex-wrap:wrap">
+          <button class="btn btn-primary btn-sm" onclick="startStudy('${esc(S.currentTopic)}','flashcard')">🃏 Flashcard</button>
+          <button class="btn btn-outline btn-sm" onclick="startStudy('${esc(S.currentTopic)}','speaking')">🎤 Speaking</button>
+        </div>
+      </div>`;
+  } else if (contWrap) {
+    contWrap.innerHTML = S.vocab.length ? `
+      <div style="background:var(--surface2);border:1.5px dashed var(--border2);border-radius:14px;padding:16px 18px;text-align:center">
+        <div style="font-size:13px;color:var(--ink3);margin-bottom:10px">👆 Chọn một chủ đề từ <strong>Chủ đề</strong> để bắt đầu học</div>
+        <button class="btn btn-primary btn-sm" onclick="showPanel('topics')">📚 Xem chủ đề →</button>
+      </div>` : `
+      <div style="background:var(--surface2);border:1.5px dashed var(--border2);border-radius:14px;padding:16px 18px;text-align:center">
+        <div style="font-size:13px;color:var(--ink3);margin-bottom:10px">📭 Chưa có từ vựng nào. Hãy import để bắt đầu!</div>
+        <button class="btn btn-primary btn-sm" onclick="showPanel('import')">📥 Import từ vựng →</button>
+      </div>`;
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   PITCH & STRESS ANALYSIS
+   Phân tích trọng âm từ dựa trên IPA hoặc pattern chuẩn
+═══════════════════════════════════════════════ */
+function analyzePitchStress(word, ipa) {
+  // Parse syllables from IPA or fall back to vowel-based split
+  let syllables = [];
+
+  if (ipa) {
+    // Extract syllables from IPA - split on vowel groups
+    const ipaClean = ipa.replace(/[\/\[\]]/g, '').trim();
+    // Find stress marks: ˈ (primary) ˌ (secondary)
+    const parts = ipaClean.split(/(ˈ|ˌ)/);
+    let stressMap = [];
+    let currentStress = 'none';
+    let sylIdx = 0;
+
+    for (let i = 0; i < parts.length; i++) {
+      if (parts[i] === 'ˈ') { currentStress = 'primary'; continue; }
+      if (parts[i] === 'ˌ') { currentStress = 'secondary'; continue; }
+      // Split segment into syllable chunks (rough heuristic)
+      const chunks = parts[i].match(/[^aeiouæɑɒɔəɛɜɪʊʌː]+[aeiouæɑɒɔəɛɜɪʊʌː]+[^aeiouæɑɒɔəɛɜɪʊʌː]*/gi) || [parts[i]];
+      chunks.forEach((chunk, ci) => {
+        if (!chunk.trim()) return;
+        stressMap.push({
+          sym: chunk,
+          stress: (ci === 0 && currentStress !== 'none') ? currentStress : 'none'
+        });
+        currentStress = 'none';
+      });
+    }
+
+    if (stressMap.length >= 2) {
+      syllables = stressMap.slice(0, 6);
+    }
+  }
+
+  // Fallback: split word into syllables by vowel pattern
+  if (!syllables.length) {
+    const vowelPattern = word.match(/[^aeiou]*[aeiou]+(?:[^aeiou]*$|[^aeiou](?=[^aeiou]))?/gi) || [word];
+    // Common English stress rules: stress on first syllable for nouns, penultimate for verbs
+    syllables = vowelPattern.slice(0, 5).map((syl, i) => ({
+      sym: syl,
+      stress: i === 0 ? 'primary' : 'none'
+    }));
+  }
+
+  return syllables;
+}
+
+function renderStressVisual(word, ipa) {
+  const syllables = analyzePitchStress(word, ipa);
+  if (!syllables.length) return '';
+
+  const heights = { primary: 42, secondary: 28, none: 16 };
+  const labels = { primary: '🔴 Trọng âm chính', secondary: '🟡 Trọng âm phụ', none: '' };
+
+  return `
+    <div class="sp-stress-wrap">
+      <div class="sp-stress-title">📊 Phân tích Pitch & Stress — <em>${word}</em> ${ipa||''}</div>
+      <div class="sp-stress-syllables">
+        ${syllables.map(s => `
+          <div class="sp-syl">
+            <div class="sp-syl-bar ${s.stress !== 'none' ? 'stressed' : ''}"
+              style="height:${heights[s.stress]||16}px;
+              background:${s.stress==='primary'?'linear-gradient(180deg,#7c3aed,#9333ea)':s.stress==='secondary'?'linear-gradient(180deg,#0891b2,#0d9488)':'var(--bg2)'}">
+            </div>
+            <div class="sp-syl-text ${s.stress==='primary'?'stressed':''}">${s.sym}</div>
+          </div>`).join('')}
+      </div>
+      <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
+        <span style="font-size:11px;color:var(--violet);font-weight:700">🔴 Trọng âm chính = nhấn mạnh, cao hơn</span>
+        <span style="font-size:11px;color:#0891b2;font-weight:700">🔵 Trọng âm phụ = nhẹ hơn một chút</span>
+      </div>
+    </div>`;
+}
+
+/* Enhanced scoreSpSpeech with pitch/stress tips */
+function scoreSpSpeechEnhanced(transcript, targetSent, targetWord, wordIpa) {
+  const status = document.getElementById('sp-rec-status');
+  if (!transcript.trim()) {
+    if (status) status.textContent = 'Không nghe được rõ. Thử lại!';
+    return;
+  }
+  if (status) status.textContent = 'Hoàn tất!';
+
+  const tWords = targetSent.toLowerCase().replace(/[.,!?]/g,'').split(/\s+/);
+  const sWords = transcript.toLowerCase().replace(/[.,!?]/g,'').split(/\s+/);
+
+  const wordScores = tWords.map((tw, i) => {
+    const sw = sWords[i] || '';
+    if (!sw) return { word: tw, score: 0 };
+    const maxLen = Math.max(tw.length, sw.length);
+    let matches = 0;
+    for (let j = 0; j < Math.min(tw.length, sw.length); j++) {
+      if (tw[j] === sw[j]) matches++;
+    }
+    // Bonus for correct vowel sounds
+    const twVowels = tw.replace(/[^aeiou]/g,'');
+    const swVowels = sw.replace(/[^aeiou]/g,'');
+    const vowelBonus = twVowels === swVowels ? 10 : 0;
+    return { word: tw, score: Math.min(100, Math.round(matches / maxLen * 90 + vowelBonus)) };
+  });
+
+  const overallScore = wordScores.length
+    ? Math.round(wordScores.reduce((s,w)=>s+w.score,0) / wordScores.length)
+    : 0;
+
+  // Highlight read-aloud words
+  if (_spMode === 'readaloud') {
+    wordScores.forEach((ws, i) => {
+      const el = document.getElementById(`ra-w-${i}`);
+      if (!el) return;
+      el.className = 'sp-ra-word ' + (ws.score >= 80 ? 'done-good' : ws.score >= 50 ? 'done-ok' : 'done-bad');
+    });
+  }
+
+  _spSession.scores.push(overallScore);
+  gainXP(overallScore >= 70 ? 25 : overallScore >= 40 ? 10 : 5);
+
+  showSpScoreEnhanced(overallScore, transcript, wordScores, targetWord, wordIpa);
+}
+
+function showSpScoreEnhanced(score, transcript, wordScores, targetWord, wordIpa) {
+  const wrap = document.getElementById('sp-score-wrap');
+  if (!wrap) return;
+
+  const clr = score >= 70 ? 'var(--teal)' : score >= 40 ? 'var(--amber)' : 'var(--rose)';
+  const msg = score >= 90 ? '🌟 Xuất sắc! Phát âm chuẩn bản xứ!' : score >= 70 ? '👍 Tốt! Gần chuẩn rồi' : score >= 40 ? '💪 Ổn, luyện thêm!' : '🔄 Thử lại, tập trung trọng âm!';
+
+  const topWords = wordScores.slice(0, 6);
+  const phonemeHTML = topWords.map(ws =>
+    `<div class="sp-phoneme ${ws.score>=80?'good':ws.score>=50?'ok':'bad'}">
+      <div class="sp-phoneme-sym">${ws.word}</div>
+      <div class="sp-phoneme-pct">${ws.score}%</div>
+    </div>`
+  ).join('');
+
+  // Specific feedback on stress
+  const stressHTML = (wordIpa && _spMode === 'pronunciation')
+    ? renderStressVisual(targetWord, wordIpa) : '';
+
+  // Pitch tips based on score
+  const pitchTip = score < 50
+    ? '<div class="sp-tip" style="margin-top:10px"><span class="sp-tip-icon">🎵</span><span><strong>Mẹo phát âm:</strong> Chú ý nhấn mạnh âm tiết in đậm (trọng âm chính). Tiếng Anh dùng pitch (cao/thấp) và length (dài/ngắn) để phân biệt trọng âm.</span></div>'
+    : score < 75
+    ? '<div class="sp-tip" style="margin-top:10px"><span class="sp-tip-icon">🎵</span><span><strong>Gần chuẩn rồi!</strong> Thử kéo dài âm tiết có trọng âm chính hơn một chút và nâng cao giọng.</span></div>'
+    : '';
+
+  wrap.innerHTML = `
+    <div style="margin-top:16px;padding:16px 18px;background:var(--surface2);border-radius:14px;border:2px solid ${score>=70?'rgba(13,148,136,.25)':score>=40?'rgba(217,119,6,.25)':'rgba(225,29,72,.25)'}">
+      <div style="display:flex;align-items:center;gap:14px;margin-bottom:14px">
+        <div class="sp-score-ring">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <circle cx="48" cy="48" r="38" fill="none" stroke="var(--bg2)" stroke-width="8"/>
+            <circle cx="48" cy="48" r="38" fill="none" stroke="${clr}" stroke-width="8"
+              stroke-dasharray="${2*Math.PI*38}" stroke-dashoffset="${2*Math.PI*38*(1-score/100)}"
+              stroke-linecap="round" style="transition:stroke-dashoffset .8s"/>
+          </svg>
+          <div class="sp-score-ring-val" style="color:${clr}">${score}%</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-weight:800;font-size:15px;color:var(--ink);margin-bottom:5px">${msg}</div>
+          <div style="font-size:12px;color:var(--ink3);font-style:italic">"${transcript}"</div>
+        </div>
+      </div>
+      <div style="font-size:12px;font-weight:700;color:var(--ink4);text-transform:uppercase;margin-bottom:8px">Từng từ:</div>
+      <div class="sp-phoneme-row">${phonemeHTML}</div>
+      ${stressHTML}
+      ${pitchTip}
+    </div>`;
+
+  const nextWrap = document.getElementById('sp-next-wrap');
+  if (nextWrap) {
+    nextWrap.innerHTML = `
+      <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="showSpQuestion()">🔄 Thử lại</button>
+        <button class="btn btn-sm" style="flex:1;justify-content:center;background:linear-gradient(135deg,var(--violet),var(--teal));color:#fff;border:none;font-weight:700" onclick="advanceSpQuestion()">Tiếp theo →</button>
+      </div>`;
+  }
+}
+</script>
+
+<script>
 /* ═══════════════════════════════════════════════
    BOOT SEQUENCE
 ═══════════════════════════════════════════════ */
