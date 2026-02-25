@@ -2,7 +2,11 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#0d9488">
 <title>SpeakUp — English Learning</title>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,700;0,900;1,600&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
@@ -151,10 +155,36 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
 .imp-topic-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px;padding:12px 14px;background:var(--teal-light);border:1.5px solid rgba(13,148,136,.25);border-radius:var(--radius-sm);}
 .imp-topic-label{font-size:13px;font-weight:700;color:var(--teal);margin-bottom:4px;}
 
-.mob-nav{display:none;position:fixed;bottom:0;left:0;right:0;height:var(--mob-nav);background:var(--surface);border-top:1px solid var(--border);z-index:200;align-items:stretch;box-shadow:0 -4px 16px rgba(0,0,0,.07);}
-.mob-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:all .15s;padding:6px 0;color:var(--ink4);font-size:10px;font-weight:600;border-top:2px solid transparent;user-select:none;}
+/* ── MOBILE NAV — redesigned ── */
+.mob-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;
+  height:var(--mob-nav);
+  background:rgba(255,255,255,0.96);
+  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  border-top:1px solid var(--border);
+  z-index:200;
+  align-items:stretch;
+  box-shadow:0 -2px 20px rgba(0,0,0,.09);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.mob-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;cursor:pointer;transition:all .18s cubic-bezier(.4,0,.2,1);
+  padding:6px 4px 4px;color:var(--ink4);font-size:10px;font-weight:600;
+  border-top:2.5px solid transparent;user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  position:relative;
+}
+.mob-item::after{
+  content:'';position:absolute;inset:0;border-radius:12px;
+  background:var(--teal);opacity:0;transition:opacity .15s;
+}
+.mob-item:active::after{opacity:.07;}
 .mob-item.active{color:var(--teal);border-top-color:var(--teal);}
-.mob-item .mi{font-size:20px;}
+.mob-item .mi{font-size:21px;line-height:1;transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
+.mob-item.active .mi{transform:scale(1.15);}
+.mob-item-label{font-size:9.5px;font-weight:700;letter-spacing:.01em;}
 
 /* MAIN */
 .main{margin-left:248px;flex:1;min-height:100vh;}
@@ -203,6 +233,108 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
 .hci-t{background:var(--teal-light);}
 .hci-v{background:var(--violet-light);}
 .hci-a{background:var(--amber-light);}
+
+/* ── HOME v2 — mobile-first components ── */
+.home-page-wrap{padding-top:10px;}
+
+/* Stats strip */
+.home-stats-strip{
+  display:flex;align-items:center;
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:16px;padding:0;margin-bottom:14px;
+  box-shadow:var(--shadow-sm);overflow:hidden;
+}
+.hss-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;
+  padding:14px 8px;gap:2px;
+}
+.hss-val{
+  font-family:var(--font-d);font-weight:800;font-size:20px;
+  color:var(--teal);line-height:1;
+}
+.hss-lbl{font-size:10px;color:var(--ink4);font-weight:600;text-align:center;margin-top:2px;}
+.hss-sep{width:1px;background:var(--border);align-self:stretch;margin:10px 0;}
+
+/* Week calendar */
+.home-week-wrap{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:16px;padding:14px 16px;margin-bottom:14px;
+  box-shadow:var(--shadow-sm);
+}
+.home-section-lbl{
+  font-size:11px;font-weight:800;text-transform:uppercase;
+  letter-spacing:.08em;color:var(--ink4);margin-bottom:10px;
+}
+.week-row{display:flex;justify-content:space-between;gap:4px;}
+.wday{display:flex;flex-direction:column;align-items:center;gap:4px;flex:1;}
+.wday-lbl{font-size:10px;color:var(--ink4);font-weight:600;}
+.wday-dot{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;background:var(--bg2);
+  color:var(--ink4);border:2px solid transparent;
+}
+.wday-dot.today{background:var(--teal);color:#fff;border-color:var(--teal);font-size:14px;}
+.wday-dot.done{background:var(--teal-light);color:var(--teal);border-color:rgba(13,148,136,.3);}
+
+/* Skill cards */
+.home-skill-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;}
+.home-skill-card{
+  border-radius:16px;padding:16px 14px;cursor:pointer;
+  position:relative;overflow:hidden;
+  transition:transform .18s cubic-bezier(.34,1.56,.64,1),box-shadow .18s;
+  -webkit-tap-highlight-color:transparent;
+}
+.home-skill-card:active{transform:scale(.95)!important;}
+.hsk-listen{background:linear-gradient(135deg,#0c4a6e,#0891b2);box-shadow:0 4px 16px rgba(8,145,178,.3);}
+.hsk-speak{background:linear-gradient(135deg,#3b0764,#7c3aed);box-shadow:0 4px 16px rgba(124,58,237,.3);}
+.hsk-bg-emoji{
+  position:absolute;right:-8px;top:-8px;font-size:60px;opacity:.12;
+  pointer-events:none;line-height:1;
+}
+.hsk-icon{font-size:26px;margin-bottom:8px;line-height:1;}
+.hsk-name{font-family:var(--font-d);font-size:15px;font-weight:900;color:#fff;margin-bottom:3px;line-height:1.2;}
+.hsk-sub{font-size:10.5px;color:rgba(255,255,255,.75);margin-bottom:10px;line-height:1.4;}
+.hsk-chips{display:flex;gap:4px;flex-wrap:wrap;}
+.hsk-chip{
+  background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.25);
+  border-radius:20px;padding:2px 7px;font-size:9.5px;font-weight:700;color:#fff;
+}
+
+/* Mini skill icons */
+.home-mini-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px;}
+.home-mini-card{
+  background:var(--surface);border:1.5px solid var(--border);
+  border-radius:14px;padding:14px 6px 12px;
+  cursor:pointer;display:flex;flex-direction:column;
+  align-items:center;gap:7px;
+  transition:all .15s;-webkit-tap-highlight-color:transparent;
+  box-shadow:var(--shadow-sm);
+}
+.home-mini-card:hover{border-color:var(--teal);background:var(--surface2);}
+.home-mini-card:active{transform:scale(.94);background:var(--bg2);}
+.hmc-icon{
+  width:40px;height:40px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:20px;
+}
+.hmc-label{font-size:11px;font-weight:700;color:var(--ink2);text-align:center;line-height:1.2;}
+
+/* Continue learning card */
+.home-continue-card{
+  background:var(--surface);border:2px solid var(--teal);
+  border-radius:16px;padding:14px 16px;
+  display:flex;align-items:center;gap:12px;
+  box-shadow:0 2px 12px rgba(13,148,136,.12);
+  margin-bottom:14px;
+}
+.home-continue-emoji{font-size:28px;flex-shrink:0;}
+.home-continue-info{flex:1;min-width:0;}
+.home-continue-tag{font-size:10px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
+.home-continue-title{font-family:var(--font-d);font-weight:800;font-size:15px;color:var(--ink);margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.home-continue-pbar{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-bottom:3px;}
+.home-continue-pfill{height:100%;background:linear-gradient(90deg,var(--teal),var(--teal-mid));border-radius:3px;transition:width .5s;}
+.home-continue-meta{font-size:11px;color:var(--ink4);}
+.home-continue-btns{display:flex;flex-direction:column;gap:6px;flex-shrink:0;}
 .hci-r{background:var(--rose-light);}
 .hcard-title{font-weight:700;font-size:14px;margin-bottom:2px;}
 .hcard-sub{font-size:12px;color:var(--ink3);line-height:1.4;}
@@ -597,99 +729,227 @@ tr.row-selected{outline:none;}
 .td-word-card-info{flex:1;min-width:0;}
 
 @media(max-width:767px){
-  :root{--mob-nav:60px;}
+  :root{--mob-nav:62px;}
   .sidebar{display:none;}
   .mob-nav{display:flex;}
   .main{margin-left:0;}
-  .page-wrap{padding:14px 12px calc(var(--mob-nav) + 24px);}
-  .page-title{font-size:20px;}
+
+  /* ── Safe area & spacing ── */
+  .page-wrap{
+    padding:12px 14px calc(var(--mob-nav) + env(safe-area-inset-bottom) + 16px);
+    max-width:100%;
+  }
+
+  /* ── Typography scale ── */
+  .page-title{font-size:21px;letter-spacing:-.3px;}
   .page-sub{font-size:13px;}
-  .home-hero{padding:18px 20px;margin-bottom:14px;}
-  .home-hero h2{font-size:17px;}
-  .home-hero p{font-size:13px;}
-  .home-hero::after{font-size:36px;right:12px;}
-  .home-grid{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px;}
-  .hcard{padding:12px 10px;gap:8px;border-radius:10px;}
-  .hcard-icon{width:34px;height:34px;font-size:17px;border-radius:8px;}
-  .hcard-title{font-size:12px;}
-  .hcard-sub{font-size:11px;}
-  .topics-grid{grid-template-columns:1fr;}
-  .topic-card{padding:14px;}
-  .topic-name{font-size:15px;}
-  /* Study tabs scroll */
-  .tabs{padding:3px;gap:0;}
-  .tab-btn{padding:7px 8px;font-size:12px;min-width:unset;flex:1;}
-  /* Flashcard */
-  .fc-card{border-radius:14px;}
-  .fc-card-body{padding:16px 16px 14px;}
-  .fc-word{font-size:clamp(22px,7vw,34px);}
-  .fc-card-footer{padding:12px 16px 16px;flex-direction:column;gap:6px;}
+  .page-header{margin-bottom:16px;}
+
+  /* ── Home hero ── */
+  .home-hero{
+    padding:16px 18px;margin-bottom:12px;border-radius:16px;
+  }
+  .home-hero h2{font-size:18px;line-height:1.3;}
+  .home-hero p{font-size:12.5px;}
+  .home-hero::after{font-size:40px;right:14px;top:50%;transform:translateY(-50%);}
+
+  /* ── Home grid — 2 cols on mobile ── */
+  .home-grid{grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+  .hcard{padding:12px 10px;gap:8px;border-radius:12px;min-height:72px;}
+  .hcard-icon{width:36px;height:36px;font-size:18px;border-radius:9px;flex-shrink:0;}
+  .hcard-title{font-size:13px;line-height:1.3;}
+  .hcard-sub{font-size:11px;display:none;}/* hide sub on mobile for clean look */
+
+  /* ── Topics grid ── */
+  .topics-grid{grid-template-columns:1fr 1fr;gap:10px;}
+  .topic-card{padding:14px 12px;border-radius:14px;}
+  .topic-name{font-size:14px;}
+  .topic-count{font-size:11px;}
+
+  /* ── Study area ── */
+  .tabs{
+    padding:3px;gap:0;
+    overflow-x:auto;-webkit-overflow-scrolling:touch;
+    scrollbar-width:none;flex-wrap:nowrap;
+  }
+  .tabs::-webkit-scrollbar{display:none;}
+  .tab-btn{
+    padding:8px 12px;font-size:12.5px;
+    min-width:max-content;flex:0 0 auto;border-radius:7px;
+  }
+
+  /* ── Flashcard ── */
+  .fc-card{border-radius:16px;}
+  .fc-card-body{padding:20px 16px 16px;}
+  .fc-word{font-size:clamp(24px,8vw,38px);}
+  .fc-card-footer{
+    padding:14px 16px 18px;
+    flex-direction:column;gap:8px;
+  }
   .rating-row{gap:6px;width:100%;}
-  .rate-btn{flex:1;padding:10px 8px;font-size:13px;text-align:center;justify-content:center;}
-  /* Quiz */
+  .rate-btn{
+    flex:1;padding:12px 8px;font-size:13px;
+    text-align:center;justify-content:center;
+    min-height:48px;/* comfortable touch target */
+    border-radius:12px;
+  }
+
+  /* ── Quiz ── */
   .opts{grid-template-columns:1fr;}
-  .opt{padding:12px 14px;}
-  .quiz-q{font-size:16px;}
-  .quiz-meta{gap:8px;padding:8px 10px;}
-  /* Speaking */
-  .speak-word-big{font-size:22px;}
-  .rec-ring{width:64px;height:64px;font-size:26px;}
-  .rec-zone{padding:20px 16px;gap:12px;}
-  /* Stats */
+  .opt{padding:14px 16px;font-size:14px;min-height:52px;border-radius:12px;}
+  .quiz-q{font-size:16px;line-height:1.5;}
+  .quiz-meta{gap:8px;padding:8px 10px;border-radius:10px;}
+
+  /* ── Speaking ── */
+  .speak-word-big{font-size:24px;}
+  .rec-ring{width:70px;height:70px;font-size:28px;}
+  .rec-zone{padding:22px 16px;gap:14px;}
+
+  /* ── Roadmap ── */
+  .rdp-day-card{padding:12px 14px;border-radius:14px;}
+  .rdp-stat-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
+
+  /* ── Stats ── */
   .stats-grid{grid-template-columns:repeat(2,1fr);gap:8px;}
-  .stat-tile{padding:14px 10px;}
-  .stat-tile-val{font-size:22px;}
-  /* Sidebar stats */
-  .s-stat-val{font-size:14px;}
-  /* Toast */
-  .toast{bottom:calc(var(--mob-nav) + 10px);font-size:13px;padding:9px 18px;}
-  /* Modal */
-  .modal{padding:20px 16px;border-radius:var(--radius);}
+  .stat-tile{padding:14px 10px;border-radius:12px;}
+  .stat-tile-val{font-size:24px;}
+
+  /* ── Cards ── */
+  .card{padding:14px;border-radius:14px;}
+
+  /* ── Buttons — larger touch targets ── */
+  .btn{font-size:14px;padding:11px 16px;border-radius:10px;min-height:44px;}
+  .btn-sm{padding:8px 14px;font-size:13px;min-height:38px;border-radius:8px;}
+
+  /* ── Modals ── */
+  .modal{
+    padding:22px 18px 24px;border-radius:20px 20px 0 0;
+    position:fixed;bottom:0;left:0;right:0;
+    max-height:90vh;overflow-y:auto;
+    margin:0;width:100%;
+    box-shadow:0 -8px 40px rgba(0,0,0,.18);
+  }
+  .modal-overlay{align-items:flex-end;}
   .modal-title{font-size:18px;}
-  /* Table */
-  .vtbl{min-width:680px;}
-  .vtbl th,.vtbl td{padding:9px 10px;font-size:13px;}
-  /* Buttons */
-  .btn{font-size:13px;padding:9px 14px;}
-  .btn-sm{padding:6px 11px;font-size:12px;}
-  /* Cards */
-  .card{padding:14px;}
-  /* Study nav */
-  .study-top{padding:8px 0;gap:8px;}
-  /* Dialogue */
-  .dlg-bubble{max-width:85%;}
-  .dlg-text{font-size:13px;}
-  /* Week cal */
-  .wday-dot{width:30px;height:30px;font-size:11px;}
-  /* Chips */
-  .chip{padding:4px 10px;font-size:12px;}
-  /* Progress panel */
-  .ach-item{padding:10px 12px;}
-  /* Mobile nav labels */
-  .mob-item{font-size:9px;}
-  .mob-item .mi{font-size:19px;}
-  /* Roadmap panel */
-  .rdp-day-card{padding:12px;}
-  .rdp-stat-grid{grid-template-columns:repeat(2,1fr);}
-  /* Vocab mobile: ẩn table, hiện card */
+
+  /* ── Table → hidden, show card view ── */
   .tbl-wrap{display:none;}
   .vocab-card-list{display:flex;}
-  /* Topic detail mobile header */
+
+  /* ── Vocab cards ── */
+  .vocab-card{padding:14px;border-radius:14px;}
+  .vocab-card-word{font-size:17px;}
+  .vocab-card-meaning{font-size:13px;}
+
+  /* ── Chips ── */
+  .chip{padding:5px 12px;font-size:12px;border-radius:20px;}
+
+  /* ── Toast ── */
+  .toast{
+    bottom:calc(var(--mob-nav) + env(safe-area-inset-bottom) + 8px);
+    font-size:13px;padding:10px 20px;border-radius:24px;
+    max-width:calc(100vw - 32px);text-align:center;
+  }
+
+  /* ── Progress chips ── */
+  .ach-item{padding:10px 12px;border-radius:12px;}
+
+  /* ── Mobile nav labels ── */
+  .mob-item{font-size:9.5px;}
+  .mob-item .mi{font-size:20px;}
+
+  /* ── Writing module ── */
+  .wr-setup-card{padding:16px;border-radius:14px;}
+  .wr-hero{padding:18px 20px;border-radius:14px;}
+  .wr-hero h2{font-size:18px;}
+  .wr-sentence-card{padding:18px 16px 16px;border-radius:16px;}
+  .wr-vi-sentence{font-size:17px;}
+  .wr-input{font-size:15px;padding:13px 15px;}
+  .wr-submit-row{gap:8px;}
+
+  /* ── Listening module ── */
+  .lt-mode-tabs{grid-template-columns:repeat(2,1fr);gap:8px;}
+  .lt-mode-tab{padding:12px 6px;border-radius:12px;}
+
+  /* ── Speaking Pro module ── */
+  .sp-mode-tabs{grid-template-columns:repeat(2,1fr);}
+  .sp-mode-tab{padding:11px 4px;}
+  .sp-rec-btn{width:80px;height:80px;font-size:32px;}
+  .sp-rp-bubble{max-width:88%;}
+  .sp-rp-chat{max-height:calc(100vh - 380px);}
+
+  /* ── Stress syllables ── */
+  .sp-stress-syllables{gap:4px;}
+  .sp-phoneme-row{gap:5px;}
+  .sp-phoneme{min-width:38px;padding:6px 8px;}
+
+  /* ── Search bar ── */
+  .search-bar{flex-direction:column;gap:8px;}
+  .search-bar .sel-inp,.search-bar .search-inp{width:100%;}
+
+  /* ── Topic detail header ── */
   .topic-detail-mobile-header{display:flex;flex-direction:column;gap:10px;}
   .topic-detail-mobile-actions{display:flex;gap:8px;flex-wrap:wrap;}
-  /* Search bar mobile */
-  .search-bar{flex-direction:column;gap:8px;}
-  .search-bar .sel-inp{width:100%;}
-  .search-bar .search-inp{width:100%;}
+
+  /* ── Week calendar dots ── */
+  .wday-dot{width:32px;height:32px;font-size:11px;border-radius:50%;}
+
+  /* ── Sidebar stats (hidden on mobile) ── */
+  .s-stat-val{font-size:14px;}
+
+  /* ── Study top nav ── */
+  .study-top{padding:8px 0;gap:8px;}
+
+  /* ── Dialogue bubbles ── */
+  .dlg-bubble{max-width:88%;}
+  .dlg-text{font-size:13.5px;}
+
+  /* ── Roadmap quiz word builder ── */
+  .rdp-builder-chips{flex-wrap:wrap;gap:6px;}
+
+  /* ── Form inputs ── */
+  .finp, input[type=text], input[type=password], input[type=email], textarea, select{
+    font-size:16px !important;/* prevent iOS zoom */
+    min-height:44px;
+  }
+  select{min-height:44px;}
+
+  /* ── Config modal ── */
+  .fb-modal{padding:20px 16px;border-radius:20px 20px 0 0;}
+
+  /* ── Inline pull-to-refresh visual cue ── */
+  .page-wrap{overscroll-behavior-y:contain;}
+
+  /* ── Quick action FAB area (extra bottom padding fix) ── */
+  .qz-actions, .fc-card-footer, .sp-rec-area{
+    padding-bottom:max(16px, env(safe-area-inset-bottom));
+  }
 }
-@media(max-width:400px){
-  .home-grid{grid-template-columns:1fr;}
-  .rate-btn{width:100%;justify-content:center;}
+
+/* ── Extra small phones (≤390px) ── */
+@media(max-width:390px){
+  .home-grid{grid-template-columns:1fr 1fr;}
+  .topics-grid{grid-template-columns:1fr;}
+  .rate-btn{font-size:12px;padding:11px 6px;}
   .opts{grid-template-columns:1fr;}
   .stats-grid{grid-template-columns:repeat(2,1fr);}
   .tabs{flex-wrap:nowrap;overflow-x:auto;}
-  .tab-btn{flex-shrink:0;}
+  .tab-btn{flex-shrink:0;font-size:11.5px;}
   .hcard{flex-direction:row;}
+  .hcard-sub{display:none;}
+  .fc-word{font-size:clamp(20px,7vw,30px);}
+  .page-title{font-size:19px;}
+  .lt-mode-tabs{grid-template-columns:repeat(2,1fr);}
+  .mob-item .mi{font-size:19px;}
+  .mob-item{font-size:9px;}
+}
+@media(min-width:768px){
+  /* Hide mobile-only home components on desktop */
+  .home-stats-strip{display:none;}
+  .home-week-wrap{display:none;}
+  .home-continue-card{max-width:600px;}
+  /* Show legacy desktop today-stats section */
+  #home-quick-stats{display:block!important;}
 }
 @media(min-width:768px) and (max-width:1024px){
   .sidebar{width:210px;}
@@ -1000,11 +1260,209 @@ tr.row-selected{outline:none;}
 @media(max-width:640px){
   .lt-mode-tabs{grid-template-columns:repeat(2,1fr);}
   .sp-mode-tabs{grid-template-columns:repeat(2,1fr);}
-  .lt-mode-tab,.sp-mode-tab{padding:10px 4px;}
+  .lt-mode-tab,.sp-mode-tab{padding:10px 4px;border-radius:11px;}
   .sp-phoneme-row{gap:5px;}
-  .sp-phoneme{min-width:40px;padding:6px 8px;}
-  .sp-rp-bubble{max-width:88%;}
+  .sp-phoneme{min-width:38px;padding:6px 8px;}
+  .sp-rp-bubble{max-width:90%;}
   .sp-stress-syllables{gap:4px;}
+  /* Writing module */
+  .wr-eval{padding:14px 16px;}
+  .wr-setup-card{padding:16px;}
+  /* Roadmap quiz */
+  .rdp-qz-topbar{flex-wrap:wrap;gap:6px;}
+}
+
+/* ═══════════════════════════════════════
+   MOBILE POLISH — Applied to ALL mobile
+═══════════════════════════════════════ */
+@media(max-width:767px){
+  /* ── Smooth momentum scrolling everywhere ── */
+  .page-wrap, .sp-rp-chat, .nav, .tabs {
+    -webkit-overflow-scrolling:touch;
+  }
+
+  /* ── Home page: compact padding ── */
+  .home-page-wrap{padding-top:8px;padding-left:12px;padding-right:12px;}
+
+  /* ── Stats strip responsive ── */
+  .home-stats-strip{margin-bottom:12px;}
+  .hss-val{font-size:17px;}
+  .hss-item{padding:12px 4px;}
+  .hss-lbl{font-size:9.5px;}
+
+  /* ── Week wrap compact ── */
+  .home-week-wrap{padding:12px 14px;margin-bottom:12px;}
+  .home-section-lbl{margin-bottom:8px;font-size:10.5px;}
+  .wday-lbl{font-size:9px;}
+  .wday-dot{width:30px;height:30px;font-size:10px;}
+  .wday-dot.today{font-size:13px;}
+
+  /* ── Skill cards compact ── */
+  .home-skill-grid{gap:8px;margin-bottom:8px;}
+  .home-skill-card{padding:14px 12px;border-radius:14px;}
+  .hsk-icon{font-size:22px;margin-bottom:6px;}
+  .hsk-name{font-size:14px;}
+  .hsk-sub{font-size:10px;margin-bottom:8px;}
+  .hsk-bg-emoji{font-size:52px;}
+
+  /* ── Mini grid compact ── */
+  .home-mini-grid{gap:7px;margin-bottom:12px;}
+  .home-mini-card{padding:12px 4px 10px;border-radius:12px;}
+  .hmc-icon{width:36px;height:36px;border-radius:10px;font-size:18px;}
+  .hmc-label{font-size:10.5px;}
+
+  /* ── Continue card compact ── */
+  .home-continue-card{padding:12px 14px;gap:10px;border-radius:14px;margin-bottom:12px;}
+  .home-continue-emoji{font-size:24px;}
+  .home-continue-title{font-size:14px;}
+  .home-continue-btns .btn{font-size:11.5px;padding:7px 10px;}
+
+  /* ── Login wall — full screen on mobile ── */
+  .login-wall{padding:0;}
+  .login-box{
+    border-radius:0;max-width:100%;height:100%;
+    overflow-y:auto;padding:40px 24px 40px;
+    display:flex;flex-direction:column;justify-content:center;
+    box-shadow:none;
+  }
+  /* or bottom-sheet style on taller screens */
+  @supports(height:100dvh){
+    .login-box{
+      min-height:100dvh;border-radius:0;
+    }
+  }
+
+  /* ── Home skill cards — full bleed feel ── */
+  #panel-home .page-wrap > div[style*="grid"]{
+    margin-left:-14px;margin-right:-14px;
+    padding-left:14px;padding-right:14px;
+  }
+
+  /* ── Improve tap targets for all interactive elements ── */
+  button, .btn, .nav-item, .rate-btn, .opt,
+  .mob-item, .tab-btn, .hcard, .topic-card,
+  .lt-mode-tab, .sp-mode-tab{
+    min-height:44px;
+  }
+
+  /* ── Scrollable tabs indicator (fade edge) ── */
+  .tabs{
+    position:relative;
+  }
+
+  /* ── Vocab card list on mobile ── */
+  .vocab-card-list{
+    display:flex;flex-direction:column;gap:10px;
+  }
+
+  /* ── Progress ring center ── */
+  .sp-score-ring{margin:8px auto 14px;}
+
+  /* ── Modal overlay alignment (bottom sheet) ── */
+  .modal-overlay{
+    align-items:flex-end;
+    padding:0;
+  }
+  .modal{
+    margin:0;
+    border-radius:20px 20px 0 0;
+    padding:22px 20px calc(22px + env(safe-area-inset-bottom));
+    animation:slideUp .25s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes slideUp{
+    from{transform:translateY(30px);opacity:0;}
+    to{transform:translateY(0);opacity:1;}
+  }
+
+  /* ── Flashcard swipe feel ── */
+  .fc-card{
+    touch-action:pan-y;
+    user-select:none;
+  }
+
+  /* ── Writing input — larger on mobile ── */
+  .wr-input{
+    font-size:16px;
+    line-height:1.6;
+    min-height:64px;
+  }
+
+  /* ── Roadmap day cards ── */
+  .rdp-day-card{
+    border-radius:16px;
+    margin-bottom:10px;
+  }
+
+  /* ── Quiz answer options — full width feel ── */
+  .opt{
+    border-radius:14px;
+    font-size:14.5px;
+    line-height:1.5;
+  }
+
+  /* ── Speaking Pro — center mic ── */
+  .sp-rec-area{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:20px 0;
+  }
+
+  /* ── Prevent horizontal scroll ── */
+  body, .main, .page-wrap{
+    max-width:100vw;
+    overflow-x:hidden;
+  }
+
+  /* ── Horizontal scroll only for tables ── */
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+
+  /* ── Bottom safe area for FABs ── */
+  .btn-fab{
+    bottom:calc(var(--mob-nav) + env(safe-area-inset-bottom) + 16px);
+  }
+
+  /* ── Improve roadmap stats grid readability ── */
+  .rdp-stat-grid .s-stat{
+    padding:10px 6px;
+  }
+  .rdp-stat-grid .s-stat-val{
+    font-size:18px;
+  }
+
+  /* ── Home weekly calendar dots ── */
+  .week-row{
+    display:flex;justify-content:space-between;gap:4px;
+  }
+  .wday-dot{
+    flex:1;max-width:38px;
+    aspect-ratio:1;
+    display:flex;align-items:center;justify-content:center;
+    border-radius:50%;font-size:10px;font-weight:700;
+  }
+
+  /* ── Listening dialogue ── */
+  .lt-dlg-line{
+    padding:8px 12px;font-size:13.5px;
+  }
+
+  /* ── Better IPA display ── */
+  .fc-ipa, .sp-shadow-ipa{
+    font-size:13px;letter-spacing:.03em;
+  }
+
+  /* ── Roadmap tab buttons ── */
+  .rdp-tab{
+    font-size:12px;padding:8px 10px;
+  }
+
+  /* ── Ensure config modal slides up ── */
+  .fb-modal-overlay.open{align-items:flex-end;padding:0;}
+  .fb-modal{
+    border-radius:20px 20px 0 0;
+    padding:22px 18px calc(20px + env(safe-area-inset-bottom));
+    max-height:85vh;
+  }
 }
 </style>
 </head>
@@ -1181,11 +1639,11 @@ tr.row-selected{outline:none;}
 
 <!-- MOBILE NAV -->
 <nav class="mob-nav">
-  <div class="mob-item active" onclick="showPanel('home')"><span class="mi">🏠</span>Trang chủ</div>
-  <div class="mob-item" onclick="showPanel('roadmap')"><span class="mi">🗓️</span>Lộ trình</div>
-  <div class="mob-item" onclick="showPanel('listening')"><span class="mi">🎧</span>Listening</div>
-  <div class="mob-item" onclick="showPanel('speaking-pro')"><span class="mi">🎤</span>Speaking</div>
-  <div class="mob-item" onclick="showPanel('vocab-list')"><span class="mi">📝</span>Từ vựng</div>
+  <div class="mob-item active" onclick="showPanel('home')"><span class="mi">🏠</span><span class="mob-item-label">Trang chủ</span></div>
+  <div class="mob-item" onclick="showPanel('roadmap')"><span class="mi">🗓️</span><span class="mob-item-label">Lộ trình</span></div>
+  <div class="mob-item" onclick="showPanel('listening')"><span class="mi">🎧</span><span class="mob-item-label">Listening</span></div>
+  <div class="mob-item" onclick="showPanel('speaking-pro')"><span class="mi">🎤</span><span class="mob-item-label">Speaking</span></div>
+  <div class="mob-item" onclick="showPanel('vocab-list')"><span class="mi">📝</span><span class="mob-item-label">Từ vựng</span></div>
 </nav>
 
 <main class="main">
@@ -1201,80 +1659,94 @@ tr.row-selected{outline:none;}
 
 <!-- HOME -->
 <div id="panel-home" class="panel active">
-<div class="page-wrap">
+<div class="page-wrap home-page-wrap">
 
   <!-- Hero with dynamic greeting -->
   <div id="home-hero-wrap"></div>
 
-  <!-- Skills grid - 3 rows -->
-  <div style="margin-bottom:22px">
-    <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);margin-bottom:12px">🎯 Luyện tập theo kỹ năng</div>
-
-    <!-- Row 1: Core skills -->
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-      <!-- Listening card -->
-      <div onclick="showPanel('listening')" style="background:linear-gradient(135deg,#0c4a6e,#0891b2);border-radius:14px;padding:18px 16px;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s;box-shadow:0 4px 16px rgba(8,145,178,.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-        <div style="position:absolute;right:-10px;top:-10px;font-size:56px;opacity:.15;pointer-events:none">🎧</div>
-        <div style="font-size:28px;margin-bottom:8px">🎧</div>
-        <div style="font-family:var(--font-d);font-size:17px;font-weight:900;color:#fff;margin-bottom:3px">Listening</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.75);margin-bottom:10px">Nghe · Chọn đáp án · Chính tả</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap">
-          <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#fff">Trắc nghiệm</span>
-          <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#fff">Hội thoại</span>
-          <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#fff">Dictation</span>
-        </div>
-      </div>
-
-      <!-- Speaking Pro card -->
-      <div onclick="showPanel('speaking-pro')" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-radius:14px;padding:18px 16px;cursor:pointer;position:relative;overflow:hidden;transition:transform .15s;box-shadow:0 4px 16px rgba(124,58,237,.3);" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-        <div style="position:absolute;right:-10px;top:-10px;font-size:56px;opacity:.15;pointer-events:none">🎤</div>
-        <div style="font-size:28px;margin-bottom:8px">🎤</div>
-        <div style="font-family:var(--font-d);font-size:17px;font-weight:900;color:#fff;margin-bottom:3px">Speaking Pro</div>
-        <div style="font-size:11px;color:rgba(255,255,255,.75);margin-bottom:10px">Phát âm · Shadowing · Roleplay</div>
-        <div style="display:flex;gap:5px;flex-wrap:wrap">
-          <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#fff">Shadowing</span>
-          <span style="background:rgba(255,255,255,.15);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;color:#fff">AI Roleplay</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Row 2: Other skills (smaller) -->
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-      <div class="hcard" style="flex-direction:column;align-items:center;text-align:center;padding:14px 8px;gap:6px" onclick="showPanel('topics')">
-        <div class="hcard-icon hci-t" style="width:36px;height:36px;font-size:17px">🃏</div>
-        <div><div class="hcard-title" style="font-size:12px">Flashcard</div></div>
-      </div>
-      <div class="hcard" style="flex-direction:column;align-items:center;text-align:center;padding:14px 8px;gap:6px" onclick="showPanel('writing')">
-        <div class="hcard-icon hci-r" style="width:36px;height:36px;font-size:17px">✍️</div>
-        <div><div class="hcard-title" style="font-size:12px">Writing</div></div>
-      </div>
-      <div class="hcard" style="flex-direction:column;align-items:center;text-align:center;padding:14px 8px;gap:6px" onclick="showPanel('roadmap')">
-        <div class="hcard-icon hci-v" style="width:36px;height:36px;font-size:17px">🗓️</div>
-        <div><div class="hcard-title" style="font-size:12px">Lộ trình</div></div>
-      </div>
-      <div class="hcard" style="flex-direction:column;align-items:center;text-align:center;padding:14px 8px;gap:6px" onclick="showPanel('progress')">
-        <div class="hcard-icon hci-a" style="width:36px;height:36px;font-size:17px">📊</div>
-        <div><div class="hcard-title" style="font-size:12px">Tiến độ</div></div>
-      </div>
-    </div>
+  <!-- Stats strip (mobile: horizontal scroll row) -->
+  <div class="home-stats-strip" id="home-stats-strip">
+    <div class="hss-item" id="hss-streak"><div class="hss-val">—</div><div class="hss-lbl">🔥 Streak</div></div>
+    <div class="hss-sep"></div>
+    <div class="hss-item" id="hss-xp"><div class="hss-val">—</div><div class="hss-lbl">⚡ XP</div></div>
+    <div class="hss-sep"></div>
+    <div class="hss-item" id="hss-words"><div class="hss-val">—</div><div class="hss-lbl">📖 Đã học</div></div>
+    <div class="hss-sep"></div>
+    <div class="hss-item" id="hss-today"><div class="hss-val">—</div><div class="hss-lbl">📅 Hôm nay</div></div>
   </div>
 
-  <!-- Today's stats + calendar -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
-    <div class="card" style="padding:16px">
-      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink4);margin-bottom:12px">📅 Tuần này</div>
-      <div class="week-row" id="week-calendar"></div>
-    </div>
-    <div class="card" style="padding:16px" id="home-quick-stats">
-      <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink4);margin-bottom:12px">⚡ Hôm nay</div>
-      <div style="display:flex;flex-direction:column;gap:8px" id="home-today-stats">
-        <div style="font-size:13px;color:var(--ink3)">Đang tải...</div>
-      </div>
-    </div>
+  <!-- Week calendar strip -->
+  <div class="home-week-wrap">
+    <div class="home-section-lbl">📅 Tuần này</div>
+    <div class="week-row" id="week-calendar"></div>
   </div>
 
-  <!-- Continue learning strip -->
+  <!-- Continue learning (dynamic) -->
   <div id="home-continue-wrap"></div>
+
+  <!-- Skills section label -->
+  <div class="home-section-lbl" style="margin-top:4px">🎯 Luyện tập</div>
+
+  <!-- Core skills: 2 big cards -->
+  <div class="home-skill-grid">
+    <div class="home-skill-card hsk-listen" onclick="showPanel('listening')">
+      <div class="hsk-bg-emoji">🎧</div>
+      <div class="hsk-icon">🎧</div>
+      <div class="hsk-name">Listening</div>
+      <div class="hsk-sub">Nghe · Trắc nghiệm · Hội thoại</div>
+      <div class="hsk-chips">
+        <span class="hsk-chip">Trắc nghiệm</span>
+        <span class="hsk-chip">Hội thoại</span>
+        <span class="hsk-chip">Dictation</span>
+      </div>
+    </div>
+    <div class="home-skill-card hsk-speak" onclick="showPanel('speaking-pro')">
+      <div class="hsk-bg-emoji">🎤</div>
+      <div class="hsk-icon">🎤</div>
+      <div class="hsk-name">Speaking Pro</div>
+      <div class="hsk-sub">Phát âm · Shadowing · Roleplay</div>
+      <div class="hsk-chips">
+        <span class="hsk-chip">Shadowing</span>
+        <span class="hsk-chip">AI Roleplay</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Secondary skills: 4 icon cards -->
+  <div class="home-mini-grid">
+    <div class="home-mini-card" onclick="showPanel('topics')">
+      <div class="hmc-icon hci-t">🃏</div>
+      <div class="hmc-label">Flashcard</div>
+    </div>
+    <div class="home-mini-card" onclick="showPanel('writing')">
+      <div class="hmc-icon hci-r">✍️</div>
+      <div class="hmc-label">Writing</div>
+    </div>
+    <div class="home-mini-card" onclick="showPanel('roadmap')">
+      <div class="hmc-icon hci-v">🗓️</div>
+      <div class="hmc-label">Lộ trình</div>
+    </div>
+    <div class="home-mini-card" onclick="showPanel('progress')">
+      <div class="hmc-icon hci-a">📊</div>
+      <div class="hmc-label">Tiến độ</div>
+    </div>
+  </div>
+
+  <!-- Today stats (legacy hidden, replaced by strip) -->
+  <div id="home-quick-stats" style="display:none">
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+      <div class="card" style="padding:16px">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink4);margin-bottom:12px">📅 Tuần này</div>
+        <div class="week-row" id="week-calendar-desktop"></div>
+      </div>
+      <div class="card" style="padding:16px">
+        <div style="font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink4);margin-bottom:12px">⚡ Hôm nay</div>
+        <div style="display:flex;flex-direction:column;gap:8px" id="home-today-stats">
+          <div style="font-size:13px;color:var(--ink3)">Đang tải...</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
 </div>
 </div>
@@ -9213,13 +9685,21 @@ window.showPanel = function(name) {
   } else if (name === 'home') {
     setTimeout(renderHomeDashboard, 50);
   }
+  // Mobile UX: scroll to top on panel switch & haptic feedback
+  if (window.innerWidth <= 767) {
+    window.scrollTo({top:0,behavior:'instant'});
+    // Haptic feedback on supported devices
+    if (navigator.vibrate) navigator.vibrate(8);
+  }
 };
 
 /* ═══════════════════════════════════════════════
    HOME DASHBOARD RENDERER
 ═══════════════════════════════════════════════ */
 function renderHomeDashboard() {
-  // Hero greeting
+  const isMob = window.innerWidth <= 767;
+
+  // ── Hero ──
   const heroWrap = document.getElementById('home-hero-wrap');
   if (heroWrap) {
     const h = new Date().getHours();
@@ -9230,90 +9710,115 @@ function renderHomeDashboard() {
     const totalWords = S.vocab.length;
     const learnedWords = S.vocab.filter(v => v.learned).length;
     const pct = totalWords ? Math.round(learnedWords / totalWords * 100) : 0;
+    const motivate = pct === 0 ? 'Bắt đầu hành trình ngay!' :
+      pct < 30 ? 'Tiếp tục cố lên!' : pct < 70 ? 'Tuyệt vời, giữ đà!' : 'Gần đến đích rồi! 🏆';
 
     heroWrap.innerHTML = `
-      <div style="background:linear-gradient(135deg,#0d9488 0%,#0891b2 60%,#7c3aed 100%);border-radius:16px;padding:22px 26px;color:#fff;margin-bottom:20px;position:relative;overflow:hidden;">
-        <div style="position:absolute;right:22px;top:50%;transform:translateY(-50%);font-size:72px;opacity:.12;pointer-events:none">🗣️</div>
-        <div style="font-size:13px;opacity:.8;margin-bottom:4px;font-weight:600">${emoji} ${greeting}${name ? ', '+name : ''}!</div>
-        <div style="font-family:var(--font-d);font-size:22px;font-weight:900;margin-bottom:12px;letter-spacing:-.3px">Học gì hôm nay? 🚀</div>
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
-          <div style="flex:1;height:8px;background:rgba(255,255,255,.2);border-radius:4px;overflow:hidden">
-            <div style="height:100%;width:${pct}%;background:rgba(255,255,255,.85);border-radius:4px;transition:width .6s"></div>
+      <div style="background:linear-gradient(135deg,#0d9488 0%,#0891b2 55%,#7c3aed 100%);border-radius:16px;padding:${isMob?'16px 18px':'22px 26px'};color:#fff;margin-bottom:12px;position:relative;overflow:hidden;">
+        <div style="position:absolute;right:${isMob?'14px':'22px'};top:50%;transform:translateY(-50%);font-size:${isMob?'52px':'72px'};opacity:.1;pointer-events:none;line-height:1">🗣️</div>
+        <div style="font-size:${isMob?'12px':'13px'};opacity:.8;margin-bottom:3px;font-weight:600">${emoji} ${greeting}${name ? ', <strong>'+name+'</strong>' : ''}!</div>
+        <div style="font-family:var(--font-d);font-size:${isMob?'20px':'22px'};font-weight:900;margin-bottom:${isMob?'10px':'12px'};letter-spacing:-.3px;line-height:1.2">Học gì hôm nay? 🚀</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+          <div style="flex:1;height:7px;background:rgba(255,255,255,.22);border-radius:4px;overflow:hidden">
+            <div style="height:100%;width:${pct}%;background:rgba(255,255,255,.88);border-radius:4px;transition:width .6s"></div>
           </div>
-          <span style="font-size:12px;font-weight:800;white-space:nowrap">${learnedWords}/${totalWords} từ</span>
+          <span style="font-size:12px;font-weight:800;white-space:nowrap;opacity:.95">${learnedWords}/${totalWords} từ</span>
         </div>
-        <div style="font-size:12px;opacity:.75">Tiến độ tổng thể: ${pct}% — ${
-          pct === 0 ? 'Bắt đầu hành trình ngay!' :
-          pct < 30 ? 'Bạn đang làm tốt, tiếp tục nhé!' :
-          pct < 70 ? 'Tuyệt vời, giữ momentum!' : 'Gần đến đích rồi! 🏆'
-        }</div>
+        <div style="font-size:11.5px;opacity:.75">${pct}% — ${motivate}</div>
       </div>`;
   }
 
-  // Today stats
-  const todayEl = document.getElementById('home-today-stats');
-  if (todayEl) {
-    const ltLogs = JSON.parse(localStorage.getItem('speakup_lt_logs') || '[]');
-    const todayStr = new Date().toLocaleDateString('vi-VN');
-    const todayLt = ltLogs.filter(l => new Date(l.ts).toLocaleDateString('vi-VN') === todayStr);
+  // ── Stats strip (mobile only) ──
+  if (isMob) {
     const rdp = (typeof getRdpState === 'function') ? getRdpState() : null;
     const todayKey = (typeof getDateKey === 'function') ? getDateKey() : new Date().toISOString().slice(0,10);
     const todayRdp = rdp?.logs?.[todayKey];
     const xp = S.stats?.xp || 0;
     const streak = S.stats?.streak || 0;
+    const learnedToday = todayRdp?.results?.filter(r=>r.correct)?.length || 0;
+    const totalWords = S.vocab.length;
 
-    todayEl.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:13px;color:var(--ink2)">🔥 Streak</span>
-        <span style="font-family:var(--font-d);font-weight:800;color:var(--teal)">${streak} ngày</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:13px;color:var(--ink2)">⚡ XP hôm nay</span>
-        <span style="font-family:var(--font-d);font-weight:800;color:var(--violet)">${xp} XP</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:13px;color:var(--ink2)">🎧 Listening</span>
-        <span style="font-size:13px;font-weight:700;color:${todayLt.length?'var(--teal)':'var(--ink4)'}">${todayLt.length ? todayLt.length+' lần' : 'Chưa luyện'}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0">
-        <span style="font-size:13px;color:var(--ink2)">📖 Từ hôm nay</span>
-        <span style="font-size:13px;font-weight:700;color:${todayRdp?.results?.length?'var(--teal)':'var(--ink4)'}">${todayRdp?.results?.length || 0} từ</span>
-      </div>`;
+    const sv = (id, val) => { const el = document.getElementById(id); if(el) el.querySelector('.hss-val').textContent = val; };
+    sv('hss-streak', streak ? streak+'🔥' : '0');
+    sv('hss-xp', xp ? xp+'✨' : '0');
+    sv('hss-words', totalWords);
+    sv('hss-today', learnedToday ? learnedToday+'✅' : '0');
+  } else {
+    // Desktop: legacy today stats
+    const todayEl = document.getElementById('home-today-stats');
+    if (todayEl) {
+      const ltLogs = JSON.parse(localStorage.getItem('speakup_lt_logs') || '[]');
+      const todayStr = new Date().toLocaleDateString('vi-VN');
+      const todayLt = ltLogs.filter(l => new Date(l.ts).toLocaleDateString('vi-VN') === todayStr);
+      const rdp = (typeof getRdpState === 'function') ? getRdpState() : null;
+      const todayKey = (typeof getDateKey === 'function') ? getDateKey() : new Date().toISOString().slice(0,10);
+      const todayRdp = rdp?.logs?.[todayKey];
+      const xp = S.stats?.xp || 0; const streak = S.stats?.streak || 0;
+      todayEl.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;color:var(--ink2)">🔥 Streak</span>
+          <span style="font-family:var(--font-d);font-weight:800;color:var(--teal)">${streak} ngày</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;color:var(--ink2)">⚡ XP hôm nay</span>
+          <span style="font-family:var(--font-d);font-weight:800;color:var(--violet)">${xp} XP</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+          <span style="font-size:13px;color:var(--ink2)">🎧 Listening</span>
+          <span style="font-size:13px;font-weight:700;color:${todayLt.length?'var(--teal)':'var(--ink4)'}">${todayLt.length ? todayLt.length+' lần' : 'Chưa luyện'}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0">
+          <span style="font-size:13px;color:var(--ink2)">📖 Từ hôm nay</span>
+          <span style="font-size:13px;font-weight:700;color:${todayRdp?.results?.length?'var(--teal)':'var(--ink4)'}">${todayRdp?.results?.length || 0} từ</span>
+        </div>`;
+    }
   }
 
-  // Continue learning strip
+  // ── Continue learning ──
   const contWrap = document.getElementById('home-continue-wrap');
   if (contWrap && S.currentTopic) {
     const topicWords = S.vocab.filter(v => v.topic === S.currentTopic);
     const learned = topicWords.filter(v => v.learned).length;
     const pct = topicWords.length ? Math.round(learned / topicWords.length * 100) : 0;
     const rule = TOPIC_RULES.find(r => r.name === S.currentTopic);
-    contWrap.innerHTML = `
-      <div style="background:var(--surface);border:2px solid var(--teal);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 2px 12px rgba(13,148,136,.12)">
-        <div style="font-size:28px">${rule?.emoji||'📌'}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">▶ Tiếp tục học</div>
-          <div style="font-family:var(--font-d);font-weight:800;font-size:16px;color:var(--ink);margin-bottom:6px">${S.currentTopic}</div>
-          <div style="height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;max-width:200px">
-            <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--teal),var(--teal-mid));border-radius:3px"></div>
+    if (isMob) {
+      contWrap.innerHTML = `
+        <div class="home-continue-card">
+          <div class="home-continue-emoji">${rule?.emoji||'📌'}</div>
+          <div class="home-continue-info">
+            <div class="home-continue-tag">▶ Tiếp tục học</div>
+            <div class="home-continue-title">${S.currentTopic}</div>
+            <div class="home-continue-pbar"><div class="home-continue-pfill" style="width:${pct}%"></div></div>
+            <div class="home-continue-meta">${learned}/${topicWords.length} từ · ${pct}%</div>
           </div>
-          <div style="font-size:11px;color:var(--ink4);margin-top:3px">${learned}/${topicWords.length} từ đã học (${pct}%)</div>
-        </div>
-        <div style="display:flex;gap:7px;flex-wrap:wrap">
-          <button class="btn btn-primary btn-sm" onclick="startStudy('${esc(S.currentTopic)}','flashcard')">🃏 Flashcard</button>
-          <button class="btn btn-outline btn-sm" onclick="startStudy('${esc(S.currentTopic)}','speaking')">🎤 Speaking</button>
-        </div>
-      </div>`;
+          <div class="home-continue-btns">
+            <button class="btn btn-primary btn-sm" onclick="startStudy('${esc(S.currentTopic)}','flashcard')" style="font-size:12px;padding:8px 12px">🃏 Học</button>
+            <button class="btn btn-outline btn-sm" onclick="startStudy('${esc(S.currentTopic)}','quiz')" style="font-size:12px;padding:8px 12px">🧩 Quiz</button>
+          </div>
+        </div>`;
+    } else {
+      contWrap.innerHTML = `
+        <div style="background:var(--surface);border:2px solid var(--teal);border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;box-shadow:0 2px 12px rgba(13,148,136,.12)">
+          <div style="font-size:28px">${rule?.emoji||'📌'}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:11px;font-weight:700;color:var(--teal);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">▶ Tiếp tục học</div>
+            <div style="font-family:var(--font-d);font-weight:800;font-size:16px;color:var(--ink);margin-bottom:6px">${S.currentTopic}</div>
+            <div style="height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;max-width:200px">
+              <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,var(--teal),var(--teal-mid));border-radius:3px"></div>
+            </div>
+            <div style="font-size:11px;color:var(--ink4);margin-top:3px">${learned}/${topicWords.length} từ đã học (${pct}%)</div>
+          </div>
+          <div style="display:flex;gap:7px;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="startStudy('${esc(S.currentTopic)}','flashcard')">🃏 Flashcard</button>
+            <button class="btn btn-outline btn-sm" onclick="startStudy('${esc(S.currentTopic)}','speaking')">🎤 Speaking</button>
+          </div>
+        </div>`;
+    }
   } else if (contWrap) {
-    contWrap.innerHTML = S.vocab.length ? `
-      <div style="background:var(--surface2);border:1.5px dashed var(--border2);border-radius:14px;padding:16px 18px;text-align:center">
-        <div style="font-size:13px;color:var(--ink3);margin-bottom:10px">👆 Chọn một chủ đề từ <strong>Chủ đề</strong> để bắt đầu học</div>
-        <button class="btn btn-primary btn-sm" onclick="showPanel('topics')">📚 Xem chủ đề →</button>
-      </div>` : `
-      <div style="background:var(--surface2);border:1.5px dashed var(--border2);border-radius:14px;padding:16px 18px;text-align:center">
-        <div style="font-size:13px;color:var(--ink3);margin-bottom:10px">📭 Chưa có từ vựng nào. Hãy import để bắt đầu!</div>
-        <button class="btn btn-primary btn-sm" onclick="showPanel('import')">📥 Import từ vựng →</button>
-      </div>`;
+    const emptyMsg = S.vocab.length
+      ? `<div style="font-size:13px;color:var(--ink3);margin-bottom:10px">👆 Chọn chủ đề để bắt đầu học</div><button class="btn btn-primary btn-sm" onclick="showPanel('topics')">📚 Xem chủ đề →</button>`
+      : `<div style="font-size:13px;color:var(--ink3);margin-bottom:10px">📭 Chưa có từ vựng. Import để bắt đầu!</div><button class="btn btn-primary btn-sm" onclick="showPanel('import')">📥 Import ngay →</button>`;
+    contWrap.innerHTML = `<div style="background:var(--surface2);border:1.5px dashed var(--border2);border-radius:14px;padding:16px 18px;text-align:center;margin-bottom:14px">${emptyMsg}</div>`;
   }
 }
 
@@ -9549,3 +10054,49 @@ function showSpScoreEnhanced(score, transcript, wordScores, targetWord, wordIpa)
 
 </body>
 </html>
+<script>
+// ═══════════════════════════════════════
+// MOBILE OPTIMIZATIONS — runtime init
+// ═══════════════════════════════════════
+(function initMobile(){
+  if(window.innerWidth > 767) return;
+
+  // 1. Prevent double-tap zoom on interactive elements
+  let lastTouch = 0;
+  document.addEventListener('touchend', function(e){
+    const now = Date.now();
+    if(now - lastTouch < 300 && e.target.closest('button,.btn,.mob-item,.tab-btn,.opt,.rate-btn')){
+      e.preventDefault();
+    }
+    lastTouch = now;
+  }, {passive:false});
+
+  // 2. Visual touch feedback
+  document.addEventListener('touchstart', function(e){
+    const el = e.target.closest('.hcard,.topic-card,.lt-mode-tab,.sp-mode-tab,.rdp-day-card');
+    if(el){ el.style.transition='transform .1s'; el.style.transform='scale(.97)'; }
+  }, {passive:true});
+  document.addEventListener('touchend', function(e){
+    const el = e.target.closest('.hcard,.topic-card,.lt-mode-tab,.sp-mode-tab,.rdp-day-card');
+    if(el){ setTimeout(()=>{ el.style.transform=''; el.style.transition=''; }, 150); }
+  }, {passive:true});
+
+  // 3. Mobile drop-zone — simplify copy
+  setTimeout(function(){
+    const sub = document.querySelector('#drop-zone .dz-sub');
+    if(sub) sub.textContent = 'Nhấn để chọn file .xlsx từ thiết bị';
+    const dz = document.getElementById('drop-zone');
+    if(dz) dz.style.minHeight = '120px';
+  }, 500);
+
+  // 4. Smooth scroll for study tabs
+  document.querySelectorAll('.tabs').forEach(function(t){
+    t.style.webkitOverflowScrolling = 'touch';
+  });
+
+  // 5. Add touch-scale CSS for nav items
+  const s = document.createElement('style');
+  s.textContent = '@media(max-width:767px){.mob-item:active{background:rgba(13,148,136,.07);border-radius:8px;}.hcard:active,.topic-card:active{filter:brightness(.96);}}';
+  document.head.appendChild(s);
+})();
+</script>
