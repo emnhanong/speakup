@@ -1813,7 +1813,10 @@ tr.row-selected{outline:none;}
       </div>
       <div class="sync-row">
         <div class="sync-badge ok" id="sync-badge">✅ Đã lưu</div>
-        <button onclick="fbManualSync()" title="Sync ngay" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--ink4)">🔄</button>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <button onclick="fbManualSync().then(()=>{if(typeof updateMobSyncBadge==='function')updateMobSyncBadge();})" title="Sync ngay" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--ink4);" title="Đồng bộ ngay">🔄</button>
+          <button onclick="diagnoseSyncIssue&&diagnoseSyncIssue()" title="Chẩn đoán đồng bộ" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--ink4);">🔍</button>
+        </div>
       </div>
       <button class="btn-signout" onclick="appSignOut()">Đăng xuất</button>
     </div>
@@ -1881,6 +1884,12 @@ tr.row-selected{outline:none;}
           <button class="sb-fb-btn danger" onclick="sbFbDisconnect()">🗑 Xóa config</button>
         </div>
         <div class="sb-fb-paste-hint">💡 Dán toàn bộ firebaseConfig JSON để điền nhanh</div>
+        <button onclick="showFirestoreRulesGuide()" style="width:100%;margin-top:7px;padding:7px 8px;background:var(--amber-light);border:1.5px solid #fde68a;border-radius:6px;font-size:10.5px;font-weight:700;color:#92400e;cursor:pointer;font-family:var(--font-b);text-align:center;">
+          📋 Cấu hình Firestore Rules
+        </button>
+        <button onclick="diagnoseSyncIssue()" style="width:100%;margin-top:5px;padding:7px 8px;background:var(--violet-light);border:1.5px solid rgba(124,58,237,.25);border-radius:6px;font-size:10.5px;font-weight:700;color:var(--violet);cursor:pointer;font-family:var(--font-b);text-align:center;">
+          🔍 Chẩn đoán lỗi đồng bộ
+        </button>
       </div>
     </div>
   </div>
@@ -2151,6 +2160,9 @@ tr.row-selected{outline:none;}
             <button class="mob-fb-btn danger" onclick="mobClearFbConfig()">🗑 Xóa config</button>
           </div>
           <div class="mob-fb-paste-hint">💡 Dán toàn bộ firebaseConfig JSON để điền nhanh</div>
+        <button onclick="showFirestoreRulesGuide()" style="width:100%;margin-top:8px;padding:9px;background:var(--amber-light);border:1.5px solid #fde68a;border-radius:9px;font-size:12px;font-weight:700;color:#92400e;cursor:pointer;font-family:var(--font-b);">
+          📋 Hướng dẫn cấu hình Firestore Rules
+        </button>
         </div>
       </div>
     </div>
@@ -8499,8 +8511,6 @@ const _doc={
 
 async function _loadUserDataFromFirestore(uid){
   try{
-    // Dùng cache của Firestore SDK trước (nếu offline persistence bật)
-    // source:'cache' trả về ngay lập tức, source:'server' lấy mới nhất
     const [statsSnap,topicsSnap,vocabSnap]=await Promise.all([
       _doc.stats(uid).get(),
       _doc.topics(uid).get(),
@@ -8514,19 +8524,66 @@ async function _loadUserDataFromFirestore(uid){
         S.vocab=vocabSnap.docs.map(d=>{ const r={id:d.id,...d.data()}; delete r._createdAt; delete r._updatedAt; return r; });
         S.vocab.forEach(v=>{ if(v.topic&&!S.topics[v.topic]) S.topics[v.topic]={desc:''}; });
       }
-      // Cập nhật UI với data mới từ cloud
       updStats(); renderTopics(); renderVocabList(); renderWeekCal();
-      // Lưu cache local để lần sau load ngay
       _saveLocalData(uid);
-      setSyncBadge('ok','✅ Đã đồng bộ');
+      setSyncBadge('ok','✅ Đã đồng bộ ('+S.vocab.length+' từ)');
+      console.log('[FB] Loaded',S.vocab.length,'words from Firestore');
     } else {
-      // Cloud rỗng — không có gì để load
-      setSyncBadge('ok','✅ Sẵn sàng');
+      // Cloud rỗng — kiểm tra xem local có data không, nếu có thì upload lên
+      if(S.vocab.length>0){
+        console.log('[FB] Cloud empty but local has',S.vocab.length,'words — auto migrating...');
+        setSyncBadge('busy','⬆️ Upload '+S.vocab.length+' từ lên cloud...');
+        await _migrateToCloud(uid);
+      } else {
+        setSyncBadge('ok','✅ Sẵn sàng');
+      }
     }
   }catch(e){
-    console.error('[FB] Load error:',e);
-    setSyncBadge('err','❌ Lỗi đồng bộ');
-    // Data local đã được hiển thị trước đó, không cần làm gì thêm
+    console.error('[FB] Load error:',e.code||e.message);
+    // Phân loại lỗi để hiển thị thông báo hữu ích
+    if(e.code==='permission-denied'||e.code==='PERMISSION_DENIED'){
+      setSyncBadge('err','🔒 Lỗi quyền Firestore');
+      _showFirestoreRulesError();
+    } else if(e.code==='unavailable'||e.code==='UNAVAILABLE'){
+      setSyncBadge('offline','📶 Offline — dùng cache local');
+    } else {
+      setSyncBadge('err','❌ Lỗi đồng bộ: '+(e.code||e.message));
+    }
+    throw e; // re-throw để caller biết có lỗi
+  }
+}
+
+/* Hiển thị hướng dẫn fix Firestore Rules */
+function _showFirestoreRulesError(){
+  const rules = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null
+        && request.auth.uid == userId;
+    }
+  }
+}`;
+  const msg = `🔒 Firestore bị chặn bởi Security Rules!
+
+Bạn cần cập nhật Firestore Rules:
+
+1. Vào Firebase Console → Firestore Database → Rules
+2. Xóa nội dung cũ, dán rules sau:
+
+${rules}
+
+3. Nhấn "Publish" để lưu.
+
+Sau đó nhấn OK và thử đăng nhập lại.`;
+  if(confirm(msg)){
+    // Mở Firebase Console
+    const cfg = getFbConfig();
+    if(cfg&&cfg.projectId){
+      window.open('https://console.firebase.google.com/project/'+cfg.projectId+'/firestore/rules','_blank');
+    } else {
+      window.open('https://console.firebase.google.com','_blank');
+    }
   }
 }
 
@@ -10671,6 +10728,177 @@ function showSpScoreEnhanced(score, transcript, wordScores, targetWord, wordIpa)
 </body>
 </html>
 <script>
+// ═══════════════════════════════════════════════════════════
+// FIRESTORE RULES GUIDE + SYNC DIAGNOSTICS
+// ═══════════════════════════════════════════════════════════
+
+/* Firestore Rules đúng cho SpeakUp */
+const FIRESTORE_RULES_CORRECT = `rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/{document=**} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+    }
+  }
+}`;
+
+window.showFirestoreRulesGuide = function(){
+  const cfg = typeof getFbConfig==='function' ? getFbConfig() : null;
+  const projectId = cfg&&cfg.projectId ? cfg.projectId : 'YOUR_PROJECT_ID';
+  const rulesUrl = 'https://console.firebase.google.com/project/'+projectId+'/firestore/rules';
+
+  // Tạo modal hướng dẫn
+  const existing = document.getElementById('_rules-modal');
+  if(existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = '_rules-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);display:flex;align-items:flex-end;justify-content:center;padding:0;';
+  modal.innerHTML = `
+    <div style="background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:90dvh;overflow-y:auto;padding:24px 24px calc(24px + env(safe-area-inset-bottom));box-shadow:0 -8px 40px rgba(0,0,0,.25);">
+      <div style="width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 16px;"></div>
+      <div style="font-size:22px;font-weight:900;font-family:var(--font-d);margin-bottom:4px;">🔥 Cấu hình Firestore Rules</div>
+      <div style="font-size:13px;color:var(--ink3);margin-bottom:20px;">Bắt buộc để dữ liệu đồng bộ giữa các thiết bị</div>
+
+      <div style="background:#fef3c7;border:1.5px solid #fde68a;border-radius:12px;padding:14px 16px;margin-bottom:16px;">
+        <div style="font-size:12px;font-weight:800;color:#92400e;margin-bottom:8px;">⚠️ Vấn đề thường gặp</div>
+        <div style="font-size:12px;color:#92400e;line-height:1.6;">
+          Khi tạo Firestore ở <strong>Production mode</strong>, Firebase mặc định <strong>chặn tất cả</strong> đọc/ghi.
+          Bạn phải cập nhật Rules để cho phép user đọc/ghi dữ liệu của chính họ.
+        </div>
+      </div>
+
+      <div style="font-size:13px;font-weight:800;color:var(--ink);margin-bottom:10px;">📋 3 bước thực hiện:</div>
+
+      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+        <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:3px;">Mở Firebase Console → Firestore Rules</div>
+            <a href="${rulesUrl}" target="_blank" style="font-size:12px;color:var(--teal);font-weight:600;word-break:break-all;">${rulesUrl}</a>
+          </div>
+        </div>
+        <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:13px;font-weight:700;margin-bottom:6px;">Thay toàn bộ nội dung bằng rules này:</div>
+            <div style="background:#1e1e2e;border-radius:8px;padding:12px;position:relative;">
+              <pre id="_rules-code" style="margin:0;font-size:11px;color:#cdd6f4;font-family:monospace;white-space:pre-wrap;word-break:break-all;line-height:1.5;">${FIRESTORE_RULES_CORRECT.replace(/</g,'&lt;').replace(/>/g,'&gt;')}</pre>
+              <button onclick="_copyRules()" style="position:absolute;top:8px;right:8px;background:rgba(255,255,255,.15);border:none;border-radius:5px;padding:4px 8px;font-size:11px;color:#cdd6f4;cursor:pointer;font-weight:700;">📋 Copy</button>
+            </div>
+          </div>
+        </div>
+        <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:12px 14px;display:flex;gap:12px;align-items:flex-start;">
+          <div style="width:26px;height:26px;border-radius:50%;background:var(--teal);color:#fff;font-size:13px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;margin-bottom:3px;">Nhấn "Publish" → quay lại app → nhấn 🔄 Sync</div>
+            <div style="font-size:12px;color:var(--ink3);">Dữ liệu sẽ được đồng bộ ngay sau khi rules được cập nhật.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <a href="${rulesUrl}" target="_blank" style="flex:1;padding:13px;background:var(--teal);color:#fff;border-radius:12px;text-align:center;font-size:14px;font-weight:800;text-decoration:none;display:block;">
+          🔗 Mở Firebase Console
+        </a>
+        <button onclick="document.getElementById('_rules-modal').remove()" style="flex:1;padding:13px;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-weight:700;color:var(--ink3);cursor:pointer;font-family:var(--font-b);">
+          Đóng
+        </button>
+      </div>
+    </div>`;
+
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+};
+
+window._copyRules = function(){
+  navigator.clipboard.writeText(FIRESTORE_RULES_CORRECT)
+    .then(()=>{ if(typeof showToast==='function') showToast('✅ Đã copy Firestore Rules!'); })
+    .catch(()=>{
+      const el = document.getElementById('_rules-code');
+      if(el){ const sel=window.getSelection(); sel.selectAllChildren(el); }
+    });
+};
+
+/* Chẩn đoán lỗi đồng bộ — kiểm tra từng bước */
+window.diagnoseSyncIssue = async function(){
+  const lines = [];
+  const ok = s=>lines.push('✅ '+s);
+  const err = s=>lines.push('❌ '+s);
+  const warn = s=>lines.push('⚠️  '+s);
+  const info = s=>lines.push('ℹ️  '+s);
+
+  info('Bắt đầu chẩn đoán...');
+
+  // 1. Firebase config
+  const cfg = typeof getFbConfig==='function' ? getFbConfig() : null;
+  if(cfg&&cfg.apiKey&&cfg.projectId){ ok('Firebase config: '+cfg.projectId); }
+  else { err('Chưa có Firebase config — vào ⚙️ để điền config'); }
+
+  // 2. Firebase init
+  if(typeof _fbOk==='function'&&_fbOk()){ ok('Firebase khởi tạo thành công'); }
+  else { err('Firebase chưa khởi tạo hoặc bị lỗi'); }
+
+  // 3. Auth state
+  if(typeof _currentUser!=='undefined'&&_currentUser){
+    ok('Đã đăng nhập: '+(_currentUser.displayName||_currentUser.username)+' (uid: '+_currentUser.uid.substring(0,12)+'...)');
+    if(_currentUser.uid==='admin_root'){ warn('Admin đang dùng uid cục bộ — Firebase chưa connect Auth'); }
+  } else { err('Chưa đăng nhập'); }
+
+  // 4. Network
+  if(navigator.onLine){ ok('Có kết nối internet'); }
+  else { err('Không có kết nối internet'); }
+
+  // 5. Test Firestore read/write
+  if(typeof _fbOk==='function'&&_fbOk()&&typeof _currentUser!=='undefined'&&_currentUser&&_currentUser.uid!=='admin_root'){
+    try{
+      const testRef = _db.collection('users').doc(_currentUser.uid).collection('_meta').doc('_ping');
+      await testRef.set({ ts: firebase.firestore.FieldValue.serverTimestamp(), test:true },{merge:true});
+      ok('Firestore WRITE: thành công');
+      const snap = await testRef.get();
+      if(snap.exists){ ok('Firestore READ: thành công'); }
+      else { err('Firestore READ: không đọc được document vừa write'); }
+    }catch(e){
+      if(e.code==='permission-denied'){ err('Firestore: BỊ CHẶN bởi Security Rules! → Cần cập nhật Rules'); }
+      else { err('Firestore error: '+e.code+' — '+e.message); }
+    }
+
+    // 6. Check vocab count
+    try{
+      const vocabSnap = await _db.collection('users').doc(_currentUser.uid).collection('vocab').limit(5).get();
+      if(!vocabSnap.empty){ ok('Firestore vocab: có '+vocabSnap.size+'+ từ trên cloud (UID này)'); }
+      else { warn('Firestore vocab: rỗng — chưa có từ nào được upload với UID này'); info('→ Thử nhấn 🔄 Sync để upload dữ liệu từ thiết bị này lên'); }
+    }catch(e){
+      err('Không đọc được vocab: '+(e.code||e.message));
+    }
+  } else if(typeof _currentUser!=='undefined'&&_currentUser&&_currentUser.uid==='admin_root'){
+    warn('Admin uid là admin_root → không thể test Firestore (cần Firebase UID thật)');
+    info('→ Đăng xuất và đăng nhập lại sau khi đã cấu hình Firebase');
+  }
+
+  // 7. Local data
+  const localCount = typeof S!=='undefined'&&S.vocab ? S.vocab.length : 0;
+  info('Từ vựng đang có trong bộ nhớ: '+localCount+' từ');
+
+  // Show result
+  const result = lines.join('
+');
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:var(--surface);border-radius:20px 20px 0 0;width:100%;max-width:600px;max-height:80dvh;overflow-y:auto;padding:22px 22px calc(22px + env(safe-area-inset-bottom));">
+      <div style="font-size:17px;font-weight:800;font-family:var(--font-d);margin-bottom:14px;">🔍 Kết quả chẩn đoán</div>
+      <pre style="font-size:12.5px;line-height:1.7;color:var(--ink2);white-space:pre-wrap;font-family:monospace;background:var(--surface2);border-radius:10px;padding:14px;margin-bottom:16px;">${result}</pre>
+      <div style="display:flex;gap:8px;">
+        <button onclick="showFirestoreRulesGuide()" style="flex:1;padding:11px;background:var(--teal);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-b);">📋 Xem hướng dẫn Rules</button>
+        <button onclick="this.closest('[style*=fixed]').remove()" style="flex:1;padding:11px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;font-size:13px;font-weight:700;color:var(--ink3);cursor:pointer;font-family:var(--font-b);">Đóng</button>
+      </div>
+    </div>`;
+  modal.addEventListener('click',e=>{ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+};
+
 // ═══════════════════════════════════════════════════
 // SIDEBAR FIREBASE SECTION — Desktop JS
 // ═══════════════════════════════════════════════════
