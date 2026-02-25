@@ -1845,7 +1845,8 @@ html.mob-sheet-open body{
       <div class="sync-row">
         <div class="sync-badge ok" id="sync-badge">✅ Đã lưu</div>
         <div style="display:flex;align-items:center;gap:4px;">
-          <button onclick="fbManualSync().then(()=>{if(typeof updateMobSyncBadge==='function')updateMobSyncBadge();})" title="Sync ngay" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--ink4);" title="Đồng bộ ngay">🔄</button>
+          <button onclick="fbManualSync().then(()=>{if(typeof updateMobSyncBadge==='function')updateMobSyncBadge();})" title="Kéo data từ cloud về" style="background:none;border:none;cursor:pointer;font-size:15px;color:var(--ink4);">🔄</button>
+          <button onclick="fbPushLocalToCloud&&fbPushLocalToCloud()" title="Đẩy data local lên cloud" style="background:none;border:none;cursor:pointer;font-size:14px;color:var(--ink4);">⬆️</button>
           <button onclick="diagnoseSyncIssue&&diagnoseSyncIssue()" title="Chẩn đoán đồng bộ" style="background:none;border:none;cursor:pointer;font-size:13px;color:var(--ink4);">🔍</button>
         </div>
       </div>
@@ -8402,34 +8403,57 @@ async function _afterLogin(){
   hideLoginWall();
   _renderLoggedInUI(_currentUser);
 
-  // Đặt lại S về rỗng để tránh trộn data cũ
+  const uid = _currentUser.uid;
+  const username = _currentUser.username;
+
+  // ── Reset state ──
   S.vocab=[];S.topics={};S.stats={streak:0,xp:0,lastDate:''};
   S.currentTopic=null; S.study={words:[],idx:0};
   S.quiz={questions:[],current:0,correct:0,wrong:0,lives:3,missed:[],batchIdx:0};
 
-  // ── Bước 1: Load data local NGAY LẬP TỨC ──
-  _loadLocalData(_currentUser.uid);
+  // ── Bước 1: Load local data của uid này ──
+  _loadLocalData(uid);
+
+  // ── Bước 1b: Migrate từ local_username → Firebase UID nếu cần ──
+  // Xảy ra khi: user đã dùng offline (local_xxx) rồi sau đó kết nối Firebase
+  const isFbUid = uid && !uid.startsWith('local_') && uid !== 'admin_root';
+  if(isFbUid && S.vocab.length === 0 && username){
+    const localKey = _lsKey('local_'+username, 'data');
+    try{
+      const localRaw = localStorage.getItem(localKey);
+      if(localRaw){
+        const localData = JSON.parse(localRaw);
+        if(localData.vocab && localData.vocab.length > 0){
+          console.log('[MigrateUID] Found', localData.vocab.length, 'words in local_'+username+' → merging to Firebase uid');
+          S.vocab  = localData.vocab;
+          S.topics = localData.topics || {};
+          S.stats  = localData.stats  || S.stats;
+          // Lưu lại dưới uid mới luôn
+          _saveLocalData(uid);
+        }
+      }
+    }catch(e){ console.warn('[MigrateUID] Error:', e); }
+  }
+
   updStats(); renderTopics(); renderVocabList(); renderWeekCal();
 
-  // ── Bước 2: Khôi phục session học dở của user này ──
-  const sessionRestored = _restoreUserSession(_currentUser.uid);
+  // ── Bước 2: Khôi phục session học dở ──
+  const sessionRestored = _restoreUserSession(uid);
   if(!sessionRestored) showPanel('home');
-  showToast('👋 Chào mừng, '+(_currentUser.displayName||_currentUser.username)+'!');
+  showToast('👋 Chào mừng, '+(username||_currentUser.displayName)+'!');
   setTimeout(renderHomeDashboard, 200);
 
-  // ── Bước 3: Sync Firestore nền (không block UI) ──
+  // ── Bước 3: Sync với Firestore (nền) ──
   if(_fbOk()){
     setSyncBadge('busy','☁️ Đang đồng bộ...');
-    _loadUserDataFromFirestore(_currentUser.uid).then(()=>{
-      _startListeners(_currentUser.uid);
-      // Sau khi có data cloud: cập nhật study.words theo topic hiện tại
+    _startListeners(uid);
+
+    _loadUserDataFromFirestore(uid).then(()=>{
       if(S.currentTopic){
         const updated = S.vocab.filter(v=>v.topic===S.currentTopic);
         if(updated.length) S.study.words = updated;
       }
-      // Render lại dashboard với data mới từ cloud
       renderHomeDashboard();
-      // Cập nhật sync badge ở mob drawer nếu đang mở
       if(typeof updateMobSyncBadge==='function') updateMobSyncBadge();
     }).catch(e=>{
       console.warn('[_afterLogin] Firestore load failed:', e.code||e.message);
@@ -8438,7 +8462,7 @@ async function _afterLogin(){
     });
   } else {
     setSyncBadge('offline','💾 Dữ liệu cục bộ');
-    console.log('[_afterLogin] Firebase not ready — offline. Words:', S.vocab.length);
+    console.log('[_afterLogin] Firebase not ready. Words:', S.vocab.length);
     renderHomeDashboard();
   }
 }
@@ -8590,31 +8614,67 @@ const _doc={
 
 async function _loadUserDataFromFirestore(uid){
   try{
+    // KHÔNG dùng orderBy('_createdAt') vì cần Firestore index — thay bằng get() rồi sort client-side
     const [statsSnap,topicsSnap,vocabSnap]=await Promise.all([
       _doc.stats(uid).get(),
       _doc.topics(uid).get(),
-      _col.vocab(uid).orderBy('_createdAt','asc').get(),
+      _col.vocab(uid).get(),
     ]);
     const hasCloud=!vocabSnap.empty||statsSnap.exists;
     if(hasCloud){
-      if(statsSnap.exists){ const d={...statsSnap.data()}; delete d._updatedAt; delete d._migratedAt; S.stats={...S.stats,...d}; }
+      if(statsSnap.exists){
+        const d={...statsSnap.data()};
+        delete d._updatedAt; delete d._migratedAt; delete d._createdAt;
+        S.stats={...S.stats,...d};
+      }
       if(topicsSnap.exists) S.topics=topicsSnap.data().topics||{};
       if(!vocabSnap.empty){
-        S.vocab=vocabSnap.docs.map(d=>{ const r={id:d.id,...d.data()}; delete r._createdAt; delete r._updatedAt; return r; });
+        // Map docs, bỏ các field internal của Firestore
+        S.vocab=vocabSnap.docs.map(d=>{
+          const r={...d.data(), id:d.id};
+          delete r._createdAt; delete r._updatedAt;
+          return r;
+        });
+        // Sort theo id (timestamp-based) để đảm bảo thứ tự nhất quán
+        S.vocab.sort((a,b)=>{ const ai=parseFloat(a.id)||0, bi=parseFloat(b.id)||0; return ai-bi; });
         S.vocab.forEach(v=>{ if(v.topic&&!S.topics[v.topic]) S.topics[v.topic]={desc:''}; });
       }
       updStats(); renderTopics(); renderVocabList(); renderWeekCal();
       _saveLocalData(uid);
       setSyncBadge('ok','✅ Đã đồng bộ ('+S.vocab.length+' từ)');
-      console.log('[FB] Loaded',S.vocab.length,'words from Firestore');
+      console.log('[FB] Loaded',S.vocab.length,'words from Firestore for uid:',uid);
     } else {
-      // Cloud rỗng — kiểm tra xem local có data không, nếu có thì upload lên
-      if(S.vocab.length>0){
-        console.log('[FB] Cloud empty but local has',S.vocab.length,'words — auto migrating...');
-        setSyncBadge('busy','⬆️ Upload '+S.vocab.length+' từ lên cloud...');
+      // Cloud rỗng — kiểm tra local (cả Firebase uid lẫn local_username)
+      const username = typeof _currentUser!=='undefined' ? (_currentUser.username||_currentUser.displayName) : null;
+      let localVocabCount = S.vocab.length;
+
+      // Nếu local cũng rỗng, thử tìm data ở local_username
+      if(localVocabCount === 0 && username){
+        try{
+          const localRaw = localStorage.getItem(_lsKey('local_'+username, 'data'));
+          if(localRaw){
+            const localData = JSON.parse(localRaw);
+            if(localData.vocab && localData.vocab.length > 0){
+              console.log('[FB] Found', localData.vocab.length, 'words in local_'+username+' → auto-uploading to cloud');
+              S.vocab  = localData.vocab;
+              S.topics = localData.topics || {};
+              S.stats  = {...S.stats, ...(localData.stats||{})};
+              localVocabCount = S.vocab.length;
+              _saveLocalData(uid);
+              updStats(); renderTopics(); renderVocabList();
+            }
+          }
+        }catch(e){ console.warn('[FB] local_uid lookup error:', e); }
+      }
+
+      if(localVocabCount > 0){
+        console.log('[FB] Cloud empty, uploading', localVocabCount, 'local words...');
+        setSyncBadge('busy','⬆️ Upload '+localVocabCount+' từ lên cloud...');
         await _migrateToCloud(uid);
+        updStats(); renderTopics(); renderVocabList();
       } else {
-        setSyncBadge('ok','✅ Sẵn sàng');
+        setSyncBadge('ok','✅ Sẵn sàng — chưa có từ vựng');
+        console.log('[FB] Cloud and local both empty for uid:',uid);
       }
     }
   }catch(e){
@@ -8674,11 +8734,14 @@ async function _cloudSaveMeta(uid){
   await b.commit();
 }
 
+/* Normalize Firestore doc ID: bỏ dấu "." vì không hợp lệ */
+function _safeDocId(id){ return String(id).replace('.','_'); }
+
 async function _migrateToCloud(uid){
   if(!_db||!uid) return;
   const total=S.vocab.length;
+  console.log('[FB] Migrating',total,'words to Firestore for uid:',uid);
 
-  // Lưu meta + vocab song song
   const metaBatch=_db.batch();
   metaBatch.set(_doc.stats(uid),{...S.stats,_migratedAt:firebase.firestore.FieldValue.serverTimestamp()});
   metaBatch.set(_doc.topics(uid),{topics:S.topics});
@@ -8688,19 +8751,24 @@ async function _migrateToCloud(uid){
   for(let i=0;i<S.vocab.length;i+=CHUNK){
     const b=_db.batch();
     S.vocab.slice(i,i+CHUNK).forEach(v=>{
-      b.set(_col.vocab(uid).doc(String(v.id)),
-        {...v,_createdAt:firebase.firestore.FieldValue.serverTimestamp(),_updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+      const docId = _safeDocId(v.id);
+      b.set(_col.vocab(uid).doc(docId),{
+        ...v,
+        id: docId, // normalize id trong document cũng vậy
+        _createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+        _updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+      });
     });
     vocabBatches.push(b);
   }
 
-  // Commit meta + tất cả chunks song song
   await Promise.all([
     metaBatch.commit(),
     ...vocabBatches.map(b=>b.commit())
   ]);
 
-  setSyncBadge('ok',`✅ Đã upload ${total} từ`);
+  console.log('[FB] Migration complete:',total,'words uploaded');
+  setSyncBadge('ok','✅ Đã upload '+total+' từ');
 }
 
 /* ─── Debounced cloud save — 3s debounce, không spam Firestore ─── */
@@ -8730,14 +8798,27 @@ function _scheduleSave(){
 /* ─── Realtime listeners ─── */
 function _startListeners(uid){
   _stopListeners();
-  _unsubVocab=_col.vocab(uid).orderBy('_createdAt','asc').onSnapshot(snap=>{
-    const serverChg=snap.docChanges().filter(c=>!c.doc.metadata.hasPendingWrites&&!c.doc.metadata.fromCache);
-    if(serverChg.length){
-      S.vocab=snap.docs.map(d=>{ const r={id:d.id,...d.data()}; delete r._createdAt; delete r._updatedAt; return r; });
+  let _firstVocabSnap = true;
+  _unsubVocab=_col.vocab(uid).onSnapshot({includeMetadataChanges: false}, snap=>{
+    // Xử lý: snapshot đầu tiên (full load) HOẶC có thay đổi từ server
+    const hasServerChanges = snap.docChanges().some(c=>c.type==='added'||c.type==='modified'||c.type==='removed');
+    if(_firstVocabSnap || hasServerChanges){
+      _firstVocabSnap = false;
+      S.vocab = snap.docs.map(d=>{
+        const r={...d.data(), id:d.id};
+        delete r._createdAt; delete r._updatedAt;
+        return r;
+      });
+      // Sort theo id để đảm bảo thứ tự nhất quán
+      S.vocab.sort((a,b)=>{ const ai=parseFloat(a.id)||0, bi=parseFloat(b.id)||0; return ai-bi; });
+      S.vocab.forEach(v=>{ if(v.topic&&!S.topics[v.topic]) S.topics[v.topic]={desc:''}; });
       updStats(); renderTopics(); renderVocabList();
-      setSyncBadge('ok','✅ Cập nhật');
+      _saveLocalData(uid);
+      setSyncBadge('ok','✅ '+S.vocab.length+' từ');
+      if(typeof updateMobSyncBadge==='function') updateMobSyncBadge();
+      console.log('[FB] Listener update:', S.vocab.length, 'words');
     }
-  },e=>{ console.warn('[FB] vocab listener:',e); setSyncBadge('err','⚠️ Mất kết nối'); });
+  },e=>{ console.warn('[FB] vocab listener error:',e.code||e.message); setSyncBadge('err','⚠️ Mất kết nối'); });
 
   _unsubMeta=_doc.stats(uid).onSnapshot(snap=>{
     if(snap.exists&&!snap.metadata.hasPendingWrites){
@@ -8757,22 +8838,26 @@ function _stopListeners(){
 async function _cloudAddWord(v){
   if(!_currentUser||!_db) return;
   try{
-    await _col.vocab(_currentUser.uid).doc(String(v.id)).set({
-      ...v,_createdAt:firebase.firestore.FieldValue.serverTimestamp(),_updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+    const docId = _safeDocId(v.id);
+    await _col.vocab(_currentUser.uid).doc(docId).set({
+      ...v, id:docId,
+      _createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+      _updatedAt:firebase.firestore.FieldValue.serverTimestamp()
     });
   }catch(e){ console.error('[FB] addWord:',e); }
 }
 async function _cloudUpdateWord(v){
   if(!_currentUser||!_db) return;
   try{
-    await _col.vocab(_currentUser.uid).doc(String(v.id)).set(
-      {...v,_updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}
+    const docId = _safeDocId(v.id);
+    await _col.vocab(_currentUser.uid).doc(docId).set(
+      {...v, id:docId, _updatedAt:firebase.firestore.FieldValue.serverTimestamp()},{merge:true}
     );
   }catch(e){ console.error('[FB] updateWord:',e); }
 }
 async function _cloudDeleteWord(id){
   if(!_currentUser||!_db) return;
-  try{ await _col.vocab(_currentUser.uid).doc(String(id)).delete(); }
+  try{ await _col.vocab(_currentUser.uid).doc(_safeDocId(id)).delete(); }
   catch(e){ console.error('[FB] delWord:',e); }
 }
 async function _cloudDeleteWords(ids){
@@ -8781,7 +8866,7 @@ async function _cloudDeleteWords(ids){
     const CHUNK=400;
     for(let i=0;i<ids.length;i+=CHUNK){
       const b=_db.batch();
-      ids.slice(i,i+CHUNK).forEach(id=>b.delete(_col.vocab(_currentUser.uid).doc(String(id))));
+      ids.slice(i,i+CHUNK).forEach(id=>b.delete(_col.vocab(_currentUser.uid).doc(_safeDocId(id))));
       await b.commit();
     }
   }catch(e){ console.error('[FB] delWords:',e); }
@@ -8903,8 +8988,12 @@ window.addV=function(d){
         for(let i=0;i<toWrite.length;i+=CHUNK){
           const b=_db.batch();
           toWrite.slice(i,i+CHUNK).forEach(v=>{
-            b.set(_col.vocab(_currentUser.uid).doc(String(v.id)),
-              {...v,_createdAt:firebase.firestore.FieldValue.serverTimestamp(),_updatedAt:firebase.firestore.FieldValue.serverTimestamp()});
+            const docId=_safeDocId(v.id);
+            b.set(_col.vocab(_currentUser.uid).doc(docId),{
+              ...v, id:docId,
+              _createdAt:firebase.firestore.FieldValue.serverTimestamp(),
+              _updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+            });
           });
           await b.commit();
         }
