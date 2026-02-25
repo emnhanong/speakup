@@ -61,7 +61,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
 .s-stat{text-align:center;padding:7px 4px;background:var(--bg);border-radius:var(--radius-sm);border:1px solid var(--border);}
 .s-stat-val{font-family:var(--font-d);font-weight:700;font-size:16px;color:var(--teal);display:block;}
 .s-stat-lbl{font-size:10px;color:var(--ink4);margin-top:1px;font-weight:500;}
-.nav{flex:1;padding:10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
+.nav{flex:1;min-height:0;padding:10px;display:flex;flex-direction:column;gap:2px;overflow-y:auto;}
 .nav-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink4);padding:8px 8px 4px;margin-top:4px;}
 .nav-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);cursor:pointer;transition:all .15s;font-size:14px;font-weight:500;color:var(--ink3);border:1px solid transparent;user-select:none;}
 .nav-item:hover{background:var(--bg);color:var(--ink);}
@@ -971,6 +971,20 @@ tr.row-selected{outline:none;}
 .btn-open-login:hover{background:#0f766e;}
 
 /* ── Desktop sidebar Firebase section ── */
+/* Sidebar bottom scrollable container */
+.sb-bottom-wrap{
+  flex-shrink:0;
+  overflow-y:auto;
+  overflow-x:hidden;
+  max-height:60vh; /* tối đa 60% viewport để nav vẫn thấy */
+  /* Scrollbar mỏng đẹp */
+  scrollbar-width:thin;
+  scrollbar-color:var(--border2) transparent;
+}
+.sb-bottom-wrap::-webkit-scrollbar{width:3px;}
+.sb-bottom-wrap::-webkit-scrollbar-track{background:transparent;}
+.sb-bottom-wrap::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px;}
+
 .sb-fb-section{
   border-top:1px solid var(--border);
   background:var(--surface2);
@@ -1810,6 +1824,8 @@ html.mob-sheet-open body{
     <div class="nav-item" onclick="showPanel('progress')"><span class="ni">📊</span>Tiến độ</div>
   </nav>
 
+  <!-- ══ SIDEBAR BOTTOM (scrollable) ══ -->
+  <div class="sb-bottom-wrap">
   <!-- ══ AUTH ZONE (sidebar bottom) ══ -->
   <div class="auth-zone" id="auth-zone">
     <!-- LOGGED OUT -->
@@ -1908,6 +1924,7 @@ html.mob-sheet-open body{
       </div>
     </div>
   </div>
+  </div><!-- /sb-bottom-wrap -->
 </aside>
 
 <!-- ════════════════════════════════════════════
@@ -10906,8 +10923,6 @@ function showSpScoreEnhanced(score, transcript, wordScores, targetWord, wordIpa)
 })();
 </script>
 
-</body>
-</html>
 <script>
 // ═══════════════════════════════════════════════════════════
 // FIRESTORE RULES GUIDE + SYNC DIAGNOSTICS
@@ -11063,8 +11078,7 @@ window.diagnoseSyncIssue = async function(){
   info('Từ vựng đang có trong bộ nhớ: '+localCount+' từ');
 
   // Show result
-  const result = lines.join('
-');
+  const result = lines.join('\n');
   const modal = document.createElement('div');
   modal.style.cssText = 'position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;';
   modal.innerHTML = `
@@ -11672,3 +11686,5 @@ if(typeof window.closeMobAccount === 'undefined'){
   document.head.appendChild(s);
 })();
 </script>
+</body>
+</html>
