@@ -4808,17 +4808,17 @@ function exportVocabToExcel(){
 
   if(!data.length){ alert('Không có từ vựng nào để export!'); return; }
 
-  const rows = [['Từ vựng', 'Nghĩa tiếng Việt', 'Câu ví dụ']];
-  data.forEach(v => rows.push([v.word || '', v.meaning || '', v.example || '']));
+  const rows = [['Từ vựng', 'Nghĩa tiếng Việt', 'Câu ví dụ', 'Chủ đề']];
+  data.forEach(v => rows.push([v.word || '', v.meaning || '', v.example || '', v.topic || '']));
 
   const wb = XLSX.utils.book_new();
   const ws = XLSX.utils.aoa_to_sheet(rows);
 
   // Column widths
-  ws['!cols'] = [{wch:20},{wch:30},{wch:50}];
+  ws['!cols'] = [{wch:20},{wch:30},{wch:50},{wch:25}];
 
   // Style header row
-  ['A1','B1','C1'].forEach(cell => {
+  ['A1','B1','C1','D1'].forEach(cell => {
     if(ws[cell]) ws[cell].s = {font:{bold:true},fill:{fgColor:{rgb:'0D9488'}},alignment:{horizontal:'center'}};
   });
 
@@ -5162,7 +5162,7 @@ function processFile(file){
       word:String(r[0]||'').trim(),
       meaning:String(r[1]||'').trim(),
       example:String(r[2]||'').trim(),
-      ipa:'',topic:'...'
+      ipa:'',topic: r[3] ? String(r[3]).trim() : '...'
     }));
     if(!raw.length){showToast('File không có dữ liệu!','error');return;}
     showImportProgress(raw, 0);
@@ -5194,28 +5194,36 @@ async function autoEnrichWords(data){
   for(let i=0;i<data.length;i+=BATCH){
     const batch=data.slice(i,i+BATCH);
     await Promise.all(batch.map(async d=>{
-      // Step 1: Smart classify from existing data (word + meaning + example)
-      d.topic = smartClassifyTopic(d.word, d.meaning, d.example);
+      // Nếu file đã có chủ đề sẵn (export từ SpeakUp), giữ nguyên không cần AI classify
+      const hasTopicFromFile = d.topic && d.topic !== '...';
+      // Step 1: Smart classify nếu chưa có topic từ file
+      if(!hasTopicFromFile) d.topic = smartClassifyTopic(d.word, d.meaning, d.example);
       // Step 2: Fetch IPA + enrich with dictionary definition for better classification
       try{
-        const res=await fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${encodeURIComponent(d.word)}`);
+        const res=await fetch();
         if(res.ok){
           const json=await res.json(); const entry=json[0];
           // IPA - prefer US accent
           const usPh=entry?.phonetics?.find(p=>p.audio?.includes('-us')||p.sourceUrl?.includes('-us'));
           const anyPh=entry?.phonetics?.find(p=>p.text);
           d.ipa=usPh?.text||anyPh?.text||entry?.phonetic||'';
-          // Re-classify with richer data from dictionary
-          const dictDef=(entry?.meanings?.[0]?.definitions?.[0]?.definition||'');
-          const dictEx=(entry?.meanings?.[0]?.definitions?.[0]?.example||d.example);
-          const enrichedTopic = smartClassifyTopic(d.word, d.meaning+' '+dictDef, dictEx||d.example);
-          d.topic = enrichedTopic;
-          // Fill example if empty
-          if(!d.example && dictEx) d.example = dictEx;
-          // Step 3: If regex classification is weak/default, try Claude API
-          if(d.topic==='Daily Conversation' && dictDef){
-            const aiTopic = await classifyWithClaude(d.word, dictDef, d.example||'');
-            if(aiTopic) d.topic = aiTopic;
+          // Re-classify chỉ khi chưa có topic từ file
+          if(!hasTopicFromFile){
+            const dictDef=(entry?.meanings?.[0]?.definitions?.[0]?.definition||'');
+            const dictEx=(entry?.meanings?.[0]?.definitions?.[0]?.example||d.example);
+            const enrichedTopic = smartClassifyTopic(d.word, d.meaning+' '+dictDef, dictEx||d.example);
+            d.topic = enrichedTopic;
+            // Fill example if empty
+            if(!d.example && dictEx) d.example = dictEx;
+            // Step 3: If regex classification is weak/default, try Claude API
+            if(d.topic==='Daily Conversation' && dictDef){
+              const aiTopic = await classifyWithClaude(d.word, dictDef, d.example||'');
+              if(aiTopic) d.topic = aiTopic;
+            }
+          } else {
+            // Vẫn fill example nếu trống
+            const dictEx=(entry?.meanings?.[0]?.definitions?.[0]?.example||'');
+            if(!d.example && dictEx) d.example = dictEx;
           }
         }
       }catch(err){}
