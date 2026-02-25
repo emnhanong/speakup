@@ -155,38 +155,41 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
 .imp-topic-row{display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap;margin-bottom:14px;padding:12px 14px;background:var(--teal-light);border:1.5px solid rgba(13,148,136,.25);border-radius:var(--radius-sm);}
 .imp-topic-label{font-size:13px;font-weight:700;color:var(--teal);margin-bottom:4px;}
 
-/* ── MOBILE NAV — redesigned ── */
+/* ── MOBILE NAV — scrollable, always fixed ── */
 .mob-nav{
   display:none;
   position:fixed;bottom:0;left:0;right:0;
   height:var(--mob-nav);
-  background:rgba(255,255,255,0.96);
-  backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+  background:rgba(255,255,255,0.97);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border-top:1px solid var(--border);
-  z-index:200;
-  align-items:stretch;
+  z-index:500;
+  overflow-x:auto;overflow-y:hidden;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
   box-shadow:0 -2px 20px rgba(0,0,0,.09);
   padding-bottom:env(safe-area-inset-bottom);
+  align-items:stretch;flex-wrap:nowrap;
+  will-change:transform;
+  -webkit-transform:translateZ(0);transform:translateZ(0);
 }
+.mob-nav::-webkit-scrollbar{display:none;}
 .mob-item{
-  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
-  gap:3px;cursor:pointer;transition:all .18s cubic-bezier(.4,0,.2,1);
-  padding:6px 4px 4px;color:var(--ink4);font-size:10px;font-weight:600;
+  flex:0 0 auto;min-width:62px;max-width:80px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:2px;cursor:pointer;transition:color .15s,border-color .15s;
+  padding:5px 6px 4px;color:var(--ink4);font-size:10px;font-weight:600;
   border-top:2.5px solid transparent;user-select:none;
   -webkit-tap-highlight-color:transparent;
-  position:relative;
+  white-space:nowrap;
 }
-.mob-item::after{
-  content:'';position:absolute;inset:0;border-radius:12px;
-  background:var(--teal);opacity:0;transition:opacity .15s;
-}
-.mob-item:active::after{opacity:.07;}
+.mob-item:active{opacity:.7;}
 .mob-item.active{color:var(--teal);border-top-color:var(--teal);}
-.mob-item .mi{font-size:21px;line-height:1;transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
-.mob-item.active .mi{transform:scale(1.15);}
-.mob-item-label{font-size:9.5px;font-weight:700;letter-spacing:.01em;}
+.mob-item .mi{font-size:20px;line-height:1;display:block;transition:transform .2s cubic-bezier(.34,1.56,.64,1);}
+.mob-item.active .mi{transform:scale(1.18);}
+.mob-item-label{font-size:9px;font-weight:700;letter-spacing:.01em;text-align:center;}
 
-/* MAIN */
+
 .main{margin-left:248px;flex:1;min-height:100vh;}
 .page-wrap{max-width:860px;margin:0 auto;padding:32px 28px;}
 
@@ -729,14 +732,15 @@ tr.row-selected{outline:none;}
 .td-word-card-info{flex:1;min-width:0;}
 
 @media(max-width:767px){
-  :root{--mob-nav:62px;}
+  :root{--mob-nav:58px;}
   .sidebar{display:none;}
-  .mob-nav{display:flex;}
+  /* mob-nav is always fixed — show via flex */
+  .mob-nav{display:flex!important;}
   .main{margin-left:0;}
 
-  /* ── Safe area & spacing ── */
+  /* ── Safe area & spacing — đủ chỗ cho nav cố định ── */
   .page-wrap{
-    padding:12px 14px calc(var(--mob-nav) + env(safe-area-inset-bottom) + 16px);
+    padding:12px 14px calc(var(--mob-nav) + env(safe-area-inset-bottom) + 20px);
     max-width:100%;
   }
 
@@ -2000,12 +2004,32 @@ tr.row-selected{outline:none;}
 </div>
 
 <!-- MOBILE NAV -->
-<nav class="mob-nav">
-  <div class="mob-item active" onclick="showPanel('home')"><span class="mi">🏠</span><span class="mob-item-label">Trang chủ</span></div>
-  <div class="mob-item" onclick="showPanel('roadmap')"><span class="mi">🗓️</span><span class="mob-item-label">Lộ trình</span></div>
-  <div class="mob-item" onclick="showPanel('listening')"><span class="mi">🎧</span><span class="mob-item-label">Listening</span></div>
-  <div class="mob-item" onclick="showPanel('speaking-pro')"><span class="mi">🎤</span><span class="mob-item-label">Speaking</span></div>
-  <div class="mob-item" onclick="openMobAccount()" id="mob-nav-account" style="position:relative">
+<nav class="mob-nav" id="mob-nav">
+  <div class="mob-item active" data-panel="home" onclick="showPanel('home')">
+    <span class="mi">🏠</span><span class="mob-item-label">Trang chủ</span>
+  </div>
+  <div class="mob-item" data-panel="roadmap" onclick="showPanel('roadmap')">
+    <span class="mi">🗓️</span><span class="mob-item-label">Lộ trình</span>
+  </div>
+  <div class="mob-item" data-panel="topics" onclick="showPanel('topics')">
+    <span class="mi">📚</span><span class="mob-item-label">Chủ đề</span>
+  </div>
+  <div class="mob-item" data-panel="listening" onclick="showPanel('listening')">
+    <span class="mi">🎧</span><span class="mob-item-label">Listening</span>
+  </div>
+  <div class="mob-item" data-panel="speaking-pro" onclick="showPanel('speaking-pro')">
+    <span class="mi">🎤</span><span class="mob-item-label">Speaking</span>
+  </div>
+  <div class="mob-item" data-panel="writing" onclick="showPanel('writing')">
+    <span class="mi">✍️</span><span class="mob-item-label">Writing</span>
+  </div>
+  <div class="mob-item" data-panel="vocab-list" onclick="showPanel('vocab-list')">
+    <span class="mi">📝</span><span class="mob-item-label">Từ vựng</span>
+  </div>
+  <div class="mob-item" data-panel="progress" onclick="showPanel('progress')">
+    <span class="mi">📊</span><span class="mob-item-label">Tiến độ</span>
+  </div>
+  <div class="mob-item" data-panel="__account__" onclick="openMobAccount()" id="mob-nav-account" style="position:relative;flex-shrink:0;">
     <span class="mi" id="mob-nav-account-icon">👤</span>
     <span class="mob-item-label" id="mob-nav-account-lbl">Tài khoản</span>
     <span class="mob-item-badge" id="mob-account-badge" style="display:none"></span>
@@ -3129,11 +3153,18 @@ function showPanel(n){
   document.getElementById('panel-'+n).classList.add('active');
   const idx=NAV_IDX[n]??-1;
   document.querySelectorAll('.nav-item').forEach((e,i)=>e.classList.toggle('active',i===idx));
-  const mobIdx={home:0,roadmap:1,listening:2,'speaking-pro':3}[n]??-1;
-  document.querySelectorAll('.mob-item').forEach((e,i)=>{
-    // index 4 = Account tab, never auto-activate from showPanel
-    if(i===4) return;
-    e.classList.toggle('active', i===mobIdx);
+  // Map panel names to nav data-panel values (some panels share a nav item)
+  const panelToNav = {
+    'home':'home','roadmap':'roadmap','topics':'topics',
+    'topic-detail':'topics','study':'topics',
+    'listening':'listening','speaking-pro':'speaking-pro',
+    'writing':'writing','vocab-list':'vocab-list',
+    'progress':'progress','import':'home'
+  };
+  const activeNav = panelToNav[n] || '';
+  document.querySelectorAll('.mob-item').forEach(e=>{
+    const dp = e.getAttribute('data-panel');
+    e.classList.toggle('active', dp === activeNav && dp !== '__account__');
   });
   if(n==='vocab-list')renderVocabList();
   if(n==='import'){populateImpTopicSelect();}
@@ -8055,34 +8086,47 @@ async function appLogin(){
   btn.disabled=true; btn.textContent='⏳ Đang đăng nhập...';
 
   try{
-    /* ══ ADMIN — xác thực cục bộ, KHÔNG cần Firebase ══ */
+    /* ══ ADMIN — xác thực cục bộ, đồng bộ Firebase UID thật ══ */
     if(username === ADMIN_USERNAME){
       if(password !== ADMIN_PASSWORD){
         errEl.textContent='❌ Sai mật khẩu admin.';
         errEl.style.display='block'; return;
       }
-      // Admin uid cố định để data luôn nhất quán
-      const uid = 'admin_root';
-      _currentUser = { uid, username:'admin', displayName:'Administrator', role:'admin' };
+
+      // Khởi đầu với uid cục bộ, sẽ cập nhật thành Firebase UID thật nếu có
+      let adminUid = 'admin_root';
+      _currentUser = { uid: adminUid, username:'admin', displayName:'Administrator', role:'admin' };
       saveAppSession(_currentUser);
 
-      // Nếu Firebase sẵn sàng thì sync lên cloud (không bắt buộc)
+      // Nếu Firebase sẵn sàng → đăng nhập ĐỒNG BỘ để lấy UID thật
+      // (quan trọng: dữ liệu trên Firestore được lưu theo Firebase UID thật)
       if(_fbOk()){
-        _auth.signInWithEmailAndPassword(ADMIN_FB_EMAIL, ADMIN_PASSWORD)
-          .catch(async e=>{
-            if(e.code==='auth/user-not-found'||e.code==='auth/invalid-credential'){
-              try{
-                const cred=await _auth.createUserWithEmailAndPassword(ADMIN_FB_EMAIL, ADMIN_PASSWORD);
-                await _db.collection('users').doc(cred.user.uid).collection('_meta').doc('profile').set({
-                  username:'admin', displayName:'Administrator', role:'admin',
-                  createdAt:firebase.firestore.FieldValue.serverTimestamp()
-                });
-                // Cập nhật uid thật từ Firebase
-                _currentUser.uid = cred.user.uid;
-                saveAppSession(_currentUser);
-              }catch(_){}
+        try{
+          let fbUser;
+          try{
+            const cred = await _auth.signInWithEmailAndPassword(ADMIN_FB_EMAIL, ADMIN_PASSWORD);
+            fbUser = cred.user;
+          }catch(e){
+            if(e.code==='auth/user-not-found'||e.code==='auth/invalid-credential'||
+               e.code==='auth/wrong-password'||e.code==='auth/invalid-email'){
+              // Tạo tài khoản Firebase cho admin lần đầu
+              const cred2 = await _auth.createUserWithEmailAndPassword(ADMIN_FB_EMAIL, ADMIN_PASSWORD);
+              fbUser = cred2.user;
+              await _db.collection('users').doc(fbUser.uid).collection('_meta').doc('profile').set({
+                username:'admin', displayName:'Administrator', role:'admin',
+                createdAt:firebase.firestore.FieldValue.serverTimestamp()
+              });
             }
-          });
+          }
+          if(fbUser && fbUser.uid){
+            // ★ QUAN TRỌNG: Cập nhật uid thật → data Firestore sẽ được load đúng
+            _currentUser.uid = fbUser.uid;
+            saveAppSession(_currentUser);
+            console.log('[Admin] Firebase UID synced:', fbUser.uid);
+          }
+        }catch(e){
+          console.warn('[Admin] Firebase auth failed, dùng local uid. Lỗi:', e.code||e.message);
+        }
       }
 
       await _afterLogin();
@@ -8300,6 +8344,8 @@ async function _afterLogin(){
         const updated = S.vocab.filter(v=>v.topic===S.currentTopic);
         if(updated.length) S.study.words = updated;
       }
+      // Render lại dashboard với data mới từ cloud
+      renderHomeDashboard();
     });
   } else {
     setSyncBadge('offline','💾 Dữ liệu cục bộ');
@@ -10585,20 +10631,25 @@ function showSpScoreEnhanced(score, transcript, wordScores, targetWord, wordIpa)
   // 3. Kiểm tra session còn hiệu lực
   const session=loadAppSession();
   if(session && session.uid){
+    // Admin có thể dùng uid local (admin_root) HOẶC Firebase UID thật
     const isLocalSession = session.uid.startsWith('local_')
-                        || session.uid === 'admin_root'
-                        || session.role === 'admin';
+                        || session.uid === 'admin_root';
+    const isAdminRole = session.role === 'admin';
 
     if(_fbOk() && !isLocalSession){
-      // Firebase có → xác minh token còn hợp lệ không
+      // Firebase có → xác minh token còn hợp lệ
       await new Promise(resolve=>{
         const unsub=_auth.onAuthStateChanged(fbUser=>{
           unsub();
-          if(fbUser && fbUser.uid===session.uid){
-            _currentUser=session;
+          if(fbUser && (fbUser.uid === session.uid || isAdminRole)){
+            // Nếu admin: cập nhật uid thật nếu khác
+            if(isAdminRole && fbUser.uid !== session.uid){
+              session.uid = fbUser.uid;
+              saveAppSession(session);
+            }
+            _currentUser = session;
             _afterLogin();
           } else {
-            // Token hết hạn → yêu cầu đăng nhập lại
             clearAppSession();
             showLoginWall();
           }
@@ -10606,8 +10657,8 @@ function showSpScoreEnhanced(score, transcript, wordScores, targetWord, wordIpa)
         });
       });
     } else {
-      // Admin, offline, hoặc local session → tin tưởng ngay
-      _currentUser=session;
+      // Admin local, offline, hoặc local session → tin tưởng ngay
+      _currentUser = session;
       await _afterLogin();
     }
   } else {
