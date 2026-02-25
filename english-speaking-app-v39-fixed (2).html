@@ -2038,7 +2038,7 @@ tr.row-selected{outline:none;}
   <div class="mob-item" data-panel="progress" onclick="showPanel('progress')">
     <span class="mi">📊</span><span class="mob-item-label">Tiến độ</span>
   </div>
-  <div class="mob-item" data-panel="__account__" onclick="openMobAccount()" id="mob-nav-account" style="position:relative;flex-shrink:0;">
+  <div class="mob-item" data-panel="__account__" onclick="if(typeof openMobAccount==='function'){openMobAccount();}else{document.getElementById('mob-account-overlay').classList.add('open');document.body.style.overflow='hidden';}" id="mob-nav-account" style="position:relative;flex-shrink:0;">
     <span class="mi" id="mob-nav-account-icon">👤</span>
     <span class="mob-item-label" id="mob-nav-account-lbl">Tài khoản</span>
     <span class="mob-item-badge" id="mob-account-badge" style="display:none"></span>
@@ -2195,20 +2195,25 @@ tr.row-selected{outline:none;}
           </div>
         </div>
 
-        <!-- Sync row -->
-        <div class="mob-sync-row">
-          <div class="mob-sync-label">☁️ Đồng bộ dữ liệu</div>
-          <div class="mob-sync-right">
+        <!-- Sync row — improved -->
+        <div style="background:var(--surface2);border:1.5px solid var(--border);border-radius:14px;padding:14px 16px;margin-bottom:12px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+            <div style="font-size:13px;font-weight:700;color:var(--ink2);">☁️ Đồng bộ dữ liệu</div>
             <div class="sync-badge ok" id="mob-sync-badge">✅ Đã lưu</div>
-            <button class="mob-sync-btn" title="Tải dữ liệu từ cloud về" onclick="fbManualSync().then(()=>{ if(typeof updateMobSyncBadge==='function') updateMobSyncBadge(); })">📥 Tải về</button>
           </div>
-        </div>
-        <div style="display:flex;gap:6px;margin:0 0 10px;padding:0 0 4px">
-          <button onclick="fbManualSync().then(()=>{ if(typeof updateMobSyncBadge==='function') updateMobSyncBadge(); })" style="flex:1;padding:9px 6px;background:var(--teal-light);border:1.5px solid rgba(13,148,136,.3);border-radius:10px;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer;font-family:var(--font-b);-webkit-tap-highlight-color:transparent;">
-            📥 Kéo dữ liệu từ cloud
-          </button>
-          <button onclick="if(confirm('Upload dữ liệu TỪ THIẾT BỊ NÀY lên cloud? Cloud sẽ bị ghi đè!')) fbPushLocalToCloud().then(()=>{ if(typeof updateMobSyncBadge==='function') updateMobSyncBadge(); })" style="flex:1;padding:9px 6px;background:var(--violet-light);border:1.5px solid rgba(124,58,237,.25);border-radius:10px;font-size:12px;font-weight:700;color:var(--violet);cursor:pointer;font-family:var(--font-b);-webkit-tap-highlight-color:transparent;">
-            ⬆️ Đẩy local lên cloud
+          <div style="font-size:12px;color:var(--ink3);margin-bottom:10px;" id="mob-sync-info">
+            📖 <strong id="mob-sync-word-count">0</strong> từ vựng · <span id="mob-sync-fb-info">Kiểm tra kết nối...</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <button onclick="fbManualSync().then(()=>{ if(typeof updateMobSyncBadge==='function')updateMobSyncBadge(); const wc=document.getElementById('mob-sync-word-count');if(wc)wc.textContent=S.vocab.length; })" style="flex:1;min-width:120px;padding:10px 8px;background:var(--teal);color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font-b);-webkit-tap-highlight-color:transparent;">
+              📥 Lấy data từ cloud
+            </button>
+            <button onclick="if(confirm('⬆️ Upload dữ liệu từ thiết bị NÀY lên cloud?\nCloud sẽ bị ghi đè bởi dữ liệu local ('+S.vocab.length+' từ).\nChỉ dùng khi bạn muốn đẩy data từ desktop lên!')) fbPushLocalToCloud().then(()=>{ if(typeof updateMobSyncBadge==='function')updateMobSyncBadge(); })" style="flex:1;min-width:120px;padding:10px 8px;background:var(--violet-light);border:1.5px solid rgba(124,58,237,.25);border-radius:10px;font-size:13px;font-weight:700;color:var(--violet);cursor:pointer;font-family:var(--font-b);-webkit-tap-highlight-color:transparent;">
+              ⬆️ Đẩy local lên
+            </button>
+          </div>
+          <button onclick="diagnoseSyncIssue&&diagnoseSyncIssue()" style="width:100%;margin-top:8px;padding:8px;background:transparent;border:1.5px solid var(--border);border-radius:8px;font-size:11px;font-weight:600;color:var(--ink4);cursor:pointer;font-family:var(--font-b);">
+            🔍 Chẩn đoán lỗi đồng bộ
           </button>
         </div>
 
@@ -8366,9 +8371,17 @@ async function _afterLogin(){
       }
       // Render lại dashboard với data mới từ cloud
       renderHomeDashboard();
+      // Cập nhật sync badge ở mob drawer nếu đang mở
+      if(typeof updateMobSyncBadge==='function') updateMobSyncBadge();
+    }).catch(e=>{
+      console.warn('[_afterLogin] Firestore load failed:', e.code||e.message);
+      renderHomeDashboard();
+      if(typeof updateMobSyncBadge==='function') updateMobSyncBadge();
     });
   } else {
     setSyncBadge('offline','💾 Dữ liệu cục bộ');
+    console.log('[_afterLogin] Firebase not ready — offline. Words:', S.vocab.length);
+    renderHomeDashboard();
   }
 }
 
@@ -8745,17 +8758,35 @@ async function appSignOut(){
 ═══════════════════════════════════════════════ */
 async function fbManualSync(){
   if(!_currentUser){ showToast('⚠️ Chưa đăng nhập','warn'); return; }
-  if(!_fbOk()){ showToast('⚠️ Firebase chưa kết nối','warn'); return; }
+  if(!_fbOk()){
+    // Firebase chưa kết nối — thử khởi tạo lại từ config đã lưu
+    const cfg = getFbConfig();
+    if(cfg && cfg.apiKey){
+      showToast('⏳ Đang kết nối Firebase...','warn');
+      try{
+        const ok = await initFirebase(cfg);
+        if(!ok){ showToast('⚠️ Firebase chưa kết nối. Kiểm tra config!','warn'); return; }
+      }catch(e){ showToast('⚠️ Firebase chưa kết nối: '+(e.message||e.code),'warn'); return; }
+    } else {
+      showToast('⚠️ Firebase chưa cấu hình. Mở Tài khoản → Firebase để nhập config!','warn'); return;
+    }
+  }
   setSyncBadge('busy','🔄 Đang kéo dữ liệu...');
   try{
-    // ── FIX: PULL từ cloud về trước (ưu tiên cloud data) ──
-    // Không push local lên vì khi dùng mobile lần đầu, local rỗng → sẽ ghi đè mất data cloud
+    // PULL từ cloud về (ưu tiên cloud data — mobile lần đầu local rỗng)
     await _loadUserDataFromFirestore(_currentUser.uid);
     _saveLocalData(_currentUser.uid);
     _lastSavedHash = _dataHash();
     setSyncBadge('ok','✅ Sync xong');
-    showToast('✅ Đã đồng bộ dữ liệu! (' + S.vocab.length + ' từ)');
+    showToast('✅ Đã đồng bộ! ' + S.vocab.length + ' từ vựng');
     if(typeof updateMobSyncBadge==='function') updateMobSyncBadge();
+    // Cập nhật mob stats nếu drawer đang mở
+    const mobStatWords = document.getElementById('mob-stat-words');
+    const mobStatStreak = document.getElementById('mob-stat-streak');
+    const mobStatXp = document.getElementById('mob-stat-xp');
+    if(mobStatWords) mobStatWords.textContent = S.vocab.length;
+    if(mobStatStreak) mobStatStreak.textContent = S.stats.streak||0;
+    if(mobStatXp) mobStatXp.textContent = S.stats.xp||0;
   }catch(e){
     setSyncBadge('err','❌ Lỗi');
     showToast('❌ Sync lỗi: '+(e.code||e.message),'error');
@@ -8828,16 +8859,31 @@ window.addV=function(d){
 const _origConfirmImport=window.confirmImport;
 window.confirmImport=async function(){
   _origConfirmImport&&_origConfirmImport();
+  // Luôn lưu local data ngay lập tức (kể cả khi Firebase chưa sẵn sàng)
+  if(_currentUser){
+    _saveLocalData(_currentUser.uid);
+  }
   if(_currentUser&&_fbOk()){
     setSyncBadge('busy','⬆️ Đang upload...');
-    // Chờ buffer addV flush xong (300ms) rồi save meta
+    // Chờ buffer addV flush xong (500ms) rồi save meta + migrate toàn bộ vocab
     setTimeout(async()=>{
       try{
-        await _cloudSaveMeta(_currentUser.uid);
+        // Dùng _migrateToCloud để đảm bảo TẤT CẢ vocab được ghi lên Firestore
+        await _migrateToCloud(_currentUser.uid);
         _saveLocalData(_currentUser.uid);
-        setSyncBadge('ok','✅ Upload xong');
-      }catch(e){ setSyncBadge('err','❌ Upload lỗi'); }
-    },600);
+        _lastSavedHash = _dataHash();
+        setSyncBadge('ok','✅ Đã upload '+S.vocab.length+' từ lên cloud');
+        showToast('☁️ Đã đồng bộ '+S.vocab.length+' từ lên cloud!');
+      }catch(e){
+        setSyncBadge('err','❌ Upload lỗi');
+        console.error('[Import] cloud upload error:', e);
+      }
+    }, 500);
+  } else if(_currentUser && !_fbOk()){
+    // Firebase chưa kết nối — ghi log để user biết cần sync thủ công
+    console.log('[Import] Firebase not connected — data saved locally only. Words:', S.vocab.length);
+    setSyncBadge('offline','💾 Lưu local (chưa sync cloud)');
+    showToast('💾 Đã lưu local! Nhấn 🔄 Sync để đồng bộ lên cloud.', 'warn');
   }
 };
 
@@ -11053,9 +11099,25 @@ window.diagnoseSyncIssue = async function(){
 // ═══════════════════════════════════════════════════
 // MOBILE ACCOUNT DRAWER — JS
 // ═══════════════════════════════════════════════════
+
+/* Stub sớm để mob-nav onclick không bị lỗi nếu IIFE chưa chạy */
+if(typeof window.openMobAccount === 'undefined'){
+  window.openMobAccount = function(){
+    const overlay = document.getElementById('mob-account-overlay');
+    if(overlay){ overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+  };
+}
+if(typeof window.closeMobAccount === 'undefined'){
+  window.closeMobAccount = function(e){
+    if(e instanceof Event && e.target !== document.getElementById('mob-account-overlay')) return;
+    const overlay = document.getElementById('mob-account-overlay');
+    if(overlay){ overlay.classList.remove('open'); document.body.style.overflow=''; }
+  };
+}
+
 (function initMobAccount(){
 
-  /* ── Open / Close ── */
+  // Expose ra global sớm để mob-nav onclick có thể gọi ngay
   window.openMobAccount = function(){
     const overlay = document.getElementById('mob-account-overlay');
     if(!overlay) return;
@@ -11168,9 +11230,18 @@ window.diagnoseSyncIssue = async function(){
       : '<div class="auth-role-badge user">👤 Thành viên</div>';
     // Stats
     const setV = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+    const wCount = (typeof S!=='undefined'&&S.vocab?.length)||0;
     setV('mob-stat-streak', (typeof S!=='undefined'&&S.stats?.streak)||0);
     setV('mob-stat-xp', (typeof S!=='undefined'&&S.stats?.xp)||0);
-    setV('mob-stat-words', (typeof S!=='undefined'&&S.vocab?.length)||0);
+    setV('mob-stat-words', wCount);
+    // Cập nhật sync info
+    setV('mob-sync-word-count', wCount);
+    const fbInfoEl = document.getElementById('mob-sync-fb-info');
+    if(fbInfoEl){
+      const cfg = typeof getFbConfig==='function' ? getFbConfig() : null;
+      const fbConn = cfg && cfg.apiKey && !cfg.apiKey.startsWith('YOUR_') && cfg.projectId;
+      fbInfoEl.textContent = fbConn ? ('🟢 Firebase: '+cfg.projectId) : '🔴 Firebase chưa kết nối';
+    }
     // Nav icon update
     _updateNavAccountIcon(true, u);
   }
@@ -11309,6 +11380,16 @@ window.diagnoseSyncIssue = async function(){
     if(src && dst){
       dst.className = src.className;
       dst.textContent = src.textContent;
+    }
+    // Cập nhật số từ
+    const wc = document.getElementById('mob-sync-word-count');
+    if(wc && typeof S !== 'undefined') wc.textContent = S.vocab?.length||0;
+    // Cập nhật stats box
+    const setV = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+    if(typeof S !== 'undefined'){
+      setV('mob-stat-words', S.vocab?.length||0);
+      setV('mob-stat-streak', S.stats?.streak||0);
+      setV('mob-stat-xp', S.stats?.xp||0);
     }
   };
 
