@@ -160,8 +160,8 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
   display:none;
   position:fixed;bottom:0;left:0;right:0;
   height:var(--mob-nav);
-  background:rgba(255,255,255,0.97);
-  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  background:rgba(255,255,255,0.98);
+  /* backdrop-filter removed: tạo stacking context phá z-index ordering */
   border-top:1px solid var(--border);
   z-index:500;
   overflow-x:auto;overflow-y:hidden;
@@ -170,8 +170,6 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
   box-shadow:0 -2px 20px rgba(0,0,0,.09);
   padding-bottom:env(safe-area-inset-bottom);
   align-items:stretch;flex-wrap:nowrap;
-  will-change:transform;
-  -webkit-transform:translateZ(0);transform:translateZ(0);
 }
 .mob-nav::-webkit-scrollbar{display:none;}
 .mob-item{
@@ -586,7 +584,7 @@ body{background:var(--bg);color:var(--ink);font-family:var(--font-b);font-size:1
 .modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;}
 
 /* TOAST */
-.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--ink);color:#fff;border-radius:20px;padding:11px 22px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-lg);animation:tIn .3s ease;white-space:nowrap;max-width:90vw;}
+.toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9400;background:var(--ink);color:#fff;border-radius:20px;padding:11px 22px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-lg);animation:tIn .3s ease;white-space:nowrap;max-width:90vw;}
 @keyframes tIn{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 .toast.success{background:#065f46;}.toast.error{background:#9f1239;}
 
@@ -1071,10 +1069,11 @@ tr.row-selected{outline:none;}
    Hiện khi bấm tab "Tài khoản" trên mobile nav
 ═══════════════════════════════════════════════════ */
 .mob-account-overlay{
-  display:none;position:fixed;inset:0;z-index:1500;
+  display:none;position:fixed;inset:0;z-index:9500;
   background:rgba(0,0,0,.45);backdrop-filter:blur(3px);
   -webkit-backdrop-filter:blur(3px);
   animation:fadeIn .2s ease;
+  /* z-index 9500: cao hơn tất cả (login-wall:8000, fb-modal:9000) */
 }
 .mob-account-overlay.open{display:flex;align-items:flex-end;}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
@@ -1085,10 +1084,19 @@ tr.row-selected{outline:none;}
   padding:0 0 calc(env(safe-area-inset-bottom) + 8px);
   box-shadow:0 -8px 40px rgba(0,0,0,.2);
   animation:sheetUp .28s cubic-bezier(.4,0,.2,1);
-  max-height:92dvh;overflow-y:auto;
+  max-height:92dvh;overflow-y:auto;overflow-x:hidden;
   -webkit-overflow-scrolling:touch;
+  position:relative;
+  z-index:9501;
+  /* z-index cao hơn overlay (9500) để sheet luôn nổi trên backdrop */
 }
 @keyframes sheetUp{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
+
+/* Prevent background scroll when sheet open */
+html.mob-sheet-open body{
+  /* Không dùng overflow:hidden — phá vỡ fixed elements trên iOS */
+  /* Chỉ dùng touch-action để block scroll ở background */
+}
 
 /* Handle bar */
 .mob-sheet-handle{
@@ -1294,8 +1302,13 @@ tr.row-selected{outline:none;}
    LOGIN FULLSCREEN OVERLAY
    (hiện khi chưa đăng nhập — bịt hết UI)
 ════════════════════════════════════ */
-.login-wall{display:none;position:fixed;inset:0;z-index:8000;background:linear-gradient(135deg,#0d9488 0%,#0891b2 50%,#7c3aed 100%);align-items:center;justify-content:center;padding:16px;}
+.login-wall{display:none;position:fixed;inset:0;z-index:8000;background:linear-gradient(135deg,#0d9488 0%,#0891b2 50%,#7c3aed 100%);align-items:center;justify-content:center;padding:16px;overflow-y:auto;}
 .login-wall.show{display:flex;}
+/* Mobile: login wall chiếm toàn màn hình, scroll được */
+@media(max-width:767px){
+  .login-wall{align-items:flex-start;padding:env(safe-area-inset-top,20px) 16px 80px;}
+  .login-box{margin-top:20px;max-width:100%;}
+}
 .login-box{background:var(--surface);border-radius:18px;padding:32px 28px 26px;width:100%;max-width:380px;box-shadow:0 24px 64px rgba(0,0,0,.25);position:relative;overflow:hidden;}
 .login-box::before{content:'🗣️';position:absolute;right:-8px;top:-12px;font-size:90px;opacity:.06;}
 .login-logo{display:flex;align-items:center;gap:10px;margin-bottom:6px;}
@@ -1709,9 +1722,11 @@ tr.row-selected{outline:none;}
   }
 
   /* ── Prevent horizontal scroll ── */
-  body, .main, .page-wrap{
+  /* CRITICAL: overflow-x:hidden on body breaks position:fixed touch events on iOS Safari!
+     Only apply to .main/.page-wrap, never to body or html */
+  .main, .page-wrap{
     max-width:100vw;
-    overflow-x:hidden;
+    overflow-x:clip;
   }
 
   /* ── Horizontal scroll only for tables ── */
@@ -1971,9 +1986,24 @@ tr.row-selected{outline:none;}
 
     <!-- ── Firebase config link ── -->
     <div style="text-align:center;margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-      <button onclick="openConfigModal()" style="background:none;border:none;cursor:pointer;font-size:11px;color:var(--ink4);font-family:var(--font-b)">
-        ⚙️ Cấu hình Firebase
+      <button onclick="toggleLoginWallFb()" style="background:none;border:none;cursor:pointer;font-size:12px;color:var(--ink4);font-family:var(--font-b);display:flex;align-items:center;gap:6px;margin:0 auto;">
+        🔥 <span id="login-fb-btn-text">Cấu hình Firebase (tuỳ chọn)</span>
       </button>
+      <div id="login-fb-panel" style="display:none;margin-top:14px;text-align:left;background:linear-gradient(135deg,#fff7ed,#fef3c7);border:1.5px solid #fde68a;border-radius:12px;padding:14px;">
+        <div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:8px;">🔥 Kết nối Firebase Cloud</div>
+        <div style="font-size:11px;color:#b45309;margin-bottom:10px;line-height:1.5;">Nhập config để đồng bộ dữ liệu trên nhiều thiết bị. Không bắt buộc — ứng dụng chạy offline hoàn toàn.</div>
+        <div style="margin-bottom:6px"><label style="font-size:10px;font-weight:700;color:#92400e;display:block;margin-bottom:3px;text-transform:uppercase">API Key *</label><input id="lw-cfg-apiKey" placeholder="AIzaSy..." style="width:100%;padding:9px 11px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;font-family:var(--font-b);background:#fffbeb;outline:none;box-sizing:border-box;-webkit-appearance:none"></div>
+        <div style="margin-bottom:6px"><label style="font-size:10px;font-weight:700;color:#92400e;display:block;margin-bottom:3px;text-transform:uppercase">Auth Domain *</label><input id="lw-cfg-authDomain" placeholder="app.firebaseapp.com" style="width:100%;padding:9px 11px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;font-family:var(--font-b);background:#fffbeb;outline:none;box-sizing:border-box;-webkit-appearance:none"></div>
+        <div style="margin-bottom:6px"><label style="font-size:10px;font-weight:700;color:#92400e;display:block;margin-bottom:3px;text-transform:uppercase">Project ID *</label><input id="lw-cfg-projectId" placeholder="your-project-id" style="width:100%;padding:9px 11px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;font-family:var(--font-b);background:#fffbeb;outline:none;box-sizing:border-box;-webkit-appearance:none"></div>
+        <div style="margin-bottom:6px"><label style="font-size:10px;font-weight:700;color:#92400e;display:block;margin-bottom:3px;text-transform:uppercase">Storage Bucket</label><input id="lw-cfg-storageBucket" placeholder="app.appspot.com" style="width:100%;padding:9px 11px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;font-family:var(--font-b);background:#fffbeb;outline:none;box-sizing:border-box;-webkit-appearance:none"></div>
+        <div style="margin-bottom:6px"><label style="font-size:10px;font-weight:700;color:#92400e;display:block;margin-bottom:3px;text-transform:uppercase">Messaging Sender ID</label><input id="lw-cfg-messagingSenderId" placeholder="123456789012" style="width:100%;padding:9px 11px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;font-family:var(--font-b);background:#fffbeb;outline:none;box-sizing:border-box;-webkit-appearance:none"></div>
+        <div style="margin-bottom:10px"><label style="font-size:10px;font-weight:700;color:#92400e;display:block;margin-bottom:3px;text-transform:uppercase">App ID</label><input id="lw-cfg-appId" placeholder="1:123:web:abc..." style="width:100%;padding:9px 11px;border:1.5px solid #fde68a;border-radius:8px;font-size:13px;font-family:var(--font-b);background:#fffbeb;outline:none;box-sizing:border-box;-webkit-appearance:none"></div>
+        <div id="lw-cfg-err" style="font-size:12px;color:var(--rose);margin-bottom:8px;font-weight:600;display:none"></div>
+        <div style="display:flex;gap:8px">
+          <button onclick="lwPasteFbConfig()" style="flex:1;padding:9px;background:transparent;border:1.5px solid #fde68a;border-radius:8px;font-size:12px;font-weight:700;color:#92400e;cursor:pointer;font-family:var(--font-b);-webkit-tap-highlight-color:transparent">📋 Dán JSON</button>
+          <button onclick="lwSaveFbConfig()" style="flex:2;padding:9px;background:var(--teal);border:none;border-radius:8px;font-size:12px;font-weight:700;color:#fff;cursor:pointer;font-family:var(--font-b);-webkit-tap-highlight-color:transparent">💾 Lưu & Kết nối</button>
+        </div>
+      </div>
     </div>
   </div>
 </div>
@@ -2232,8 +2262,21 @@ tr.row-selected{outline:none;}
           <div class="mob-fb-body" id="mob-fb-body2">
             <div class="mob-fb-status" id="mob-fb-status2" style="margin-bottom:8px">🔴 Chưa kết nối</div>
             <div class="mob-fb-actions">
-              <button class="mob-fb-btn outline" onclick="openConfigModal();closeMobAccount()">⚙️ Cấu hình</button>
+              <button class="mob-fb-btn outline" onclick="toggleMobFbEditForm()">⚙️ Chỉnh sửa config</button>
               <button class="mob-fb-btn danger" onclick="mobClearFbConfig()">🗑 Xóa</button>
+            </div>
+            <div id="mob-fb-edit-form" style="display:none;margin-top:12px;">
+              <div class="mob-fb-field"><label>API Key *</label><input id="mob-cfg2-apiKey" placeholder="AIzaSy..."></div>
+              <div class="mob-fb-field"><label>Auth Domain *</label><input id="mob-cfg2-authDomain" placeholder="app.firebaseapp.com"></div>
+              <div class="mob-fb-field"><label>Project ID *</label><input id="mob-cfg2-projectId" placeholder="your-project-id"></div>
+              <div class="mob-fb-field"><label>Storage Bucket</label><input id="mob-cfg2-storageBucket" placeholder="app.appspot.com"></div>
+              <div class="mob-fb-field"><label>Messaging Sender ID</label><input id="mob-cfg2-messagingSenderId" placeholder="123456789012"></div>
+              <div class="mob-fb-field"><label>App ID</label><input id="mob-cfg2-appId" placeholder="1:123:web:abc..."></div>
+              <div id="mob-cfg2-err" style="font-size:12px;color:var(--rose);margin-top:4px;font-weight:600;display:none"></div>
+              <div class="mob-fb-actions" style="margin-top:8px">
+                <button class="mob-fb-btn outline" onclick="mobPasteFbConfig2()">📋 Dán JSON</button>
+                <button class="mob-fb-btn primary" onclick="mobSaveFirebase2()">💾 Lưu & Kết nối</button>
+              </div>
             </div>
           </div>
         </div>
@@ -8003,15 +8046,13 @@ function setSyncBadge(state,text){
 }
 
 function showLoginWall(){
-  // On mobile: open account drawer instead of fullscreen wall
-  if(window.innerWidth <= 767 && typeof openMobAccount === 'function'){
-    openMobAccount();
-    return;
-  }
+  // Always show fullscreen login wall — cả desktop lẫn mobile
   document.getElementById('login-wall').classList.add('show');
 }
 function hideLoginWall(){
   document.getElementById('login-wall').classList.remove('show');
+  // Đóng mob account drawer nếu đang mở
+  if(typeof closeMobAccount==='function') closeMobAccount();
 }
 
 function _renderLoggedInUI(u){
@@ -8988,6 +9029,65 @@ function openConfigModal(){
   document.getElementById('modal-config').classList.add('open');
 }
 function closeConfigModal(){ document.getElementById('modal-config').classList.remove('open'); }
+
+/* ── Login wall Firebase panel helpers ── */
+function toggleLoginWallFb(){
+  const panel=document.getElementById('login-fb-panel');
+  const btn=document.getElementById('login-fb-btn-text');
+  if(!panel) return;
+  const open=panel.style.display==='none'||!panel.style.display;
+  panel.style.display=open?'block':'none';
+  if(btn) btn.textContent=open?'Thu gọn cấu hình Firebase ▲':'Cấu hình Firebase (tuỳ chọn)';
+  if(open){
+    const cfg=getFbConfig();
+    if(cfg){
+      ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{
+        const el=document.getElementById('lw-cfg-'+k); if(el&&cfg[k]) el.value=cfg[k];
+      });
+    }
+  }
+}
+async function lwSaveFbConfig(){
+  const cfg={};
+  ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{
+    const el=document.getElementById('lw-cfg-'+k); cfg[k]=el?el.value.trim():'';
+  });
+  const errEl=document.getElementById('lw-cfg-err');
+  if(!cfg.apiKey||!cfg.authDomain||!cfg.projectId){
+    if(errEl){errEl.textContent='❌ API Key, Auth Domain và Project ID là bắt buộc.';errEl.style.display='block';} return;
+  }
+  if(errEl) errEl.style.display='none';
+  ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{
+    const el=document.getElementById('cfg-'+k); if(el) el.value=cfg[k];
+  });
+  try{
+    localStorage.setItem(FB_CFG_KEY,JSON.stringify(cfg));
+    const ok=await initFirebase(cfg);
+    if(ok){
+      const panel=document.getElementById('login-fb-panel');
+      if(panel){ const msg=document.createElement('div'); msg.style.cssText='background:var(--teal-light);border-radius:8px;padding:8px 12px;font-size:12px;font-weight:700;color:var(--teal);margin-top:8px;'; msg.textContent='✅ Firebase kết nối thành công! Đăng nhập để đồng bộ.'; panel.appendChild(msg); }
+    } else {
+      if(errEl){errEl.textContent='⚠️ Kết nối thất bại. Kiểm tra lại config.';errEl.style.display='block';}
+    }
+  }catch(e){
+    if(errEl){errEl.textContent='❌ '+e.message;errEl.style.display='block';}
+  }
+}
+async function lwPasteFbConfig(){
+  try{
+    const text=await navigator.clipboard.readText();
+    const m=text.match(/\{[\s\S]*\}/);
+    if(!m){alert('Không tìm thấy firebaseConfig trong clipboard');return;}
+    let cfg;
+    try{ cfg=JSON.parse(m[0]); }catch(_){
+      const clean=m[0].replace(/(\w+)\s*:/g,'"$1":').replace(/'/g,'"');
+      try{cfg=JSON.parse(clean);}catch(e2){alert('Không parse được config. Dán thủ công nhé!');return;}
+    }
+    ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{
+      const el=document.getElementById('lw-cfg-'+k); if(el&&cfg[k]) el.value=cfg[k];
+    });
+  }catch(e){ alert('Không đọc được clipboard. Hãy dán thủ công từng trường.'); }
+}
 
 async function saveAndConnectFirebase(){
   const required=['apiKey','authDomain','projectId'];
@@ -10761,29 +10861,37 @@ function showSpScoreEnhanced(score, transcript, wordScores, targetWord, wordIpa)
   // 3. Kiểm tra session còn hiệu lực
   const session=loadAppSession();
   if(session && session.uid){
-    // Admin có thể dùng uid local (admin_root) HOẶC Firebase UID thật
     const isLocalSession = session.uid.startsWith('local_')
                         || session.uid === 'admin_root';
     const isAdminRole = session.role === 'admin';
 
     if(_fbOk() && !isLocalSession){
-      // Firebase có → xác minh token còn hợp lệ
+      // Firebase có → xác minh token còn hợp lệ, timeout 5s để tránh chờ mãi
       await new Promise(resolve=>{
-        const unsub=_auth.onAuthStateChanged(fbUser=>{
-          unsub();
-          if(fbUser && (fbUser.uid === session.uid || isAdminRole)){
-            // Nếu admin: cập nhật uid thật nếu khác
-            if(isAdminRole && fbUser.uid !== session.uid){
-              session.uid = fbUser.uid;
-              saveAppSession(session);
-            }
-            _currentUser = session;
+        let resolved=false;
+        const done=(loginOk)=>{
+          if(resolved) return; resolved=true;
+          if(loginOk){
+            _currentUser=session;
             _afterLogin();
           } else {
             clearAppSession();
             showLoginWall();
           }
           resolve();
+        };
+        // Sau 5 giây không response (mạng chậm/offline) → tin session local
+        const timer=setTimeout(()=>done(true), 5000);
+        const unsub=_auth.onAuthStateChanged(fbUser=>{
+          clearTimeout(timer); unsub();
+          if(fbUser && (fbUser.uid===session.uid || isAdminRole)){
+            if(isAdminRole && fbUser.uid!==session.uid){
+              session.uid=fbUser.uid; saveAppSession(session);
+            }
+            done(true);
+          } else {
+            done(false);
+          }
         });
       });
     } else {
@@ -11104,14 +11212,14 @@ window.diagnoseSyncIssue = async function(){
 if(typeof window.openMobAccount === 'undefined'){
   window.openMobAccount = function(){
     const overlay = document.getElementById('mob-account-overlay');
-    if(overlay){ overlay.classList.add('open'); document.body.style.overflow='hidden'; }
+    if(overlay){ overlay.classList.add('open'); }
   };
 }
 if(typeof window.closeMobAccount === 'undefined'){
   window.closeMobAccount = function(e){
     if(e instanceof Event && e.target !== document.getElementById('mob-account-overlay')) return;
     const overlay = document.getElementById('mob-account-overlay');
-    if(overlay){ overlay.classList.remove('open'); document.body.style.overflow=''; }
+    if(overlay){ overlay.classList.remove('open'); }
   };
 }
 
@@ -11122,12 +11230,14 @@ if(typeof window.closeMobAccount === 'undefined'){
     const overlay = document.getElementById('mob-account-overlay');
     if(!overlay) return;
     overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-    // Sync Firebase status display
     _updateMobFbStatus();
-    // Sync stats if logged in
-    if(typeof _currentUser !== 'undefined' && _currentUser){
-      _showMobLoggedIn(_currentUser);
+    // Xác định trạng thái login: ưu tiên _currentUser, fallback localStorage
+    let user = (typeof _currentUser !== 'undefined' && _currentUser) || null;
+    if(!user){
+      try{ user = JSON.parse(localStorage.getItem('speakup_app_session')||'null'); }catch(_){}
+    }
+    if(user && user.uid){
+      _showMobLoggedIn(user);
     } else {
       _showMobLoggedOut();
     }
@@ -11144,7 +11254,6 @@ if(typeof window.closeMobAccount === 'undefined'){
     setTimeout(()=>{
       overlay.classList.remove('open');
       if(sheet) sheet.style.animation = '';
-      document.body.style.overflow = '';
     }, 220);
   };
 
@@ -11285,8 +11394,17 @@ if(typeof window.closeMobAccount === 'undefined'){
     if(errEl) errEl.style.display='none';
     try{
       await appLogin();
-      // If success, appLogin calls _afterLogin → _renderLoggedInUI
-      // We hook into that via our observer below
+      // If _currentUser set → success: close login wall AND drawer
+      if(typeof _currentUser !== 'undefined' && _currentUser){
+        hideLoginWall();
+        closeMobAccount();
+      } else {
+        // Copy error from main form to mob form
+        const mainErr = document.getElementById('li-err');
+        if(mainErr && mainErr.style.display !== 'none'){
+          showErr(mainErr.textContent);
+        }
+      }
     } catch(e){ showErr('Đăng nhập thất bại. Kiểm tra lại thông tin.'); }
     finally{ if(btn){ btn.disabled=false; btn.textContent='🔐 Đăng nhập'; } }
   };
@@ -11311,6 +11429,14 @@ if(typeof window.closeMobAccount === 'undefined'){
     if(errEl) errEl.style.display='none';
     try{
       await appRegister();
+      // If success, _currentUser is set
+      if(typeof _currentUser !== 'undefined' && _currentUser){
+        if(okEl){okEl.textContent='🎉 Tạo tài khoản thành công!';okEl.style.display='block';}
+        setTimeout(()=>{ hideLoginWall(); closeMobAccount(); }, 700);
+      } else {
+        const mainErr = document.getElementById('rg-err');
+        if(mainErr && mainErr.style.display !== 'none') showErr(mainErr.textContent);
+      }
     } catch(e){ showErr('Đăng ký thất bại. Thử lại.'); }
     finally{ if(btn){ btn.disabled=false; btn.textContent='🚀 Tạo tài khoản'; } }
   };
@@ -11373,6 +11499,73 @@ if(typeof window.closeMobAccount === 'undefined'){
     showToast('🗑 Đã xóa Firebase config');
   };
 
+  /* ── Logged-in Firebase edit form ── */
+  window.toggleMobFbEditForm = function(){
+    const form = document.getElementById('mob-fb-edit-form');
+    if(!form) return;
+    const open = form.style.display === 'none' || !form.style.display;
+    form.style.display = open ? 'block' : 'none';
+    if(open){
+      const cfg = getFbConfig();
+      if(cfg){
+        ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{
+          const el = document.getElementById('mob-cfg2-'+k); if(el&&cfg[k]) el.value=cfg[k];
+        });
+      }
+    }
+  };
+
+  window.mobSaveFirebase2 = async function(){
+    const map = {
+      'mob-cfg2-apiKey':'cfg-apiKey','mob-cfg2-authDomain':'cfg-authDomain',
+      'mob-cfg2-projectId':'cfg-projectId','mob-cfg2-storageBucket':'cfg-storageBucket',
+      'mob-cfg2-messagingSenderId':'cfg-messagingSenderId','mob-cfg2-appId':'cfg-appId'
+    };
+    Object.entries(map).forEach(([src,dst])=>{
+      const s=document.getElementById(src), d=document.getElementById(dst);
+      if(s&&d) d.value=s.value;
+    });
+    // Also sync to mob-cfg fields
+    const map2 = {
+      'mob-cfg2-apiKey':'mob-cfg-apiKey','mob-cfg2-authDomain':'mob-cfg-authDomain',
+      'mob-cfg2-projectId':'mob-cfg-projectId','mob-cfg2-storageBucket':'mob-cfg-storageBucket',
+      'mob-cfg2-messagingSenderId':'mob-cfg-messagingSenderId','mob-cfg2-appId':'mob-cfg-appId'
+    };
+    Object.entries(map2).forEach(([src,dst])=>{
+      const s=document.getElementById(src), d=document.getElementById(dst);
+      if(s&&d) d.value=s.value;
+    });
+    const errEl = document.getElementById('mob-cfg2-err');
+    if(errEl) errEl.style.display='none';
+    try{
+      await saveAndConnectFirebase();
+      _updateMobFbStatus();
+      showToast('✅ Firebase đã kết nối thành công!');
+      // Close form after success
+      const form = document.getElementById('mob-fb-edit-form');
+      if(form) form.style.display='none';
+    }catch(e){
+      if(errEl){errEl.textContent='⚠️ Lỗi kết nối. Kiểm tra lại config.';errEl.style.display='block';}
+    }
+  };
+
+  window.mobPasteFbConfig2 = async function(){
+    try{
+      const text = await navigator.clipboard.readText();
+      const match = text.match(/\{[\s\S]*\}/);
+      if(!match) return;
+      let cfg;
+      try{ cfg=JSON.parse(match[0]); }catch(_){
+        const clean=match[0].replace(/(\w+)\s*:/g,'"$1":').replace(/'/g,'"');
+        cfg=JSON.parse(clean);
+      }
+      ['apiKey','authDomain','projectId','storageBucket','messagingSenderId','appId'].forEach(k=>{
+        const el=document.getElementById('mob-cfg2-'+k); if(el&&cfg[k]) el.value=cfg[k];
+      });
+      showToast('📋 Đã dán config Firebase!');
+    }catch(e){ showToast('⚠️ Không đọc được clipboard. Dán thủ công nhé!'); }
+  };
+
   /* ── Sync badge mirror ── */
   window.updateMobSyncBadge = function(){
     const src = document.getElementById('sync-badge');
@@ -11405,11 +11598,10 @@ if(typeof window.closeMobAccount === 'undefined'){
       const isIn = uiIn && uiIn.style.display !== 'none';
       if(isIn && typeof _currentUser !== 'undefined' && _currentUser){
         _showMobLoggedIn(_currentUser);
-        // Auto-close login wall if open
+        // Tự đóng login-wall nếu đang mở (không đóng drawer)
         const wall = document.getElementById('login-wall');
         if(wall && wall.classList.contains('show')){
           wall.classList.remove('show');
-          closeMobAccount();
         }
       } else {
         _showMobLoggedOut();
@@ -11425,12 +11617,16 @@ if(typeof window.closeMobAccount === 'undefined'){
     new MutationObserver(()=>updateMobSyncBadge()).observe(syncBadge, {childList:true, attributes:true, characterData:true, subtree:true});
   }
 
-  // On initial load check session
+  // On initial load check session — chờ boot sequence xong (1.5s)
   setTimeout(()=>{
-    if(typeof _currentUser !== 'undefined' && _currentUser){
-      _showMobLoggedIn(_currentUser);
+    let user = (typeof _currentUser !== 'undefined' && _currentUser) || null;
+    if(!user){
+      try{ user = JSON.parse(localStorage.getItem('speakup_app_session')||'null'); }catch(_){}
     }
-  }, 800);
+    if(user && user.uid){
+      _showMobLoggedIn(user);
+    }
+  }, 1500);
 
 })();
 
