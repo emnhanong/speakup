@@ -2200,8 +2200,16 @@ tr.row-selected{outline:none;}
           <div class="mob-sync-label">☁️ Đồng bộ dữ liệu</div>
           <div class="mob-sync-right">
             <div class="sync-badge ok" id="mob-sync-badge">✅ Đã lưu</div>
-            <button class="mob-sync-btn" onclick="fbManualSync().then(()=>updateMobSyncBadge())">🔄 Sync</button>
+            <button class="mob-sync-btn" title="Tải dữ liệu từ cloud về" onclick="fbManualSync().then(()=>{ if(typeof updateMobSyncBadge==='function') updateMobSyncBadge(); })">📥 Tải về</button>
           </div>
+        </div>
+        <div style="display:flex;gap:6px;margin:0 0 10px;padding:0 0 4px">
+          <button onclick="fbManualSync().then(()=>{ if(typeof updateMobSyncBadge==='function') updateMobSyncBadge(); })" style="flex:1;padding:9px 6px;background:var(--teal-light);border:1.5px solid rgba(13,148,136,.3);border-radius:10px;font-size:12px;font-weight:700;color:var(--teal);cursor:pointer;font-family:var(--font-b);-webkit-tap-highlight-color:transparent;">
+            📥 Kéo dữ liệu từ cloud
+          </button>
+          <button onclick="if(confirm('Upload dữ liệu TỪ THIẾT BỊ NÀY lên cloud? Cloud sẽ bị ghi đè!')) fbPushLocalToCloud().then(()=>{ if(typeof updateMobSyncBadge==='function') updateMobSyncBadge(); })" style="flex:1;padding:9px 6px;background:var(--violet-light);border:1.5px solid rgba(124,58,237,.25);border-radius:10px;font-size:12px;font-weight:700;color:var(--violet);cursor:pointer;font-family:var(--font-b);-webkit-tap-highlight-color:transparent;">
+            ⬆️ Đẩy local lên cloud
+          </button>
         </div>
 
         <!-- Firebase status in logged-in -->
@@ -8737,18 +8745,37 @@ async function appSignOut(){
 ═══════════════════════════════════════════════ */
 async function fbManualSync(){
   if(!_currentUser){ showToast('⚠️ Chưa đăng nhập','warn'); return; }
-  setSyncBadge('busy','🔄 Đang sync...');
+  if(!_fbOk()){ showToast('⚠️ Firebase chưa kết nối','warn'); return; }
+  setSyncBadge('busy','🔄 Đang kéo dữ liệu...');
   try{
+    // ── FIX: PULL từ cloud về trước (ưu tiên cloud data) ──
+    // Không push local lên vì khi dùng mobile lần đầu, local rỗng → sẽ ghi đè mất data cloud
+    await _loadUserDataFromFirestore(_currentUser.uid);
     _saveLocalData(_currentUser.uid);
-    if(_fbOk()){
-      await _migrateToCloud(_currentUser.uid);
-      _lastSavedHash=_dataHash(); // cập nhật hash sau sync
-    }
+    _lastSavedHash = _dataHash();
     setSyncBadge('ok','✅ Sync xong');
-    showToast('✅ Đồng bộ hoàn tất!');
+    showToast('✅ Đã đồng bộ dữ liệu! (' + S.vocab.length + ' từ)');
+    if(typeof updateMobSyncBadge==='function') updateMobSyncBadge();
   }catch(e){
     setSyncBadge('err','❌ Lỗi');
-    showToast('❌ Sync lỗi: '+e.message,'error');
+    showToast('❌ Sync lỗi: '+(e.code||e.message),'error');
+  }
+}
+
+// ─── Hàm riêng: PUSH local lên cloud (dùng khi muốn ghi đè cloud bằng local) ───
+async function fbPushLocalToCloud(){
+  if(!_currentUser){ showToast('⚠️ Chưa đăng nhập','warn'); return; }
+  if(!_fbOk()){ showToast('⚠️ Firebase chưa kết nối','warn'); return; }
+  setSyncBadge('busy','⬆️ Đang upload...');
+  try{
+    await _migrateToCloud(_currentUser.uid);
+    _saveLocalData(_currentUser.uid);
+    _lastSavedHash = _dataHash();
+    setSyncBadge('ok','✅ Upload xong');
+    showToast('✅ Đã upload ' + S.vocab.length + ' từ lên cloud!');
+  }catch(e){
+    setSyncBadge('err','❌ Lỗi');
+    showToast('❌ Upload lỗi: '+(e.code||e.message),'error');
   }
 }
 
@@ -11045,14 +11072,16 @@ window.diagnoseSyncIssue = async function(){
   };
 
   window.closeMobAccount = function(e){
-    if(e && e.target !== document.getElementById('mob-account-overlay')) return;
+    // Nếu được gọi từ click overlay → chỉ đóng khi click đúng backdrop (không phải sheet bên trong)
+    // Nếu gọi trực tiếp (nút ✕, mobSignOut...) → e là undefined → luôn đóng
+    if(e instanceof Event && e.target !== document.getElementById('mob-account-overlay')) return;
     const overlay = document.getElementById('mob-account-overlay');
     if(!overlay) return;
     const sheet = document.getElementById('mob-account-sheet');
-    sheet.style.animation = 'sheetDown .22s cubic-bezier(.4,0,.2,1) forwards';
+    if(sheet) sheet.style.animation = 'sheetDown .22s cubic-bezier(.4,0,.2,1) forwards';
     setTimeout(()=>{
       overlay.classList.remove('open');
-      sheet.style.animation = '';
+      if(sheet) sheet.style.animation = '';
       document.body.style.overflow = '';
     }, 220);
   };
