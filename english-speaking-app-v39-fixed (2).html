@@ -990,6 +990,230 @@ tr.row-selected{outline:none;}
 .btn-signout{width:100%;padding:7px;background:transparent;border:1.5px solid var(--border);border-radius:var(--radius-sm);cursor:pointer;font-size:11px;font-weight:600;color:var(--ink4);font-family:var(--font-b);transition:all .15s;}
 .btn-signout:hover{border-color:var(--rose);color:var(--rose);}
 
+/* ═══════════════════════════════════════════════════
+   MOBILE ACCOUNT DRAWER — bottom sheet
+   Hiện khi bấm tab "Tài khoản" trên mobile nav
+═══════════════════════════════════════════════════ */
+.mob-account-overlay{
+  display:none;position:fixed;inset:0;z-index:1500;
+  background:rgba(0,0,0,.45);backdrop-filter:blur(3px);
+  -webkit-backdrop-filter:blur(3px);
+  animation:fadeIn .2s ease;
+}
+.mob-account-overlay.open{display:flex;align-items:flex-end;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.mob-account-sheet{
+  width:100%;background:var(--surface);
+  border-radius:22px 22px 0 0;
+  padding:0 0 calc(env(safe-area-inset-bottom) + 8px);
+  box-shadow:0 -8px 40px rgba(0,0,0,.2);
+  animation:sheetUp .28s cubic-bezier(.4,0,.2,1);
+  max-height:92dvh;overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+}
+@keyframes sheetUp{from{transform:translateY(100%);opacity:.5}to{transform:translateY(0);opacity:1}}
+
+/* Handle bar */
+.mob-sheet-handle{
+  width:40px;height:4px;background:var(--border2);
+  border-radius:2px;margin:12px auto 0;
+}
+
+/* Sheet header */
+.mob-sheet-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 20px 10px;border-bottom:1px solid var(--border);
+}
+.mob-sheet-title{
+  font-family:var(--font-d);font-size:17px;font-weight:800;color:var(--ink);
+}
+.mob-sheet-close{
+  width:32px;height:32px;border-radius:50%;background:var(--bg2);
+  border:none;cursor:pointer;font-size:16px;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--ink3);transition:all .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.mob-sheet-close:active{background:var(--border);transform:scale(.9);}
+
+/* ── LOGGED OUT state ── */
+.mob-auth-loggedout{padding:20px 20px 16px;}
+.mob-auth-brand{
+  display:flex;align-items:center;gap:10px;margin-bottom:16px;
+}
+.mob-auth-brand-icon{
+  width:42px;height:42px;background:var(--teal);border-radius:12px;
+  display:flex;align-items:center;justify-content:center;font-size:22px;
+}
+.mob-auth-brand-text{font-family:var(--font-d);font-size:19px;font-weight:900;color:var(--ink);}
+.mob-auth-tagline{font-size:13px;color:var(--ink3);margin-bottom:20px;line-height:1.5;}
+
+.mob-login-tabs{
+  display:flex;background:var(--bg2);border-radius:10px;
+  padding:3px;margin-bottom:16px;gap:3px;
+}
+.mob-login-tab{
+  flex:1;padding:9px;border-radius:8px;border:none;
+  cursor:pointer;font-family:var(--font-b);font-size:13px;font-weight:700;
+  background:transparent;color:var(--ink3);transition:all .18s;
+  -webkit-tap-highlight-color:transparent;
+}
+.mob-login-tab.active{background:var(--surface);color:var(--teal);box-shadow:var(--shadow-sm);}
+
+.mob-login-field{margin-bottom:12px;position:relative;}
+.mob-login-field label{
+  display:block;font-size:11px;font-weight:700;color:var(--ink3);
+  margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em;
+}
+.mob-login-field input{
+  width:100%;padding:13px 15px;border:1.5px solid var(--border2);
+  border-radius:12px;font-size:16px;font-family:var(--font-b);
+  color:var(--ink);background:var(--surface2);outline:none;
+  transition:all .18s;box-sizing:border-box;
+  -webkit-appearance:none;
+}
+.mob-login-field input:focus{
+  border-color:var(--teal);box-shadow:0 0 0 3px rgba(13,148,136,.12);
+  background:var(--surface);
+}
+.mob-login-field input.err{border-color:var(--rose);}
+.mob-pw-toggle{
+  position:absolute;right:14px;bottom:13px;
+  cursor:pointer;font-size:18px;color:var(--ink4);
+  -webkit-tap-highlight-color:transparent;
+}
+
+.mob-login-err{
+  background:var(--rose-light);border:1.5px solid #fecdd3;
+  border-radius:10px;padding:10px 13px;font-size:13px;
+  color:#9f1239;font-weight:600;margin-bottom:12px;display:none;
+}
+.mob-login-ok{
+  background:var(--teal-light);border:1.5px solid rgba(13,148,136,.3);
+  border-radius:10px;padding:10px 13px;font-size:13px;
+  color:var(--teal);font-weight:600;margin-bottom:12px;display:none;
+}
+.mob-btn-submit{
+  width:100%;padding:14px;border:none;border-radius:12px;
+  background:var(--teal);color:#fff;font-family:var(--font-b);
+  font-size:15px;font-weight:800;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .15s;margin-bottom:10px;
+  -webkit-tap-highlight-color:transparent;
+}
+.mob-btn-submit:active{transform:scale(.97);background:#0f766e;}
+.mob-btn-submit:disabled{opacity:.6;cursor:not-allowed;}
+.mob-btn-submit.admin-btn{background:linear-gradient(135deg,var(--violet),#7c3aed);}
+
+.mob-login-footer{text-align:center;font-size:12px;color:var(--ink4);margin-bottom:4px;}
+
+/* ── Firebase config section inside drawer ── */
+.mob-fb-section{
+  margin:0 20px 16px;padding:14px 16px;
+  background:linear-gradient(135deg,#fff7ed,#fef3c7);
+  border:1.5px solid #fde68a;border-radius:14px;
+}
+.mob-fb-toggle{
+  display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;-webkit-tap-highlight-color:transparent;
+}
+.mob-fb-toggle-left{display:flex;align-items:center;gap:8px;}
+.mob-fb-toggle-icon{font-size:18px;}
+.mob-fb-toggle-title{font-size:13px;font-weight:700;color:#92400e;}
+.mob-fb-toggle-sub{font-size:11px;color:#b45309;margin-top:1px;}
+.mob-fb-toggle-arrow{font-size:14px;color:#b45309;transition:transform .2s;}
+.mob-fb-toggle-arrow.open{transform:rotate(180deg);}
+.mob-fb-body{display:none;margin-top:14px;}
+.mob-fb-body.open{display:block;}
+.mob-fb-status{
+  display:flex;align-items:center;gap:6px;padding:8px 12px;
+  border-radius:8px;font-size:12px;font-weight:700;margin-bottom:12px;
+}
+.mob-fb-status.connected{background:var(--teal-light);color:var(--teal);}
+.mob-fb-status.disconnected{background:var(--rose-light);color:var(--rose);}
+.mob-fb-field{margin-bottom:8px;}
+.mob-fb-field label{font-size:10px;font-weight:700;color:#92400e;display:block;margin-bottom:3px;text-transform:uppercase;letter-spacing:.04em;}
+.mob-fb-field input{
+  width:100%;padding:10px 12px;border:1.5px solid #fde68a;
+  border-radius:9px;font-size:13px;font-family:var(--font-b);
+  color:var(--ink);background:#fffbeb;outline:none;
+  transition:border-color .15s;box-sizing:border-box;
+  -webkit-appearance:none;
+}
+.mob-fb-field input:focus{border-color:#f59e0b;box-shadow:0 0 0 3px rgba(245,158,11,.1);}
+.mob-fb-actions{display:flex;gap:8px;margin-top:12px;}
+.mob-fb-btn{
+  flex:1;padding:10px;border:none;border-radius:9px;
+  font-family:var(--font-b);font-size:12px;font-weight:700;
+  cursor:pointer;transition:all .15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.mob-fb-btn.primary{background:var(--teal);color:#fff;}
+.mob-fb-btn.primary:active{background:#0f766e;}
+.mob-fb-btn.outline{background:transparent;border:1.5px solid #fde68a;color:#92400e;}
+.mob-fb-btn.danger{background:var(--rose-light);color:var(--rose);border:1.5px solid #fecdd3;}
+.mob-fb-paste-hint{font-size:11px;color:#92400e;text-align:center;margin-top:8px;opacity:.8;}
+
+/* ── LOGGED IN state ── */
+.mob-auth-loggedin{padding:20px 20px 16px;}
+.mob-user-card{
+  display:flex;align-items:center;gap:12px;
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:14px;padding:14px 16px;margin-bottom:14px;
+}
+.mob-user-avatar{
+  width:46px;height:46px;border-radius:50%;
+  background:var(--teal);display:flex;align-items:center;
+  justify-content:center;color:#fff;font-size:20px;font-weight:800;
+  flex-shrink:0;
+}
+.mob-user-avatar.admin{background:linear-gradient(135deg,var(--violet),#7c3aed);}
+.mob-user-name{font-family:var(--font-d);font-weight:800;font-size:16px;color:var(--ink);}
+.mob-user-role{margin-top:4px;}
+.mob-sync-row{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:12px 16px;background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:12px;margin-bottom:12px;
+}
+.mob-sync-label{font-size:13px;font-weight:600;color:var(--ink2);}
+.mob-sync-right{display:flex;align-items:center;gap:8px;}
+.mob-sync-btn{
+  background:none;border:1.5px solid var(--border);border-radius:8px;
+  padding:6px 10px;cursor:pointer;font-size:13px;
+  color:var(--ink3);transition:all .15s;font-family:var(--font-b);
+  -webkit-tap-highlight-color:transparent;
+}
+.mob-sync-btn:active{background:var(--bg2);}
+.mob-stat-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;
+}
+.mob-stat-box{
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:12px;padding:12px 8px;text-align:center;
+}
+.mob-stat-box-val{
+  font-family:var(--font-d);font-weight:800;font-size:20px;
+  color:var(--teal);line-height:1;
+}
+.mob-stat-box-lbl{font-size:10px;color:var(--ink4);margin-top:3px;font-weight:600;}
+.mob-signout-btn{
+  width:100%;padding:13px;background:transparent;
+  border:1.5px solid var(--border);border-radius:12px;
+  cursor:pointer;font-size:14px;font-weight:700;
+  color:var(--ink3);font-family:var(--font-b);
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  transition:all .18s;-webkit-tap-highlight-color:transparent;
+}
+.mob-signout-btn:active{border-color:var(--rose);color:var(--rose);background:var(--rose-light);}
+
+/* Mob nav account badge */
+.mob-item-badge{
+  position:absolute;top:6px;right:calc(50% - 18px);
+  width:8px;height:8px;border-radius:50%;
+  background:var(--teal);border:2px solid var(--surface);
+}
+
 /* ════════════════════════════════════
    LOGIN FULLSCREEN OVERLAY
    (hiện khi chưa đăng nhập — bịt hết UI)
@@ -1643,8 +1867,199 @@ tr.row-selected{outline:none;}
   <div class="mob-item" onclick="showPanel('roadmap')"><span class="mi">🗓️</span><span class="mob-item-label">Lộ trình</span></div>
   <div class="mob-item" onclick="showPanel('listening')"><span class="mi">🎧</span><span class="mob-item-label">Listening</span></div>
   <div class="mob-item" onclick="showPanel('speaking-pro')"><span class="mi">🎤</span><span class="mob-item-label">Speaking</span></div>
-  <div class="mob-item" onclick="showPanel('vocab-list')"><span class="mi">📝</span><span class="mob-item-label">Từ vựng</span></div>
+  <div class="mob-item" onclick="openMobAccount()" id="mob-nav-account" style="position:relative">
+    <span class="mi" id="mob-nav-account-icon">👤</span>
+    <span class="mob-item-label" id="mob-nav-account-lbl">Tài khoản</span>
+    <span class="mob-item-badge" id="mob-account-badge" style="display:none"></span>
+  </div>
 </nav>
+
+<!-- ═══════════════════════════════════════════════════════
+     MOBILE ACCOUNT DRAWER — bottom sheet
+     Hiện khi bấm "Tài khoản" trên mobile nav
+═══════════════════════════════════════════════════════ -->
+<div class="mob-account-overlay" id="mob-account-overlay" onclick="closeMobAccount(event)">
+  <div class="mob-account-sheet" id="mob-account-sheet" onclick="event.stopPropagation()">
+    <div class="mob-sheet-handle"></div>
+    <div class="mob-sheet-header">
+      <div class="mob-sheet-title">👤 Tài khoản</div>
+      <button class="mob-sheet-close" onclick="closeMobAccount()">✕</button>
+    </div>
+
+    <!-- ── LOGGED OUT ── -->
+    <div id="mob-ui-loggedout">
+      <div class="mob-auth-loggedout">
+        <div class="mob-auth-brand">
+          <div class="mob-auth-brand-icon">🗣️</div>
+          <div class="mob-auth-brand-text">SpeakUp</div>
+        </div>
+        <div class="mob-auth-tagline">Đăng nhập để lưu tiến độ và đồng bộ dữ liệu trên mọi thiết bị.</div>
+
+        <!-- Login / Register tabs -->
+        <div class="mob-login-tabs">
+          <button class="mob-login-tab active" id="mob-ltab-login" onclick="switchMobLoginTab('login')">Đăng nhập</button>
+          <button class="mob-login-tab" id="mob-ltab-register" onclick="switchMobLoginTab('register')">Đăng ký</button>
+        </div>
+
+        <!-- TAB: ĐĂNG NHẬP -->
+        <div id="mob-login-panel">
+          <div class="mob-login-field">
+            <label>Tên đăng nhập</label>
+            <input id="mob-li-username" type="text" placeholder="admin hoặc tên của bạn"
+              autocomplete="username" inputmode="text"
+              onkeydown="if(event.key==='Enter')document.getElementById('mob-li-pass').focus()">
+          </div>
+          <div class="mob-login-field">
+            <label>Mật khẩu</label>
+            <input id="mob-li-pass" type="password" placeholder="••••••••"
+              autocomplete="current-password"
+              onkeydown="if(event.key==='Enter')mobLogin()">
+            <span class="mob-pw-toggle" onclick="togglePw('mob-li-pass',this)">👁</span>
+          </div>
+          <div class="mob-login-err" id="mob-li-err"></div>
+          <button class="mob-btn-submit" id="mob-li-btn" onclick="mobLogin()">🔐 Đăng nhập</button>
+          <div class="mob-login-footer">
+            Chưa có tài khoản?
+            <a href="#" onclick="switchMobLoginTab('register');return false" style="color:var(--teal);font-weight:700">Đăng ký ngay →</a>
+          </div>
+        </div>
+
+        <!-- TAB: ĐĂNG KÝ -->
+        <div id="mob-register-panel" style="display:none">
+          <div class="mob-login-field">
+            <label>Tên hiển thị</label>
+            <input id="mob-rg-displayname" type="text" placeholder="Nguyễn Văn A"
+              onkeydown="if(event.key==='Enter')document.getElementById('mob-rg-username').focus()">
+          </div>
+          <div class="mob-login-field">
+            <label>Tên đăng nhập <span style="color:var(--rose)">*</span></label>
+            <input id="mob-rg-username" type="text" placeholder="vd: hoanganh123 (không dấu)"
+              oninput="validateUsernameInput(this)"
+              onkeydown="if(event.key==='Enter')document.getElementById('mob-rg-pass').focus()">
+            <div id="mob-rg-un-hint" style="font-size:11px;color:var(--ink4);margin-top:3px"></div>
+          </div>
+          <div class="mob-login-field">
+            <label>Mật khẩu <span style="color:var(--rose)">*</span> (≥6 ký tự)</label>
+            <input id="mob-rg-pass" type="password" placeholder="••••••••"
+              onkeydown="if(event.key==='Enter')document.getElementById('mob-rg-pass2').focus()">
+            <span class="mob-pw-toggle" onclick="togglePw('mob-rg-pass',this)">👁</span>
+          </div>
+          <div class="mob-login-field">
+            <label>Xác nhận mật khẩu <span style="color:var(--rose)">*</span></label>
+            <input id="mob-rg-pass2" type="password" placeholder="••••••••"
+              onkeydown="if(event.key==='Enter')mobRegister()">
+            <span class="mob-pw-toggle" onclick="togglePw('mob-rg-pass2',this)">👁</span>
+          </div>
+          <div class="mob-login-err" id="mob-rg-err"></div>
+          <div class="mob-login-ok" id="mob-rg-ok"></div>
+          <button class="mob-btn-submit" id="mob-rg-btn" onclick="mobRegister()">🚀 Tạo tài khoản</button>
+          <div class="mob-login-footer">
+            Đã có tài khoản?
+            <a href="#" onclick="switchMobLoginTab('login');return false" style="color:var(--teal);font-weight:700">← Đăng nhập</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Firebase config collapsible -->
+      <div class="mob-fb-section">
+        <div class="mob-fb-toggle" onclick="toggleMobFb()">
+          <div class="mob-fb-toggle-left">
+            <span class="mob-fb-toggle-icon">🔥</span>
+            <div>
+              <div class="mob-fb-toggle-title">Tích hợp Firebase</div>
+              <div class="mob-fb-toggle-sub">Kết nối cloud database</div>
+            </div>
+          </div>
+          <span class="mob-fb-toggle-arrow" id="mob-fb-arrow">▼</span>
+        </div>
+        <div class="mob-fb-body" id="mob-fb-body">
+          <div class="mob-fb-status disconnected" id="mob-fb-status">🔴 Chưa kết nối Firebase</div>
+          <div class="mob-fb-field"><label>API Key *</label><input id="mob-cfg-apiKey" placeholder="AIzaSy..."></div>
+          <div class="mob-fb-field"><label>Auth Domain *</label><input id="mob-cfg-authDomain" placeholder="your-app.firebaseapp.com"></div>
+          <div class="mob-fb-field"><label>Project ID *</label><input id="mob-cfg-projectId" placeholder="your-app-123"></div>
+          <div class="mob-fb-field"><label>Storage Bucket</label><input id="mob-cfg-storageBucket" placeholder="your-app.appspot.com"></div>
+          <div class="mob-fb-field"><label>Messaging Sender ID</label><input id="mob-cfg-messagingSenderId" placeholder="123456789012"></div>
+          <div class="mob-fb-field"><label>App ID</label><input id="mob-cfg-appId" placeholder="1:123:web:abc..."></div>
+          <div id="mob-cfg-err" style="font-size:12px;color:var(--rose);margin-top:4px;font-weight:600;display:none"></div>
+          <div class="mob-fb-actions">
+            <button class="mob-fb-btn outline" onclick="mobPasteFbConfig()">📋 Dán JSON</button>
+            <button class="mob-fb-btn primary" onclick="mobSaveFirebase()">💾 Lưu & Kết nối</button>
+          </div>
+          <div class="mob-fb-actions" style="margin-top:6px">
+            <button class="mob-fb-btn danger" onclick="mobClearFbConfig()">🗑 Xóa config</button>
+          </div>
+          <div class="mob-fb-paste-hint">💡 Dán toàn bộ firebaseConfig JSON để điền nhanh</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── LOGGED IN ── -->
+    <div id="mob-ui-loggedin" style="display:none">
+      <div class="mob-auth-loggedin">
+        <!-- User card -->
+        <div class="mob-user-card">
+          <div class="mob-user-avatar" id="mob-user-avatar">👤</div>
+          <div>
+            <div class="mob-user-name" id="mob-user-name">—</div>
+            <div class="mob-user-role" id="mob-user-role"></div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="mob-stat-row">
+          <div class="mob-stat-box">
+            <div class="mob-stat-box-val" id="mob-stat-streak">0</div>
+            <div class="mob-stat-box-lbl">🔥 Streak</div>
+          </div>
+          <div class="mob-stat-box">
+            <div class="mob-stat-box-val" id="mob-stat-xp">0</div>
+            <div class="mob-stat-box-lbl">⚡ XP</div>
+          </div>
+          <div class="mob-stat-box">
+            <div class="mob-stat-box-val" id="mob-stat-words">0</div>
+            <div class="mob-stat-box-lbl">📖 Từ</div>
+          </div>
+        </div>
+
+        <!-- Sync row -->
+        <div class="mob-sync-row">
+          <div class="mob-sync-label">☁️ Đồng bộ dữ liệu</div>
+          <div class="mob-sync-right">
+            <div class="sync-badge ok" id="mob-sync-badge">✅ Đã lưu</div>
+            <button class="mob-sync-btn" onclick="fbManualSync().then(()=>updateMobSyncBadge())">🔄 Sync</button>
+          </div>
+        </div>
+
+        <!-- Firebase status in logged-in -->
+        <div class="mob-fb-section" style="margin:0 0 14px">
+          <div class="mob-fb-toggle" onclick="toggleMobFb()">
+            <div class="mob-fb-toggle-left">
+              <span class="mob-fb-toggle-icon">🔥</span>
+              <div>
+                <div class="mob-fb-toggle-title">Firebase</div>
+                <div class="mob-fb-toggle-sub" id="mob-fb-status-loggedin">Đang kiểm tra...</div>
+              </div>
+            </div>
+            <span class="mob-fb-toggle-arrow" id="mob-fb-arrow2">▼</span>
+          </div>
+          <div class="mob-fb-body" id="mob-fb-body2">
+            <div class="mob-fb-status" id="mob-fb-status2" style="margin-bottom:8px">🔴 Chưa kết nối</div>
+            <div class="mob-fb-actions">
+              <button class="mob-fb-btn outline" onclick="openConfigModal();closeMobAccount()">⚙️ Cấu hình</button>
+              <button class="mob-fb-btn danger" onclick="mobClearFbConfig()">🗑 Xóa</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sign out -->
+        <button class="mob-signout-btn" onclick="mobSignOut()">
+          🚪 Đăng xuất
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <main class="main">
 <div id="px-banner" style="display:none;align-items:center;gap:10px;flex-wrap:wrap;background:#fef3c7;border-bottom:2px solid #fde68a;padding:10px 20px;font-size:13px;color:#92400e;position:sticky;top:0;z-index:100">
@@ -2576,8 +2991,12 @@ function showPanel(n){
   document.getElementById('panel-'+n).classList.add('active');
   const idx=NAV_IDX[n]??-1;
   document.querySelectorAll('.nav-item').forEach((e,i)=>e.classList.toggle('active',i===idx));
-  const mobIdx={home:0,roadmap:1,writing:2,'vocab-list':3,progress:4,'topic-detail':2}[n]??-1;
-  document.querySelectorAll('.mob-item').forEach((e,i)=>e.classList.toggle('active',i===mobIdx));
+  const mobIdx={home:0,roadmap:1,listening:2,'speaking-pro':3}[n]??-1;
+  document.querySelectorAll('.mob-item').forEach((e,i)=>{
+    // index 4 = Account tab, never auto-activate from showPanel
+    if(i===4) return;
+    e.classList.toggle('active', i===mobIdx);
+  });
   if(n==='vocab-list')renderVocabList();
   if(n==='import'){populateImpTopicSelect();}
   if(n==='topics')renderTopics();
@@ -7390,6 +7809,11 @@ function setSyncBadge(state,text){
 }
 
 function showLoginWall(){
+  // On mobile: open account drawer instead of fullscreen wall
+  if(window.innerWidth <= 767 && typeof openMobAccount === 'function'){
+    openMobAccount();
+    return;
+  }
   document.getElementById('login-wall').classList.add('show');
 }
 function hideLoginWall(){
@@ -10055,9 +10479,307 @@ function showSpScoreEnhanced(score, transcript, wordScores, targetWord, wordIpa)
 </body>
 </html>
 <script>
-// ═══════════════════════════════════════
-// MOBILE OPTIMIZATIONS — runtime init
-// ═══════════════════════════════════════
+// ═══════════════════════════════════════════════════
+// MOBILE ACCOUNT DRAWER — JS
+// ═══════════════════════════════════════════════════
+(function initMobAccount(){
+
+  /* ── Open / Close ── */
+  window.openMobAccount = function(){
+    const overlay = document.getElementById('mob-account-overlay');
+    if(!overlay) return;
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+    // Sync Firebase status display
+    _updateMobFbStatus();
+    // Sync stats if logged in
+    if(typeof _currentUser !== 'undefined' && _currentUser){
+      _showMobLoggedIn(_currentUser);
+    } else {
+      _showMobLoggedOut();
+    }
+  };
+
+  window.closeMobAccount = function(e){
+    if(e && e.target !== document.getElementById('mob-account-overlay')) return;
+    const overlay = document.getElementById('mob-account-overlay');
+    if(!overlay) return;
+    const sheet = document.getElementById('mob-account-sheet');
+    sheet.style.animation = 'sheetDown .22s cubic-bezier(.4,0,.2,1) forwards';
+    setTimeout(()=>{
+      overlay.classList.remove('open');
+      sheet.style.animation = '';
+      document.body.style.overflow = '';
+    }, 220);
+  };
+
+  // Add slide-down animation
+  const s = document.createElement('style');
+  s.textContent = '@keyframes sheetDown{from{transform:translateY(0);opacity:1}to{transform:translateY(100%);opacity:.3}}';
+  document.head.appendChild(s);
+
+  /* ── Tab switch ── */
+  window.switchMobLoginTab = function(tab){
+    ['login','register'].forEach(t=>{
+      const btn = document.getElementById('mob-ltab-'+t);
+      const panel = document.getElementById('mob-'+(t==='login'?'login':'register')+'-panel');
+      if(btn) btn.classList.toggle('active', t===tab);
+      if(panel) panel.style.display = t===tab ? 'block' : 'none';
+    });
+    // Clear errors
+    ['mob-li-err','mob-rg-err','mob-rg-ok'].forEach(id=>{
+      const el=document.getElementById(id); if(el){el.style.display='none';el.textContent='';}
+    });
+  };
+
+  /* ── Firebase toggle ── */
+  window.toggleMobFb = function(){
+    ['','2'].forEach(suffix=>{
+      const body = document.getElementById('mob-fb-body'+suffix);
+      const arrow = document.getElementById('mob-fb-arrow'+suffix);
+      if(body){ body.classList.toggle('open'); }
+      if(arrow){ arrow.classList.toggle('open', body && body.classList.contains('open')); }
+    });
+  };
+
+  /* ── Firebase status helper ── */
+  function _updateMobFbStatus(){
+    const cfg = typeof getFbConfig === 'function' ? getFbConfig() : null;
+    const connected = cfg && cfg.apiKey && !cfg.apiKey.startsWith('YOUR_') && cfg.projectId;
+    // Logged-out status
+    const st = document.getElementById('mob-fb-status');
+    if(st){
+      st.className = 'mob-fb-status ' + (connected ? 'connected' : 'disconnected');
+      st.textContent = connected ? '🟢 Đã kết nối: '+cfg.projectId : '🔴 Chưa kết nối Firebase';
+    }
+    // Logged-in status
+    const st2 = document.getElementById('mob-fb-status2');
+    const stSub = document.getElementById('mob-fb-status-loggedin');
+    if(st2){
+      st2.className = 'mob-fb-status ' + (connected ? 'connected' : 'disconnected');
+      st2.textContent = connected ? '🟢 Kết nối: '+cfg.projectId : '🔴 Chưa kết nối';
+    }
+    if(stSub) stSub.textContent = connected ? '🟢 '+cfg.projectId : 'Chưa kết nối';
+
+    // Pre-fill fields
+    if(connected && cfg){
+      _setFbField('mob-cfg-apiKey', cfg.apiKey);
+      _setFbField('mob-cfg-authDomain', cfg.authDomain);
+      _setFbField('mob-cfg-projectId', cfg.projectId);
+      _setFbField('mob-cfg-storageBucket', cfg.storageBucket);
+      _setFbField('mob-cfg-messagingSenderId', cfg.messagingSenderId);
+      _setFbField('mob-cfg-appId', cfg.appId);
+    }
+  }
+  function _setFbField(id, val){ const el=document.getElementById(id); if(el && val) el.value=val; }
+
+  /* ── Show logged in / out ── */
+  function _showMobLoggedIn(u){
+    const lo = document.getElementById('mob-ui-loggedout');
+    const li = document.getElementById('mob-ui-loggedin');
+    if(lo) lo.style.display = 'none';
+    if(li) li.style.display = 'block';
+    // Avatar
+    const av = document.getElementById('mob-user-avatar');
+    if(av){
+      av.className = 'mob-user-avatar' + (u.role==='admin' ? ' admin' : '');
+      av.textContent = u.role==='admin' ? '👑' : (u.displayName||u.username||'U')[0].toUpperCase();
+    }
+    // Name
+    const nm = document.getElementById('mob-user-name');
+    if(nm) nm.textContent = u.displayName || u.username || '—';
+    // Role badge
+    const rl = document.getElementById('mob-user-role');
+    if(rl) rl.innerHTML = u.role==='admin'
+      ? '<div class="auth-role-badge admin">👑 Admin</div>'
+      : '<div class="auth-role-badge user">👤 Thành viên</div>';
+    // Stats
+    const setV = (id,v)=>{ const el=document.getElementById(id); if(el) el.textContent=v; };
+    setV('mob-stat-streak', (typeof S!=='undefined'&&S.stats?.streak)||0);
+    setV('mob-stat-xp', (typeof S!=='undefined'&&S.stats?.xp)||0);
+    setV('mob-stat-words', (typeof S!=='undefined'&&S.vocab?.length)||0);
+    // Nav icon update
+    _updateNavAccountIcon(true, u);
+  }
+
+  function _showMobLoggedOut(){
+    const lo = document.getElementById('mob-ui-loggedout');
+    const li = document.getElementById('mob-ui-loggedin');
+    if(lo) lo.style.display = 'block';
+    if(li) li.style.display = 'none';
+    _updateNavAccountIcon(false, null);
+  }
+
+  /* ── Update nav account icon ── */
+  function _updateNavAccountIcon(loggedIn, u){
+    const icon = document.getElementById('mob-nav-account-icon');
+    const lbl = document.getElementById('mob-nav-account-lbl');
+    const badge = document.getElementById('mob-account-badge');
+    if(loggedIn && u){
+      if(icon) icon.textContent = u.role==='admin' ? '👑' : '😊';
+      if(lbl) lbl.textContent = (u.displayName||u.username||'').split(' ').pop() || 'Tài khoản';
+      if(badge) badge.style.display = 'block';
+    } else {
+      if(icon) icon.textContent = '👤';
+      if(lbl) lbl.textContent = 'Tài khoản';
+      if(badge) badge.style.display = 'none';
+    }
+  }
+
+  /* ── Login ── */
+  window.mobLogin = async function(){
+    const username = (document.getElementById('mob-li-username')?.value||'').trim();
+    const pass = document.getElementById('mob-li-pass')?.value||'';
+    const errEl = document.getElementById('mob-li-err');
+    const btn = document.getElementById('mob-li-btn');
+    const showErr = (msg)=>{ if(errEl){errEl.textContent=msg;errEl.style.display='block';} };
+    if(!username||!pass){ showErr('Vui lòng nhập đầy đủ thông tin.'); return; }
+    // Sync to main login fields and call existing appLogin
+    const setV = (id,v)=>{ const el=document.getElementById(id); if(el) el.value=v; };
+    setV('li-username', username); setV('li-pass', pass);
+    if(btn){ btn.disabled=true; btn.textContent='⏳ Đang đăng nhập...'; }
+    if(errEl) errEl.style.display='none';
+    try{
+      await appLogin();
+      // If success, appLogin calls _afterLogin → _renderLoggedInUI
+      // We hook into that via our observer below
+    } catch(e){ showErr('Đăng nhập thất bại. Kiểm tra lại thông tin.'); }
+    finally{ if(btn){ btn.disabled=false; btn.textContent='🔐 Đăng nhập'; } }
+  };
+
+  /* ── Register ── */
+  window.mobRegister = async function(){
+    const dn = (document.getElementById('mob-rg-displayname')?.value||'').trim();
+    const un = (document.getElementById('mob-rg-username')?.value||'').trim();
+    const pw = document.getElementById('mob-rg-pass')?.value||'';
+    const pw2 = document.getElementById('mob-rg-pass2')?.value||'';
+    const errEl = document.getElementById('mob-rg-err');
+    const okEl = document.getElementById('mob-rg-ok');
+    const btn = document.getElementById('mob-rg-btn');
+    const showErr=(m)=>{ if(errEl){errEl.textContent=m;errEl.style.display='block';} };
+    if(!un||!pw){ showErr('Vui lòng nhập đầy đủ thông tin.'); return; }
+    if(pw!==pw2){ showErr('Mật khẩu xác nhận không khớp.'); return; }
+    if(pw.length<6){ showErr('Mật khẩu phải có ít nhất 6 ký tự.'); return; }
+    // Sync to main register fields
+    const setV=(id,v)=>{ const el=document.getElementById(id); if(el) el.value=v; };
+    setV('rg-displayname',dn); setV('rg-username',un); setV('rg-pass',pw); setV('rg-pass2',pw2);
+    if(btn){ btn.disabled=true; btn.textContent='⏳ Đang tạo tài khoản...'; }
+    if(errEl) errEl.style.display='none';
+    try{
+      await appRegister();
+    } catch(e){ showErr('Đăng ký thất bại. Thử lại.'); }
+    finally{ if(btn){ btn.disabled=false; btn.textContent='🚀 Tạo tài khoản'; } }
+  };
+
+  /* ── Sign out ── */
+  window.mobSignOut = async function(){
+    await appSignOut();
+    closeMobAccount();
+  };
+
+  /* ── Firebase save ── */
+  window.mobSaveFirebase = async function(){
+    // Sync values to main config modal fields
+    const map = {
+      'mob-cfg-apiKey':'cfg-apiKey','mob-cfg-authDomain':'cfg-authDomain',
+      'mob-cfg-projectId':'cfg-projectId','mob-cfg-storageBucket':'cfg-storageBucket',
+      'mob-cfg-messagingSenderId':'cfg-messagingSenderId','mob-cfg-appId':'cfg-appId'
+    };
+    Object.entries(map).forEach(([src,dst])=>{
+      const s=document.getElementById(src), d=document.getElementById(dst);
+      if(s&&d) d.value=s.value;
+    });
+    const errEl = document.getElementById('mob-cfg-err');
+    if(errEl) errEl.style.display='none';
+    try{
+      await saveAndConnectFirebase();
+      _updateMobFbStatus();
+      if(errEl){ errEl.style.display='none'; }
+      showToast('✅ Firebase đã kết nối thành công!');
+    } catch(e){
+      if(errEl){ errEl.textContent='⚠️ Lỗi kết nối. Kiểm tra lại config.'; errEl.style.display='block'; }
+    }
+  };
+
+  window.mobPasteFbConfig = async function(){
+    try{
+      const text = await navigator.clipboard.readText();
+      // Reuse existing pasteFbConfig logic
+      const match = text.match(/\{[\s\S]*\}/);
+      if(!match) return;
+      const cfg = JSON.parse(match[0]);
+      const map = {
+        apiKey:'mob-cfg-apiKey', authDomain:'mob-cfg-authDomain',
+        projectId:'mob-cfg-projectId', storageBucket:'mob-cfg-storageBucket',
+        messagingSenderId:'mob-cfg-messagingSenderId', appId:'mob-cfg-appId'
+      };
+      Object.entries(map).forEach(([k,id])=>{
+        const el=document.getElementById(id); if(el&&cfg[k]) el.value=cfg[k];
+      });
+      showToast('📋 Đã dán config Firebase!');
+    } catch(e){ showToast('⚠️ Không đọc được clipboard. Dán thủ công nhé!'); }
+  };
+
+  window.mobClearFbConfig = function(){
+    clearFbConfig();
+    ['mob-cfg-apiKey','mob-cfg-authDomain','mob-cfg-projectId',
+     'mob-cfg-storageBucket','mob-cfg-messagingSenderId','mob-cfg-appId']
+      .forEach(id=>{ const el=document.getElementById(id); if(el) el.value=''; });
+    _updateMobFbStatus();
+    showToast('🗑 Đã xóa Firebase config');
+  };
+
+  /* ── Sync badge mirror ── */
+  window.updateMobSyncBadge = function(){
+    const src = document.getElementById('sync-badge');
+    const dst = document.getElementById('mob-sync-badge');
+    if(src && dst){
+      dst.className = src.className;
+      dst.textContent = src.textContent;
+    }
+  };
+
+  /* ── Observe main auth UI changes to mirror in drawer ── */
+  const _origRenderIn = typeof _renderLoggedInUI !== 'undefined' ? _renderLoggedInUI : null;
+  const _origRenderOut = typeof _renderLoggedOutUI !== 'undefined' ? _renderLoggedOutUI : null;
+
+  // Intercept via MutationObserver on ui-logged-in
+  const uiIn = document.getElementById('ui-logged-in');
+  const uiOut = document.getElementById('ui-logged-out');
+  if(uiIn || uiOut){
+    const mo = new MutationObserver(()=>{
+      const isIn = uiIn && uiIn.style.display !== 'none';
+      if(isIn && typeof _currentUser !== 'undefined' && _currentUser){
+        _showMobLoggedIn(_currentUser);
+        // Auto-close login wall if open
+        const wall = document.getElementById('login-wall');
+        if(wall && wall.classList.contains('show')){
+          wall.classList.remove('show');
+          closeMobAccount();
+        }
+      } else {
+        _showMobLoggedOut();
+      }
+    });
+    if(uiIn) mo.observe(uiIn, {attributes:true, attributeFilter:['style']});
+    if(uiOut) mo.observe(uiOut, {attributes:true, attributeFilter:['style']});
+  }
+
+  // Mirror sync badge changes
+  const syncBadge = document.getElementById('sync-badge');
+  if(syncBadge){
+    new MutationObserver(()=>updateMobSyncBadge()).observe(syncBadge, {childList:true, attributes:true, characterData:true, subtree:true});
+  }
+
+  // On initial load check session
+  setTimeout(()=>{
+    if(typeof _currentUser !== 'undefined' && _currentUser){
+      _showMobLoggedIn(_currentUser);
+    }
+  }, 800);
+
+})();
+
 (function initMobile(){
   if(window.innerWidth > 767) return;
 
