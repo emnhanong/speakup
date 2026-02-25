@@ -2598,7 +2598,10 @@ html.mob-sheet-open body{
         <div class="page-title">Danh Sách <em>Từ Vựng</em></div>
         <div class="page-sub" id="vocab-count-sub">Đang tải...</div>
       </div>
-      <button class="btn btn-primary btn-sm" onclick="openModal()">+ Thêm từ mới</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-outline btn-sm" onclick="exportVocabToExcel()">📤 Export Excel</button>
+        <button class="btn btn-primary btn-sm" onclick="openModal()">+ Thêm từ mới</button>
+      </div>
     </div>
   </div>
   <div class="card">
@@ -4791,6 +4794,39 @@ function updTopicFilter(){
     const dl = document.getElementById(id);
     if(dl) dl.innerHTML = allTopics.map(t => `<option value="${t}">`).join('');
   });
+}
+
+function exportVocabToExcel(){
+  const topicFilter = document.getElementById('topic-filter')?.value || '';
+  const searchVal = document.getElementById('vocab-search')?.value || '';
+  const starredOnly = document.getElementById('starred-only')?.checked || false;
+
+  let data = S.vocab.slice();
+  if(topicFilter) data = data.filter(v => v.topic === topicFilter);
+  if(searchVal) data = data.filter(v => v.word.toLowerCase().includes(searchVal.toLowerCase()) || v.meaning.includes(searchVal));
+  if(starredOnly) data = data.filter(v => v.starred);
+
+  if(!data.length){ alert('Không có từ vựng nào để export!'); return; }
+
+  const rows = [['Từ vựng', 'Nghĩa tiếng Việt', 'Câu ví dụ']];
+  data.forEach(v => rows.push([v.word || '', v.meaning || '', v.example || '']));
+
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.aoa_to_sheet(rows);
+
+  // Column widths
+  ws['!cols'] = [{wch:20},{wch:30},{wch:50}];
+
+  // Style header row
+  ['A1','B1','C1'].forEach(cell => {
+    if(ws[cell]) ws[cell].s = {font:{bold:true},fill:{fgColor:{rgb:'0D9488'}},alignment:{horizontal:'center'}};
+  });
+
+  XLSX.utils.book_append_sheet(wb, ws, 'Template');
+
+  const topicSuffix = topicFilter ? `_${topicFilter.replace(/[^a-zA-Z0-9]/g,'_')}` : '_all';
+  const fileName = `SpeakUp_Vocabulary${topicSuffix}_${new Date().toISOString().slice(0,10)}.xlsx`;
+  XLSX.writeFile(wb, fileName);
 }
 
 function filterVocab(search){
