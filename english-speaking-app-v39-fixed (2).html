@@ -11819,5 +11819,605 @@ if(typeof window.closeMobAccount === 'undefined'){
   document.head.appendChild(s);
 })();
 </script>
+
+<!-- ═══════════════════════════════════════════════════════════
+     ⌨️  KEYBOARD SHORTCUTS — SpeakUp
+     Tác giả: Claude (Anthropic) — thêm vào phiên bản keyboard
+     
+     FLASHCARD (panel study, tab flashcard):
+       ← / A      → Từ trước
+       → / D      → Từ tiếp
+       1          → Đánh giá "Khó nhớ"
+       2          → Đánh giá "Tạm ổn"
+       3          → Đánh giá "Nhớ rồi!"
+       Space      → Phát âm từ hiện tại
+     
+     SPEAKING (panel study, tab speaking):
+       ← / A      → Từ trước
+       → / D      → Từ tiếp
+       Space      → Bắt đầu / dừng ghi âm
+     
+     QUIZ:
+       ← / A      → Câu trước (prevQ)
+       → / D      → Câu sau / skip (skipQ)
+       1–4        → Chọn đáp án A–D (trắc nghiệm)
+       Enter      → Nếu feedback đúng → tiếp (advanceQ)
+                    Nếu điền từ chưa submit → checkFill()
+                    Nếu sắp xếp câu chưa submit → checkOrder()
+     
+     WRITING:
+       Enter      → Nếu chưa chấm: kiểm tra (checkAnswer)
+                    Nếu đã chấm: câu tiếp (advanceWr)
+       ← / A      → Câu trước (prevWr)
+       → / D      → Câu tiếp (advanceWr) — chỉ sau khi đã chấm
+     
+     LISTENING:
+       Enter / → / D → Câu tiếp (ltNext)
+       ← / A         → Câu trước (ltPrev)
+       Space         → Phát / dừng audio
+     
+     ROADMAP QUIZ-10:
+       1–4        → Chọn đáp án
+       Enter      → Tiếp nếu đã có feedback
+     
+     REVIEW SESSION:
+       1–4        → Chọn đáp án
+       Enter      → Tiếp nếu đã có feedback
+     
+     TOÀN CỤC:
+       Escape     → Đóng modal / confirm đang mở
+═══════════════════════════════════════════════════════════ -->
+<script>
+(function initKeyboardShortcuts(){
+  'use strict';
+
+  /* ── Helpers ── */
+  function activePanel(){
+    const p = document.querySelector('.panel.active');
+    return p ? p.id : '';
+  }
+
+  function isTyping(e){
+    const t = e.target;
+    if(!t) return false;
+    const tag = t.tagName;
+    // Cho phép phím tắt nếu đang focus vào textarea wr-ans nhưng chỉ khi cần
+    if(tag==='INPUT'||tag==='SELECT'||tag==='TEXTAREA') return true;
+    if(t.isContentEditable) return true;
+    return false;
+  }
+
+  /* Kiểm tra tab đang active trong panel study */
+  function activeStudyTab(){
+    const fc = document.getElementById('tab-flashcard');
+    const qz = document.getElementById('tab-quiz');
+    const sp = document.getElementById('tab-speaking');
+    if(fc && fc.style.display!=='none') return 'flashcard';
+    if(qz && qz.style.display!=='none') return 'quiz';
+    if(sp && sp.style.display!=='none') return 'speaking';
+    return '';
+  }
+
+  /* Kiểm tra có modal/overlay đang mở không */
+  function anyModalOpen(){
+    const selectors = [
+      '#confirm-overlay.show',
+      '#login-wall.show',
+      '#modal-config.open',
+      '#edit-word-modal.show',
+      '.mob-account-overlay.open',
+      '#add-modal.show',
+    ];
+    return selectors.some(sel => document.querySelector(sel));
+  }
+
+  /* ── Highlight button giả lập click ── */
+  function flashBtn(el){
+    if(!el || el.disabled) return false;
+    el.style.transition = 'transform .1s, box-shadow .1s';
+    el.style.transform  = 'scale(.95)';
+    setTimeout(()=>{ el.style.transform=''; }, 120);
+    return true;
+  }
+
+  /* ── Toast nhỏ hiển thị phím tắt vừa dùng ── */
+  let _kbToastTimer = null;
+  function kbHint(msg){
+    let el = document.getElementById('_kb_hint');
+    if(!el){
+      el = document.createElement('div');
+      el.id = '_kb_hint';
+      el.style.cssText = [
+        'position:fixed','bottom:80px','left:50%',
+        'transform:translateX(-50%)','z-index:99999',
+        'background:rgba(0,0,0,.72)','color:#fff',
+        'padding:6px 14px','border-radius:20px',
+        'font-size:12px','font-weight:700',
+        'pointer-events:none','transition:opacity .25s',
+        'white-space:nowrap','letter-spacing:.02em',
+      ].join(';');
+      document.body.appendChild(el);
+    }
+    el.textContent = msg;
+    el.style.opacity = '1';
+    clearTimeout(_kbToastTimer);
+    _kbToastTimer = setTimeout(()=>{ el.style.opacity='0'; }, 900);
+  }
+
+  /* ══════════════════════════════════════════════
+     FLASHCARD SHORTCUTS
+  ══════════════════════════════════════════════ */
+  function handleFlashcard(e){
+    const k = e.key;
+
+    if(k==='ArrowLeft'||k==='a'||k==='A'){
+      e.preventDefault();
+      const btn = document.querySelector('#tab-flashcard .fc-prev-btn:not(:disabled)');
+      if(btn){ flashBtn(btn); fcPrev(); kbHint('← Từ trước'); }
+      return;
+    }
+    if(k==='ArrowRight'||k==='d'||k==='D'){
+      e.preventDefault();
+      const btn = document.querySelector('#tab-flashcard .fc-next-btn:not(:disabled)');
+      if(btn){ flashBtn(btn); fcNext(); kbHint('→ Từ tiếp'); }
+      return;
+    }
+    if(k===' '){ // Space → phát âm
+      e.preventDefault();
+      const w = S.study.words[S.study.idx % (S.study.words.length||1)];
+      if(w){ speak(w.word); kbHint('🔊 Phát âm'); }
+      return;
+    }
+    if(k==='1'){
+      e.preventDefault();
+      const btn = document.querySelector('.rate-btn.rb-hard');
+      if(btn){ flashBtn(btn); rateCard('hard'); kbHint('1 — 😅 Khó nhớ'); }
+      return;
+    }
+    if(k==='2'){
+      e.preventDefault();
+      const btn = document.querySelector('.rate-btn.rb-ok');
+      if(btn){ flashBtn(btn); rateCard('ok'); kbHint('2 — 🤔 Tạm ổn'); }
+      return;
+    }
+    if(k==='3'){
+      e.preventDefault();
+      const btn = document.querySelector('.rate-btn.rb-easy');
+      if(btn){ flashBtn(btn); rateCard('easy'); kbHint('3 — 😊 Nhớ rồi!'); }
+      return;
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     SPEAKING SHORTCUTS
+  ══════════════════════════════════════════════ */
+  function handleSpeaking(e){
+    const k = e.key;
+    if(k==='ArrowLeft'||k==='a'||k==='A'){
+      e.preventDefault();
+      const btn = document.querySelector('#tab-speaking button[onclick*="prevSpeak"]:not([disabled])');
+      if(btn){ flashBtn(btn); prevSpeak(); kbHint('← Từ trước'); }
+      return;
+    }
+    if(k==='ArrowRight'||k==='d'||k==='D'){
+      e.preventDefault();
+      const btn = document.querySelector('#tab-speaking button[onclick*="nextSpeak"]');
+      if(btn){ flashBtn(btn); nextSpeak(); kbHint('→ Từ tiếp'); }
+      return;
+    }
+    if(k===' '){
+      e.preventDefault();
+      const recBtn = document.getElementById('rec-btn');
+      if(recBtn){ flashBtn(recBtn); toggleRec(); kbHint('🎙️ Ghi âm'); }
+      return;
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     QUIZ SHORTCUTS
+  ══════════════════════════════════════════════ */
+  function handleQuiz(e){
+    const k = e.key;
+
+    // Nếu có feedback đang mở → Enter = tiếp theo
+    const feedbackEl = document.querySelector('.qz-feedback');
+    if(feedbackEl){
+      if(k==='Enter'){
+        e.preventDefault();
+        // Ưu tiên nút "Tiếp →" (advanceQ)
+        const nextBtn = feedbackEl.querySelector('.qz-next-btn[onclick*="advanceQ"]');
+        if(nextBtn){ flashBtn(nextBtn); advanceQ(); kbHint('Enter → Câu tiếp'); return; }
+      }
+      // Nếu có feedback nhưng chưa Enter → block các phím khác tránh nhầm
+      if(k!=='ArrowLeft'&&k!=='a'&&k!=='A') return;
+    }
+
+    const q = S.quiz.questions[S.quiz.current];
+    if(!q) return;
+
+    // ← → Prev / Skip
+    if(k==='ArrowLeft'||k==='a'||k==='A'){
+      e.preventDefault();
+      prevQ(); kbHint('← Câu trước');
+      return;
+    }
+    if(k==='ArrowRight'||k==='d'||k==='D'){
+      e.preventDefault();
+      skipQ(); kbHint('→ Bỏ qua');
+      return;
+    }
+
+    // Trắc nghiệm: 1-4 chọn đáp án
+    if(q.type==='meaning-mc' && !feedbackEl){
+      const idx = {'1':0,'2':1,'3':2,'4':3}[k];
+      if(idx !== undefined){
+        e.preventDefault();
+        const opts = document.querySelectorAll('#tab-quiz .opt:not(.correct):not(.wrong)');
+        if(opts[idx]){
+          const id = opts[idx].getAttribute('data-id');
+          flashBtn(opts[idx]);
+          checkMCOpt(opts[idx], id, q.correct);
+          kbHint(`${k} — Chọn ${['A','B','C','D'][idx]}`);
+        }
+        return;
+      }
+    }
+
+    // Điền từ: Enter → checkFill (nếu input chưa submit)
+    if(q.type==='fill-blank' && !feedbackEl){
+      if(k==='Enter'){
+        const inp = document.getElementById('fill-ans');
+        if(inp && document.activeElement !== inp){
+          e.preventDefault();
+          checkFill(); kbHint('Enter → Kiểm tra');
+        }
+        // Nếu đang focus input → để input tự xử lý Enter (đã có onkeydown)
+        return;
+      }
+    }
+
+    // Sắp xếp câu: Enter → checkOrder
+    if(q.type==='word-builder' && !feedbackEl){
+      if(k==='Enter'){
+        e.preventDefault();
+        checkOrder(); kbHint('Enter → Kiểm tra');
+        return;
+      }
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     WRITING SHORTCUTS
+  ══════════════════════════════════════════════ */
+  function handleWriting(e){
+    const k = e.key;
+    if(!_wrSession) return;
+
+    const result = _wrSession.results[_wrSession.current];
+    const wrAns  = document.getElementById('wr-ans');
+    const isInTextarea = (document.activeElement === wrAns);
+
+    // Enter: nếu đã có kết quả → tiếp; nếu chưa và không focus textarea → check
+    if(k==='Enter' && !e.shiftKey){
+      if(result){
+        // Đã chấm → Enter tiến câu tiếp
+        e.preventDefault();
+        const btn = document.querySelector('#wr-content .btn-primary[onclick*="advanceWr"]');
+        if(btn){ flashBtn(btn); advanceWr(); kbHint('Enter → Câu tiếp'); }
+        return;
+      } else if(!isInTextarea){
+        // Chưa chấm, không focus vào textarea → trigger check
+        e.preventDefault();
+        checkAnswer(); kbHint('Enter → Kiểm tra');
+        return;
+      }
+      // Nếu đang focus textarea thì để Enter tự xử lý bởi onkeydown trong textarea
+      return;
+    }
+
+    // Arrow phải / D → câu tiếp (chỉ sau khi đã chấm)
+    if((k==='ArrowRight'||k==='d'||k==='D') && !isInTextarea){
+      if(result){
+        e.preventDefault();
+        advanceWr(); kbHint('→ Câu tiếp');
+      }
+      return;
+    }
+
+    // Arrow trái / A → câu trước
+    if((k==='ArrowLeft'||k==='a'||k==='A') && !isInTextarea){
+      e.preventDefault();
+      prevWr(); kbHint('← Câu trước');
+      return;
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     LISTENING SHORTCUTS
+  ══════════════════════════════════════════════ */
+  function handleListening(e){
+    const k = e.key;
+    const ltInp = document.querySelector('#panel-listening input, #panel-listening .lt-fill-input, #panel-listening .lt-dict-input');
+    const isInInput = (ltInp && document.activeElement === ltInp);
+
+    if(isInInput) return; // Đừng can thiệp khi user đang gõ
+
+    if(k==='ArrowRight'||k==='d'||k==='D'||(k==='Enter')){
+      e.preventDefault();
+      // Tìm nút "Tiếp theo" trong listening
+      const nextBtn = document.querySelector('#panel-listening .lt-next-btn, #panel-listening .btn-primary[onclick*="ltNext"], #panel-listening .btn-primary[onclick*="ltAdvance"]');
+      if(nextBtn && !nextBtn.disabled){ flashBtn(nextBtn); nextBtn.click(); kbHint('→ Câu tiếp'); }
+      return;
+    }
+    if(k==='ArrowLeft'||k==='a'||k==='A'){
+      e.preventDefault();
+      const prevBtn = document.querySelector('#panel-listening .btn[onclick*="ltPrev"], #panel-listening .btn-outline[onclick*="Prev"]');
+      if(prevBtn && !prevBtn.disabled){ flashBtn(prevBtn); prevBtn.click(); kbHint('← Câu trước'); }
+      return;
+    }
+    if(k===' '){
+      e.preventDefault();
+      const playBtn = document.querySelector('#panel-listening .lt-play-btn');
+      if(playBtn){ flashBtn(playBtn); playBtn.click(); kbHint('Space → Phát âm'); }
+      return;
+    }
+    // Trắc nghiệm listening: 1-4
+    const idx = {'1':0,'2':1,'3':2,'4':3}[k];
+    if(idx !== undefined){
+      e.preventDefault();
+      const opts = document.querySelectorAll('#panel-listening .lt-opt:not(.correct):not(.wrong)');
+      if(opts[idx]){ flashBtn(opts[idx]); opts[idx].click(); kbHint(`${k} — Chọn ${['A','B','C','D'][idx]}`); }
+      return;
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     ROADMAP QUIZ-10 SHORTCUTS
+  ══════════════════════════════════════════════ */
+  function handleRdpQuiz(e){
+    const k = e.key;
+    const rdpView = document.getElementById('rdp-quiz10-view');
+    if(!rdpView || rdpView.style.display==='none') return;
+
+    // Enter → tiếp nếu có nút next
+    if(k==='Enter'){
+      e.preventDefault();
+      const nextBtn = rdpView.querySelector('.btn-primary[onclick*="rdpNext"], .btn-primary[onclick*="advanceRdp"], .btn-primary[onclick*="showRdpQuestion"]');
+      if(nextBtn){ flashBtn(nextBtn); nextBtn.click(); kbHint('Enter → Câu tiếp'); return; }
+      const checkBtn = rdpView.querySelector('.btn-primary[onclick*="checkRdp"], .btn-primary[onclick*="checkFill"]');
+      if(checkBtn){ flashBtn(checkBtn); checkBtn.click(); kbHint('Enter → Kiểm tra'); return; }
+    }
+    // 1-4 chọn đáp án
+    const idx = {'1':0,'2':1,'3':2,'4':3}[k];
+    if(idx !== undefined){
+      e.preventDefault();
+      const opts = rdpView.querySelectorAll('.opt:not(.correct):not(.wrong), .lt-opt:not(.correct):not(.wrong)');
+      if(opts[idx]){ flashBtn(opts[idx]); opts[idx].click(); kbHint(`${k} — Chọn ${['A','B','C','D'][idx]}`); }
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     REVIEW SESSION SHORTCUTS
+  ══════════════════════════════════════════════ */
+  function handleReview(e){
+    const k = e.key;
+    const revView = document.getElementById('rdp-review-view');
+    if(!revView || revView.style.display==='none') return;
+
+    if(k==='Enter'){
+      e.preventDefault();
+      const nextBtn = revView.querySelector('.btn-primary[onclick*="next"], .btn-primary[onclick*="advance"], .btn-primary[onclick*="showReview"]');
+      if(nextBtn){ flashBtn(nextBtn); nextBtn.click(); kbHint('Enter → Câu tiếp'); return; }
+    }
+    const idx = {'1':0,'2':1,'3':2,'4':3}[k];
+    if(idx !== undefined){
+      e.preventDefault();
+      const opts = revView.querySelectorAll('.opt:not(.correct):not(.wrong)');
+      if(opts[idx]){ flashBtn(opts[idx]); opts[idx].click(); kbHint(`${k} — ${['A','B','C','D'][idx]}`); }
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     SPEAKING PRO SHORTCUTS
+  ══════════════════════════════════════════════ */
+  function handleSpeakingPro(e){
+    const k = e.key;
+    if(k===' '){
+      e.preventDefault();
+      // Nút mic speaking pro
+      const micBtn = document.querySelector('#panel-speaking-pro .sp-mic-btn, #panel-speaking-pro .rec-ring, #panel-speaking-pro button[onclick*="toggleSpRec"]');
+      if(micBtn){ flashBtn(micBtn); micBtn.click(); kbHint('Space → Ghi âm'); }
+      return;
+    }
+    if(k==='ArrowRight'||k==='d'||k==='D'){
+      e.preventDefault();
+      const nextBtn = document.querySelector('#panel-speaking-pro .btn-primary[onclick*="spNext"], #panel-speaking-pro .btn[onclick*="next"]');
+      if(nextBtn && !nextBtn.disabled){ flashBtn(nextBtn); nextBtn.click(); kbHint('→ Tiếp theo'); }
+      return;
+    }
+    if(k==='ArrowLeft'||k==='a'||k==='A'){
+      e.preventDefault();
+      const prevBtn = document.querySelector('#panel-speaking-pro .btn[onclick*="Prev"], #panel-speaking-pro .btn[onclick*="prev"]');
+      if(prevBtn && !prevBtn.disabled){ flashBtn(prevBtn); prevBtn.click(); kbHint('← Trước'); }
+      return;
+    }
+  }
+
+  /* ══════════════════════════════════════════════
+     ESCAPE — đóng modal / confirm
+  ══════════════════════════════════════════════ */
+  function handleEscape(){
+    // Đóng confirm dialog
+    const confirmOverlay = document.getElementById('confirm-overlay');
+    if(confirmOverlay && confirmOverlay.classList.contains('show')){
+      closeConfirm(); kbHint('Esc → Đóng');
+      return true;
+    }
+    // Đóng edit word modal
+    const editModal = document.getElementById('edit-word-modal');
+    if(editModal && editModal.classList.contains('show')){
+      closeEditWordModal(); kbHint('Esc → Đóng');
+      return true;
+    }
+    // Đóng add word modal
+    const addModal = document.getElementById('add-modal');
+    if(addModal && addModal.classList.contains('show')){
+      closeModal(); kbHint('Esc → Đóng');
+      return true;
+    }
+    // Đóng firebase config modal
+    const cfgModal = document.getElementById('modal-config');
+    if(cfgModal && cfgModal.classList.contains('open')){
+      closeConfigModal(); kbHint('Esc → Đóng');
+      return true;
+    }
+    // Đóng login wall
+    const loginWall = document.getElementById('login-wall');
+    if(loginWall && loginWall.classList.contains('show')){
+      hideLoginWall(); kbHint('Esc → Đóng');
+      return true;
+    }
+    // Đóng mobile account drawer
+    const mobDrawer = document.getElementById('mob-account-overlay');
+    if(mobDrawer && mobDrawer.classList.contains('open')){
+      if(typeof closeMobAccount==='function') closeMobAccount();
+      kbHint('Esc → Đóng');
+      return true;
+    }
+    return false;
+  }
+
+  /* ══════════════════════════════════════════════
+     MAIN KEY HANDLER
+  ══════════════════════════════════════════════ */
+  document.addEventListener('keydown', function(e){
+    // Escape luôn xử lý trước
+    if(e.key === 'Escape'){
+      handleEscape();
+      return;
+    }
+
+    // Bỏ qua nếu có modifier key (Ctrl/Cmd/Alt) để không chặn browser shortcuts
+    if(e.ctrlKey || e.metaKey || e.altKey) return;
+
+    // Nếu có modal mở → không xử lý phím tắt khác
+    if(anyModalOpen()) return;
+
+    const panel = activePanel();
+
+    // ── PANEL STUDY ──
+    if(panel === 'panel-study'){
+      const tab = activeStudyTab();
+
+      if(tab === 'flashcard'){
+        // Không can thiệp nếu đang focus input
+        if(isTyping(e)) return;
+        handleFlashcard(e);
+        return;
+      }
+
+      if(tab === 'speaking'){
+        // Space khi không focus input
+        if(e.key !== ' ' && isTyping(e)) return;
+        if(e.key === ' ' && isTyping(e)) return;
+        handleSpeaking(e);
+        return;
+      }
+
+      if(tab === 'quiz'){
+        // Cho phép xử lý quiz nhưng skip khi đang focus input text
+        const quizInp = document.getElementById('fill-ans');
+        const focusedFill = (quizInp && document.activeElement === quizInp);
+        // Nếu đang điền từ và Enter → để onkeydown của input tự xử lý
+        if(focusedFill && e.key === 'Enter') return;
+        if(focusedFill && e.key !== 'Enter' && e.key !== 'Escape') return;
+        handleQuiz(e);
+        return;
+      }
+    }
+
+    // ── PANEL WRITING ──
+    if(panel === 'panel-writing'){
+      handleWriting(e);
+      return;
+    }
+
+    // ── PANEL LISTENING ──
+    if(panel === 'panel-listening'){
+      if(isTyping(e) && e.key !== 'Enter') return;
+      handleListening(e);
+      return;
+    }
+
+    // ── PANEL SPEAKING PRO ──
+    if(panel === 'panel-speaking-pro'){
+      if(isTyping(e)) return;
+      handleSpeakingPro(e);
+      return;
+    }
+
+    // ── PANEL ROADMAP ──
+    if(panel === 'panel-roadmap'){
+      if(isTyping(e)) return;
+      handleRdpQuiz(e);
+      handleReview(e);
+      return;
+    }
+  });
+
+  /* ══════════════════════════════════════════════
+     VISUAL: Thêm CSS cho kb-hint
+  ══════════════════════════════════════════════ */
+  const kbStyle = document.createElement('style');
+  kbStyle.textContent = `
+    #_kb_hint {
+      font-family: var(--font-b, system-ui, sans-serif);
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    /* Highlight rate buttons khi hover/active để user biết phím */
+    .rate-btn { position: relative; }
+    .rate-btn.rb-hard::after  { content: '[1]'; position:absolute; top:3px; right:5px; font-size:9px; color:rgba(0,0,0,.35); font-weight:700; }
+    .rate-btn.rb-ok::after    { content: '[2]'; position:absolute; top:3px; right:5px; font-size:9px; color:rgba(0,0,0,.35); font-weight:700; }
+    .rate-btn.rb-easy::after  { content: '[3]'; position:absolute; top:3px; right:5px; font-size:9px; color:rgba(0,0,0,.35); font-weight:700; }
+    @media(max-width:767px){ .rate-btn::after { display:none; } }
+  `;
+  document.head.appendChild(kbStyle);
+
+  /* ══════════════════════════════════════════════
+     HELP TOOLTIP — Hiện khi hover biểu tượng ⌨️
+     (thêm tự động vào topbar của các module)
+  ══════════════════════════════════════════════ */
+  function injectKbHelp(containerId, tips){
+    setTimeout(function(){
+      const el = document.getElementById(containerId);
+      if(!el || el.querySelector('._kb_help_btn')) return;
+      const btn = document.createElement('button');
+      btn.className = '_kb_help_btn';
+      btn.title = tips;
+      btn.innerHTML = '⌨️';
+      btn.style.cssText = [
+        'background:none','border:none','cursor:pointer',
+        'font-size:14px','opacity:.5','padding:2px 6px',
+        'transition:opacity .15s','position:absolute',
+        'top:12px','right:12px','z-index:10',
+      ].join(';');
+      btn.onmouseenter = ()=>{ btn.style.opacity='1'; };
+      btn.onmouseleave = ()=>{ btn.style.opacity='.5'; };
+      btn.onclick = (ev)=>{
+        ev.stopPropagation();
+        showToast('⌨️ ' + tips.split('\n')[0]);
+      };
+      if(getComputedStyle(el).position === 'static') el.style.position = 'relative';
+      el.appendChild(btn);
+    }, 800);
+  }
+
+  // Không inject trực tiếp vì HTML được re-render mỗi lần — hint tooltip đã qua kbHint
+  console.log('[SpeakUp] ⌨️ Keyboard shortcuts loaded! ArrowLeft/Right, 1-3, Enter, Space đã hoạt động.');
+
+})();
+</script>
 </body>
 </html>
