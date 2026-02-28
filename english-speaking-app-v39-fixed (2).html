@@ -1793,6 +1793,239 @@ html.mob-sheet-open body{
     max-height:85vh;
   }
 }
+
+
+
+/* ══════════════════════════════════════════════════════════
+   🎬 VIDEO VOCAB — CSS
+══════════════════════════════════════════════════════════ */
+
+/* Hero banner */
+.vv-hero {
+  background: linear-gradient(135deg, #0a0618 0%, #1a0f3c 45%, #082a22 100%);
+  border-radius: 18px; padding: 24px 28px; color: #fff;
+  margin-bottom: 22px; position: relative; overflow: hidden;
+}
+.vv-hero::before {
+  content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(ellipse at 75% 40%, rgba(124,58,237,.3) 0%, transparent 55%),
+              radial-gradient(ellipse at 15% 75%, rgba(13,148,136,.22) 0%, transparent 50%);
+}
+.vv-hero-cine {
+  position: absolute; right: -10px; top: 50%; transform: translateY(-50%);
+  font-size: 90px; opacity: .07; line-height: 1;
+}
+.vv-hero-title {
+  font-family: var(--font-d); font-size: 23px; font-weight: 900;
+  margin-bottom: 4px; position: relative;
+}
+.vv-hero-sub { font-size: 13px; opacity: .72; margin-bottom: 16px; position: relative; }
+.vv-hero-tags { display: flex; gap: 6px; flex-wrap: wrap; position: relative; }
+.vv-hero-tag {
+  background: rgba(255,255,255,.11); border: 1px solid rgba(255,255,255,.2);
+  border-radius: 20px; padding: 3px 11px; font-size: 11px; font-weight: 700;
+}
+
+/* Source card */
+.vv-source-card {
+  border-radius: 14px; padding: 16px 18px; margin-bottom: 16px; font-size: 13px;
+  background: linear-gradient(135deg, rgba(124,58,237,.08), rgba(13,148,136,.06));
+  border: 1.5px solid rgba(124,58,237,.18); line-height: 1.75; color: var(--ink2);
+}
+.vv-source-card h4 { font-size: 13px; font-weight: 800; color: var(--violet); margin: 0 0 6px; }
+.vv-source-row { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 4px; }
+.vv-source-badge {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--teal-light); color: var(--teal);
+  border-radius: 20px; padding: 2px 10px; font-size: 11px; font-weight: 700;
+  white-space: nowrap; flex-shrink: 0; margin-top: 1px;
+}
+.vv-source-badge.violet { background: var(--violet-light); color: var(--violet); }
+.vv-source-badge.amber  { background: var(--amber-light);  color: var(--amber); }
+
+/* Setup card */
+.vv-setup {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 20px 22px; margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+}
+.vv-setup-title {
+  font-family: var(--font-d); font-size: 15px; font-weight: 800;
+  color: var(--ink); margin-bottom: 14px;
+}
+
+/* Key row */
+.vv-key-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.vv-key-inp {
+  flex: 1; min-width: 180px; padding: 10px 14px;
+  border: 1.5px solid var(--border2); border-radius: var(--radius-sm);
+  font-size: 13px; font-family: var(--font-b); color: var(--ink);
+  background: var(--surface2); outline: none; transition: border-color .15s;
+}
+.vv-key-inp:focus { border-color: var(--violet); box-shadow: 0 0 0 3px rgba(124,58,237,.1); }
+.vv-key-ok  { color: var(--teal); font-size: 12px; font-weight: 700; }
+.vv-key-no  { color: var(--amber); font-size: 12px; font-weight: 700; }
+
+/* ─── PLAYER ─── */
+.vv-player-wrap {
+  position: relative; background: #0a0618;
+  border-radius: 18px; overflow: hidden;
+  margin-bottom: 14px;
+  box-shadow: 0 16px 48px rgba(0,0,0,.4);
+  aspect-ratio: 16 / 9;
+}
+@media(max-width:767px) { .vv-player-wrap { border-radius: 14px; } }
+
+.vv-video-el {
+  width: 100%; height: 100%; object-fit: cover;
+  display: block; border-radius: 18px;
+}
+@media(max-width:767px) { .vv-video-el { border-radius: 14px; } }
+
+/* Loading overlay */
+.vv-overlay {
+  position: absolute; inset: 0; z-index: 6;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: rgba(10, 6, 24, .75); backdrop-filter: blur(6px);
+  transition: opacity .3s;
+}
+.vv-overlay.gone { opacity: 0; pointer-events: none; }
+.vv-spin {
+  width: 46px; height: 46px;
+  border: 4px solid rgba(255,255,255,.15);
+  border-top-color: #a78bfa;
+  border-radius: 50%;
+  animation: _vvspin .8s linear infinite;
+  margin-bottom: 12px;
+}
+@keyframes _vvspin { to { transform: rotate(360deg); } }
+.vv-overlay-msg { font-size: 13px; color: rgba(255,255,255,.65); font-weight: 600; }
+
+/* No-video fallback */
+.vv-no-video {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #1a0f3c, #082a22);
+  padding: 24px; text-align: center;
+}
+.vv-nv-word { font-family: var(--font-d); font-size: 44px; font-weight: 900; color: #e2d9f3; margin-bottom: 8px; }
+.vv-nv-ipa  { font-size: 16px; color: rgba(255,255,255,.5); font-style: italic; margin-bottom: 6px; }
+.vv-nv-meaning { font-size: 14px; color: rgba(255,255,255,.45); }
+
+/* Word badge (top-left over video) */
+.vv-badge {
+  position: absolute; top: 14px; left: 14px; z-index: 7;
+  background: rgba(0,0,0,.6); backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,.18); color: #fff;
+  border-radius: 12px; padding: 9px 14px;
+  display: flex; align-items: center; gap: 12px;
+  animation: fadeUp .3s ease;
+  max-width: calc(100% - 100px);
+}
+.vv-badge-word { font-family: var(--font-d); font-size: 20px; font-weight: 900; line-height: 1; }
+.vv-badge-ipa  { font-size: 11px; color: rgba(255,255,255,.6); font-style: italic; margin-top: 2px; }
+.vv-badge-vi   { font-size: 12px; color: rgba(255,255,255,.75); font-weight: 600; border-left: 1.5px solid rgba(255,255,255,.25); padding-left: 12px; }
+
+/* Counter (top-right) */
+.vv-counter {
+  position: absolute; top: 14px; right: 14px; z-index: 7;
+  background: rgba(0,0,0,.5); backdrop-filter: blur(6px);
+  color: rgba(255,255,255,.85); border-radius: 20px;
+  padding: 4px 12px; font-size: 12px; font-weight: 700;
+}
+
+/* Progress bar (bottom of video) */
+.vv-vpbar { position: absolute; bottom: 0; left: 0; right: 0; height: 4px; z-index: 7; background: rgba(255,255,255,.12); }
+.vv-vpbar-fill { height: 100%; background: linear-gradient(90deg, #7c3aed, #0d9488); border-radius: 2px; transition: width .4s ease; }
+
+/* TTS indicator */
+.vv-tts-btn {
+  position: absolute; bottom: 14px; right: 14px; z-index: 7;
+  background: rgba(0,0,0,.55); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,.2); color: #fff;
+  border-radius: 50%; width: 38px; height: 38px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 16px; transition: all .15s;
+}
+.vv-tts-btn:hover { background: rgba(124,58,237,.7); border-color: rgba(255,255,255,.4); }
+.vv-tts-btn.playing { background: rgba(13,148,136,.8); animation: _vvpulse 1.2s ease infinite; }
+@keyframes _vvpulse { 0%,100%{box-shadow:0 0 0 0 rgba(13,148,136,.5)} 50%{box-shadow:0 0 0 8px rgba(13,148,136,0)} }
+
+/* ─── Caption ─── */
+.vv-caption {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 14px; padding: 16px 18px; margin-bottom: 12px;
+  box-shadow: var(--shadow-sm); animation: fadeUp .22s ease;
+}
+.vv-caption-en {
+  font-size: 17px; font-weight: 700; color: var(--ink);
+  line-height: 1.65; margin-bottom: 6px; font-family: var(--font-d);
+}
+.vv-caption-en .vv-hl {
+  color: var(--teal); background: var(--teal-light);
+  border-radius: 6px; padding: 0 5px;
+  border-bottom: 2.5px solid var(--teal);
+}
+.vv-caption-vi { font-size: 13px; color: var(--ink3); font-style: italic; line-height: 1.5; margin-bottom: 10px; }
+.vv-caption-btns { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; }
+
+/* ─── Nav bar ─── */
+.vv-nav {
+  display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-bottom: 14px;
+}
+.vv-dots { display: flex; gap: 5px; flex: 1; justify-content: center; flex-wrap: wrap; }
+.vv-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--border2); cursor: pointer;
+  transition: all .2s; flex-shrink: 0;
+}
+.vv-dot.on   { width: 24px; border-radius: 4px; background: var(--violet); }
+.vv-dot.done { background: var(--teal); }
+
+/* ─── Word strip ─── */
+.vv-wordstrip { display: flex; gap: 7px; flex-wrap: wrap; margin-bottom: 6px; }
+.vv-wchip {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+  cursor: pointer; transition: all .15s;
+  background: var(--surface); border: 1.5px solid var(--border); color: var(--ink3);
+}
+.vv-wchip:hover { border-color: var(--violet); color: var(--violet); background: var(--violet-light); }
+.vv-wchip.cur  { background: var(--violet); border-color: var(--violet); color: #fff; }
+.vv-wchip.ok   { border-color: var(--teal); }
+.vv-wchip .wdot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .4; flex-shrink: 0; }
+.vv-wchip.cur .wdot { opacity: .7; }
+
+/* Attribution */
+.vv-attrib { font-size: 11px; color: var(--ink4); text-align: right; margin-top: 4px; }
+.vv-attrib a { color: var(--teal); font-weight: 600; }
+
+/* Done screen */
+.vv-done { text-align: center; padding: 36px 16px; }
+.vv-done-emoji { font-size: 64px; display: block; margin-bottom: 16px; }
+.vv-done-title { font-family: var(--font-d); font-size: 26px; font-weight: 900; color: var(--ink); margin-bottom: 6px; }
+.vv-done-sub   { font-size: 14px; color: var(--ink3); margin-bottom: 24px; }
+.vv-done-recap { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-bottom: 28px; }
+.vv-done-chip  {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 20px; padding: 6px 14px; font-size: 13px; font-weight: 700;
+  cursor: pointer; display: inline-flex; align-items: center; gap: 5px;
+  transition: all .15s; color: var(--ink2);
+}
+.vv-done-chip:hover { border-color: var(--violet); color: var(--violet); }
+
+/* Responsive */
+@media(max-width:767px) {
+  .vv-hero { padding: 16px 18px; }
+  .vv-hero-title { font-size: 19px; }
+  .vv-caption { padding: 12px 14px; }
+  .vv-caption-en { font-size: 15px; }
+  .vv-badge-word { font-size: 17px; }
+  .vv-badge-vi { display: none; }
+}
 </style>
 </head>
 <body>
@@ -1821,6 +2054,7 @@ html.mob-sheet-open body{
     <div class="nav-item" onclick="showPanel('writing')"><span class="ni">✍️</span>Writing</div>
     <div class="nav-item" onclick="showPanel('listening')"><span class="ni">🎧</span>Listening</div>
     <div class="nav-item" onclick="showPanel('speaking-pro')"><span class="ni">🎤</span>Speaking Pro</div>
+    <div class="nav-item" onclick="showPanel('video-vocab')"><span class="ni">🎬</span>Video Vocab</div>
     <div class="nav-item" onclick="showPanel('progress')"><span class="ni">📊</span>Tiến độ</div>
   </nav>
 
@@ -2082,6 +2316,9 @@ html.mob-sheet-open body{
   </div>
   <div class="mob-item" data-panel="vocab-list" onclick="showPanel('vocab-list')">
     <span class="mi">📝</span><span class="mob-item-label">Từ vựng</span>
+  </div>
+  <div class="mob-item" data-panel="video-vocab" onclick="showPanel('video-vocab')">
+    <span class="mi">🎬</span><span class="mob-item-label">Video</span>
   </div>
   <div class="mob-item" data-panel="progress" onclick="showPanel('progress')">
     <span class="mi">📊</span><span class="mob-item-label">Tiến độ</span>
@@ -2763,6 +3000,20 @@ html.mob-sheet-open body{
 </div>
 </div>
 
+
+<!-- ═══════════════════════════════════════════════════════
+     🎬 VIDEO VOCAB PANEL
+═══════════════════════════════════════════════════════ -->
+<div id="panel-video-vocab" class="panel">
+<div class="page-wrap">
+  <div class="page-header">
+    <div class="page-title">Video <em>Vocab</em> 🎬</div>
+    <div class="page-sub">Xem video minh họa cho từng từ vựng — hình ảnh + câu ví dụ + phát âm</div>
+  </div>
+  <div id="vv-content"><!-- rendered by JS --></div>
+</div>
+</div>
+
 </main>
 </div>
 
@@ -3236,7 +3487,7 @@ async function fetchAndStoreImage(wordObj){
 }
 
 /* ── NAV ── */
-const NAV_IDX={home:0,roadmap:1,'import':2,topics:3,'vocab-list':4,writing:5,progress:6,'topic-detail':3};
+const NAV_IDX={home:0,roadmap:1,'import':2,topics:3,'vocab-list':4,writing:5,'video-vocab':6,progress:7,'topic-detail':3};
 function showPanel(n){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
   document.getElementById('panel-'+n).classList.add('active');
@@ -3248,7 +3499,7 @@ function showPanel(n){
     'topic-detail':'topics','study':'topics',
     'listening':'listening','speaking-pro':'speaking-pro',
     'writing':'writing','vocab-list':'vocab-list',
-    'progress':'progress','import':'home'
+    'progress':'progress','import':'home','video-vocab':'video-vocab'
   };
   const activeNav = panelToNav[n] || '';
   document.querySelectorAll('.mob-item').forEach(e=>{
@@ -3261,6 +3512,7 @@ function showPanel(n){
   if(n==='progress')renderProgress();
   if(n==='roadmap')renderRoadmap();
   if(n==='writing')renderWritingSetup();
+  if(n==='video-vocab')renderVideoVocab();
   saveSession();
 }
 
@@ -4041,23 +4293,45 @@ function playCurrentDlg(){
   const w = S.study.words[_dlgWordIdx];
   if(!w) return;
   const lines = _dlgCache['wd_' + w.id];
-  if(!lines) return;
-  window.speechSynthesis.cancel();
+  if(!lines || !lines.length) return;
+
+  /* Dừng audio đang phát */
+  if(_ttsAudio){ _ttsAudio.pause(); _ttsAudio.src=''; _ttsAudio=null; }
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+
   let i = 0;
-  const femaleVoice = getFemaleUSVoice();
-  function speakNext(){
+  function playNext(){
     if(i >= lines.length) return;
     const ln = lines[i++];
-    const u = new SpeechSynthesisUtterance(ln.t);
-    u.lang='en-US'; u.rate=0.85;
-    if(femaleVoice) u.voice = femaleVoice;
-    u.onend = ()=>setTimeout(speakNext, 380);
-    u.onerror = ()=>setTimeout(speakNext, 380);
-    window.speechSynthesis.speak(u);
+    const text = ln.t;
+    const url  = _googleTtsUrl(text, 'en', false);
+
+    const audio = new Audio();
+    _ttsAudio = audio;
+    audio.onended = () => setTimeout(playNext, 350);
+    audio.onerror = () => {
+      /* Fallback Web Speech */
+      _fallbackSpeak(text, 'en');
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang='en-US'; u.rate=0.9;
+      const v = getFemaleUSVoice(); if(v) u.voice=v;
+      u.onend  = () => setTimeout(playNext, 350);
+      u.onerror= () => setTimeout(playNext, 350);
+      window.speechSynthesis.speak(u);
+    };
+
+    fetch(url, { mode:'cors', referrerPolicy:'no-referrer' })
+      .then(r => r.ok ? r.blob() : Promise.reject())
+      .then(blob => {
+        const burl = URL.createObjectURL(blob);
+        if(_ttsAudio === audio){
+          audio.src = burl;
+          audio.play().catch(() => audio.onerror());
+        }
+      })
+      .catch(() => { if(_ttsAudio===audio) audio.onerror(); });
   }
-  if(window.speechSynthesis.getVoices().length===0){
-    window.speechSynthesis.onvoiceschanged=()=>{_femaleUSVoice=null;speakNext();};
-  } else { speakNext(); }
+  playNext();
 }
 function hlW(text,word){if(!word)return text;return text.replace(new RegExp('\\b'+word+'\\b','gi'),m=>`<span class="hl">${m}</span>`);}
 
@@ -5628,47 +5902,146 @@ function showDuplicateReport(added, duplicates){
   const okBtn=el.querySelector('.btn.btn-primary');if(okBtn)okBtn.style.display='none';
 }
 
-/* ── VOICE SELECTION ── */
-let _femaleUSVoice=null;
+/* ══════════════════════════════════════════════════════════
+   🔊 SPEAK — Google Translate TTS (giống giọng Google Dịch)
+   • Ưu tiên: Google Translate API (tts.gstatic.com) — giọng tự nhiên nhất
+   • Fallback 1: Google US English (Web Speech API, Chrome)
+   • Fallback 2: Web Speech API với giọng en-US tốt nhất có sẵn
+══════════════════════════════════════════════════════════ */
+
+/* Cache audio đã fetch để không gọi lại nhiều lần */
+const _ttsCache = {};
+/* Audio element dùng chung để có thể cancel */
+let _ttsAudio = null;
+
+/**
+ * Tạo URL Google Translate TTS
+ * Hoạt động giống hệt nút phát âm trên Google Translate
+ */
+function _googleTtsUrl(text, lang='en', slow=false){
+  const encoded = encodeURIComponent(text);
+  const speed   = slow ? 0.24 : 1;
+  // tk token — Google Translate dùng token này để rate-limit,
+  // nhưng với text ngắn (<200 ký tự) thường không cần
+  return `https://translate.googleapis.com/translate_tts`
+       + `?ie=UTF-8&q=${encoded}&tl=${lang}&client=gtx&ttsspeed=${speed}`;
+}
+
+/**
+ * Phát âm qua Google Translate TTS
+ * @param {string} text - Văn bản cần phát âm
+ * @param {object} opts - { slow: bool, lang: 'en'|'vi' }
+ */
+function speak(text, opts){
+  if(!text) return;
+  const options  = opts || {};
+  const lang     = options.lang  || 'en';
+  const slow     = options.slow  || false;
+  const textClean = String(text).trim();
+
+  /* Dừng audio đang phát (nếu có) */
+  if(_ttsAudio){
+    _ttsAudio.pause();
+    _ttsAudio.src = '';
+    _ttsAudio = null;
+  }
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+
+  /* ── Thử Google Translate TTS ── */
+  const cacheKey = lang + ':' + slow + ':' + textClean;
+
+  const _doGoogleTts = () => {
+    const url = _googleTtsUrl(textClean, lang, slow);
+    const audio = new Audio();
+    _ttsAudio = audio;
+
+    audio.oncanplaythrough = () => {
+      audio.play().catch(() => _fallbackSpeak(textClean, lang));
+    };
+    audio.onerror = () => {
+      /* Google TTS thất bại → dùng Web Speech API */
+      _fallbackSpeak(textClean, lang);
+    };
+
+    /* Dùng Blob URL để tránh CORS block trong một số browser */
+    if(_ttsCache[cacheKey]){
+      audio.src = _ttsCache[cacheKey];
+    } else {
+      fetch(url, { mode: 'cors', referrerPolicy: 'no-referrer' })
+        .then(r => {
+          if(!r.ok) throw new Error('HTTP ' + r.status);
+          return r.blob();
+        })
+        .then(blob => {
+          const blobUrl = URL.createObjectURL(blob);
+          _ttsCache[cacheKey] = blobUrl;
+          /* Giới hạn cache 60 entries */
+          const keys = Object.keys(_ttsCache);
+          if(keys.length > 60) URL.revokeObjectURL(_ttsCache[keys[0]]), delete _ttsCache[keys[0]];
+          if(_ttsAudio === audio){ /* Vẫn là request hiện tại */
+            audio.src = blobUrl;
+          }
+        })
+        .catch(() => _fallbackSpeak(textClean, lang));
+    }
+  };
+
+  _doGoogleTts();
+}
+
+/**
+ * Fallback: Web Speech API với Google US English voice (Chrome)
+ * hoặc bất kỳ giọng en-US nào có sẵn
+ */
+let _femaleUSVoice = null;
+
 function getFemaleUSVoice(){
   if(_femaleUSVoice) return _femaleUSVoice;
-  const voices=window.speechSynthesis.getVoices();
-  // Priority: Samantha (macOS/iOS US female), then any en-US female
-  const priority=['Samantha','Google US English','Microsoft Aria','Zira','Karen','Victoria','Allison','Susan','Joanna','Ivy','Kendra','Kimberly','Salli'];
+  const voices = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
+  /* Ưu tiên giọng Google — nghe gần giống Google Translate nhất */
+  const priority = [
+    'Google US English',       /* Chrome on desktop — giọng chuẩn nhất */
+    'Google UK English Female',
+    'Samantha',                /* macOS / iOS */
+    'Microsoft Aria Online (Natural) - English (United States)',
+    'Microsoft Aria',
+    'Karen',                   /* macOS Australian */
+    'Moira',                   /* macOS Irish */
+    'Tessa',                   /* macOS South Africa */
+    'Zira',                    /* Windows */
+    'Victoria',
+  ];
   for(const name of priority){
-    const v=voices.find(v=>v.name.includes(name)&&v.lang.startsWith('en'));
-    if(v){_femaleUSVoice=v;return v;}
+    const v = voices.find(v => v.name.includes(name) && v.lang.startsWith('en'));
+    if(v){ _femaleUSVoice = v; return v; }
   }
-  // Fallback: any en-US voice
-  const enUS=voices.find(v=>v.lang==='en-US');
-  if(enUS){_femaleUSVoice=enUS;return enUS;}
+  const enUS = voices.find(v => v.lang === 'en-US');
+  if(enUS){ _femaleUSVoice = enUS; return enUS; }
   return null;
 }
 
-function speak(text){
+function _fallbackSpeak(text, lang='en'){
   if(!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const doSpeak=()=>{
-    const u=new SpeechSynthesisUtterance(text);
-    u.lang='en-US';
-    u.rate=0.85;
-    const v=getFemaleUSVoice();
-    if(v) u.voice=v;
-    // Workaround for Chrome bug where long utterances get cut off
-    const resumeTimer=setInterval(()=>{
-      if(!window.speechSynthesis.speaking){clearInterval(resumeTimer);return;}
-      window.speechSynthesis.pause();window.speechSynthesis.resume();
-    },10000);
-    u.onend=()=>clearInterval(resumeTimer);
-    u.onerror=()=>clearInterval(resumeTimer);
+  const _do = () => {
+    const u   = new SpeechSynthesisUtterance(text);
+    u.lang    = lang === 'vi' ? 'vi-VN' : 'en-US';
+    u.rate    = 0.9;
+    u.pitch   = 1;
+    const v   = getFemaleUSVoice();
+    if(v) u.voice = v;
+    /* Chrome long-utterance bug workaround */
+    const t = setInterval(() => {
+      if(!window.speechSynthesis.speaking){ clearInterval(t); return; }
+      window.speechSynthesis.pause();
+      window.speechSynthesis.resume();
+    }, 10000);
+    u.onend   = () => clearInterval(t);
+    u.onerror = () => clearInterval(t);
     window.speechSynthesis.speak(u);
   };
-  // Voices may not be loaded yet on first call
-  if(window.speechSynthesis.getVoices().length===0){
-    window.speechSynthesis.onvoiceschanged=()=>{_femaleUSVoice=null;doSpeak();};
-  } else {
-    doSpeak();
-  }
+  if(window.speechSynthesis.getVoices().length === 0){
+    window.speechSynthesis.onvoiceschanged = () => { _femaleUSVoice = null; _do(); };
+  } else { _do(); }
 }
 function gainXP(n){S.stats.xp=(S.stats.xp||0)+n;const today=new Date().toDateString();if(S.stats.lastDate!==today){S.stats.streak=(S.stats.streak||0)+1;S.stats.lastDate=today;}updStats();save();}
 function updStats(){document.getElementById('stat-streak').textContent=S.stats.streak;document.getElementById('stat-xp').textContent=S.stats.xp;document.getElementById('stat-words').textContent=S.vocab.filter(v=>v.learned).length;}
@@ -9788,38 +10161,63 @@ function setLtSpeed(s) {
 }
 
 function ltPlayAudio(word, sentence) {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const btn = document.getElementById('lt-play-btn');
+  const btn   = document.getElementById('lt-play-btn');
   const waves = document.querySelectorAll('.lt-wave-bar');
+  const text  = sentence || word;
   if (btn) { btn.textContent = '⏹'; btn.classList.add('playing'); }
   waves.forEach(w => w.classList.add('active'));
-
-  const text = sentence || word;
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'en-US'; u.rate = _ltCurrentSpeed;
-  const v = getFemaleUSVoice(); if (v) u.voice = v;
-  u.onend = u.onerror = () => {
+  const _done = () => {
     if (btn) { btn.textContent = '▶'; btn.classList.remove('playing'); }
     waves.forEach(w => w.classList.remove('active'));
   };
-  window.speechSynthesis.speak(u);
+  if(_ttsAudio){ _ttsAudio.pause(); _ttsAudio.src=''; _ttsAudio=null; }
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+  const slow = (_ltCurrentSpeed <= 0.75);
+  const url  = _googleTtsUrl(text, 'en', slow);
+  const audio = new Audio();
+  _ttsAudio = audio;
+  if(_ltCurrentSpeed > 1.0) audio.playbackRate = _ltCurrentSpeed;
+  audio.onended = _done;
+  audio.onerror = () => {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang='en-US'; u.rate=_ltCurrentSpeed;
+    const v=getFemaleUSVoice(); if(v) u.voice=v;
+    u.onend=u.onerror=_done;
+    if(window.speechSynthesis) window.speechSynthesis.speak(u);
+    else _done();
+  };
+  fetch(url, { mode:'cors', referrerPolicy:'no-referrer' })
+    .then(r => r.ok ? r.blob() : Promise.reject())
+    .then(blob => { if(_ttsAudio===audio){ audio.src=URL.createObjectURL(blob); audio.play().catch(()=>audio.onerror()); } })
+    .catch(() => { if(_ttsAudio===audio) audio.onerror(); });
 }
 
 function ltPlayDialogue(lines) {
   if (!lines || !lines.length) return;
+  if(_ttsAudio){ _ttsAudio.pause(); _ttsAudio.src=''; _ttsAudio=null; }
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
   let i = 0;
   const playNext = () => {
     if (i >= lines.length) return;
-    const u = new SpeechSynthesisUtterance(lines[i].t);
-    u.lang = 'en-US'; u.rate = _ltCurrentSpeed;
-    const v = getFemaleUSVoice(); if(v) u.voice = v;
-    u.pitch = lines[i].s === 'B' ? 0.85 : 1.1;
-    u.onend = () => { i++; setTimeout(playNext, 300); };
-    window.speechSynthesis.speak(u);
+    const ln   = lines[i++];
+    const text = ln.t;
+    const url  = _googleTtsUrl(text, 'en', false);
+    const audio = new Audio();
+    _ttsAudio = audio;
+    audio.onended = () => setTimeout(playNext, 300);
+    audio.onerror = () => {
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang='en-US'; u.rate=_ltCurrentSpeed;
+      const v=getFemaleUSVoice(); if(v) u.voice=v;
+      u.onend=()=>setTimeout(playNext,300);
+      if(window.speechSynthesis) window.speechSynthesis.speak(u);
+    };
+    fetch(url, { mode:'cors', referrerPolicy:'no-referrer' })
+      .then(r => r.ok ? r.blob() : Promise.reject())
+      .then(blob => { if(_ttsAudio===audio){ audio.src=URL.createObjectURL(blob); audio.play().catch(()=>audio.onerror()); } })
+      .catch(() => { if(_ttsAudio===audio) audio.onerror(); });
   };
-  window.speechSynthesis.cancel();
-  setTimeout(playNext, 200);
+  setTimeout(playNext, 100);
 }
 
 /* ── Check answers ── */
@@ -10316,12 +10714,8 @@ function renderSpReadAloud(w, cur, total, pct) {
 
 /* ── Recording Logic ── */
 function spSlowSpeak(text) {
-  if (!window.speechSynthesis) return;
-  window.speechSynthesis.cancel();
-  const u = new SpeechSynthesisUtterance(text);
-  u.lang = 'en-US'; u.rate = 0.7;
-  const v = getFemaleUSVoice(); if(v) u.voice = v;
-  window.speechSynthesis.speak(u);
+  /* Phát chậm (slow mode) qua Google TTS, fallback Web Speech */
+  speak(text, { slow: true, lang: 'en' });
 }
 
 function toggleSpRec(targetSent, targetWord) {
@@ -11820,6 +12214,8 @@ if(typeof window.closeMobAccount === 'undefined'){
 })();
 </script>
 
+
+
 <!-- ═══════════════════════════════════════════════════════════
      ⌨️  KEYBOARD SHORTCUTS — SpeakUp
      Tác giả: Claude (Anthropic) — thêm vào phiên bản keyboard
@@ -12418,6 +12814,578 @@ if(typeof window.closeMobAccount === 'undefined'){
   console.log('[SpeakUp] ⌨️ Keyboard shortcuts loaded! ArrowLeft/Right, 1-3, Enter, Space đã hoạt động.');
 
 })();
+</script>
+
+<script>
+/* ════════════════════════════════════════════════════════════════════
+   🎬 VIDEO VOCAB MODULE — v2.0
+   
+   Cách hoạt động:
+   ┌─ Người dùng chọn topic + số từ → nhấn "Bắt đầu xem"
+   ├─ Mỗi từ → fetch video từ Pexels API (free: 200 req/h)
+   │   ├─ Query thông minh: word → synonyms → topic context
+   │   ├─ Chọn video 3-40s, ưu tiên HD nhỏ để load nhanh
+   │   └─ Cache kết quả vào _vvCache để không fetch lại
+   ├─ Hiển thị:
+   │   ├─ Video autoplay loop muted (phủ 16:9)
+   │   ├─ Badge từ vựng + IPA + nghĩa overlay lên video
+   │   ├─ Caption câu ví dụ (highlight từ khóa)
+   │   └─ Google TTS tự động phát âm khi đổi từ
+   └─ Fallback: ảnh Pexels → gradient card với chữ lớn
+   
+   API Free tốt nhất:
+   ✅ Pexels Video API — 200 req/h, 20k/month, video HD không watermark
+      → pexels.com/api (đăng ký 30s, không cần thẻ)
+   ℹ️ Pixabay: 4.4M assets nhưng không cho phép hotlink embed
+   ℹ️ Unsplash: chỉ ảnh, không có video
+════════════════════════════════════════════════════════════════════ */
+
+const _vvCache  = {};   // { word_lc: {videoUrl,thumb,author,authorUrl,pexelsUrl} | null }
+const _vvAudios = {};   // audio elements for cleanup
+let _vvCurAudio = null;
+
+/* ── Key helpers ── */
+const _VV_LS_KEY = 'speakup_pexels_vv2';
+function _vvGetKey(){
+  return localStorage.getItem(_VV_LS_KEY) || (typeof PEXELS_KEY !== 'undefined' ? PEXELS_KEY : '');
+}
+function _vvSetKey(k){ localStorage.setItem(_VV_LS_KEY, k); }
+
+/* ════════════════════════════
+   SETUP / ENTRY SCREEN
+════════════════════════════ */
+function renderVideoVocab(){
+  const el = document.getElementById('vv-content');
+  if(!el) return;
+
+  const key      = _vvGetKey();
+  const hasKey   = !!key && key !== 'YOUR_PEXELS_API_KEY';
+  const hasVocab = S.vocab && S.vocab.length > 0;
+  const topics   = [...new Set(S.vocab.map(v=>v.topic))].filter(Boolean).sort();
+
+  el.innerHTML = `
+    <!-- ── Hero ── -->
+    <div class="vv-hero">
+      <div class="vv-hero-cine">🎬</div>
+      <div class="vv-hero-title">Video Vocab 🎬</div>
+      <div class="vv-hero-sub">Học từ vựng qua video minh họa thực tế — nghe, nhìn, nhớ lâu hơn</div>
+      <div class="vv-hero-tags">
+        <span class="vv-hero-tag">🎥 Pexels HD</span>
+        <span class="vv-hero-tag">🔊 Google TTS</span>
+        <span class="vv-hero-tag">✨ Auto Caption</span>
+        <span class="vv-hero-tag">📱 Mobile OK</span>
+      </div>
+    </div>
+
+    ${!hasVocab ? `
+    <div style="text-align:center;padding:48px 16px">
+      <div style="font-size:60px;margin-bottom:14px">📭</div>
+      <div style="font-family:var(--font-d);font-size:20px;font-weight:800;color:var(--ink);margin-bottom:8px">Chưa có từ vựng</div>
+      <div style="font-size:14px;color:var(--ink3);margin-bottom:20px">Import từ vựng trước để trải nghiệm Video Vocab</div>
+      <button class="btn btn-primary" onclick="showPanel('import')">📥 Import từ vựng</button>
+    </div>` : `
+
+    <!-- ── Nguồn API ── -->
+    <div class="vv-source-card">
+      <h4>📡 Nguồn video miễn phí được đề xuất</h4>
+      <div class="vv-source-row">
+        <span class="vv-source-badge">⭐ Khuyên dùng</span>
+        <span><strong style="color:var(--ink)">Pexels Video API</strong> — 200 req/giờ · 20,000/tháng · video HD không watermark<br>
+        <a href="https://www.pexels.com/api/" target="_blank" style="color:var(--teal);font-weight:700">pexels.com/api</a>
+        → Đăng nhập → <em>Your API Key</em> (miễn phí, không cần thẻ)</span>
+      </div>
+      <div class="vv-source-row" style="margin-top:6px;font-size:12px;color:var(--ink3)">
+        <span class="vv-source-badge amber" style="font-size:10px">ℹ️ Khác</span>
+        <span>Pixabay: 4.4M assets nhưng <em>không cho hotlink</em> — cần server proxy. Unsplash: chỉ có ảnh, không có video.</span>
+      </div>
+    </div>
+
+    <!-- ── API Key ── -->
+    <div class="vv-setup">
+      <div class="vv-setup-title">🔑 Pexels API Key ${hasKey ? '<span class="vv-key-ok">✅ Đã có</span>' : '<span class="vv-key-no">⚠️ Chưa cài — dùng key mặc định</span>'}</div>
+      <div class="vv-key-row">
+        <input class="vv-key-inp" id="vv-key-inp"
+          placeholder="Dán Pexels API Key..."
+          value="${hasKey ? key : ''}"
+          type="password"
+          onkeydown="if(event.key==='Enter')_vvSaveKey()">
+        <button class="btn btn-primary btn-sm" onclick="_vvSaveKey()">💾 Lưu</button>
+        <button class="btn btn-ghost btn-sm" onclick="(function(){var i=document.getElementById('vv-key-inp');i.type=i.type==='password'?'text':'password';})()">👁</button>
+      </div>
+      <div style="font-size:12px;color:var(--ink3);margin-top:6px">
+        ${hasKey ? '✅ Key đã lưu. Video sẽ tải từ Pexels.' : '⚠️ Không có key vẫn dùng được (dùng key mặc định có sẵn trong app).'}
+      </div>
+    </div>
+
+    <!-- ── Cấu hình bài học ── -->
+    <div class="vv-setup">
+      <div class="vv-setup-title">🎯 Chọn từ vựng để học</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end">
+        <div style="flex:1;min-width:160px">
+          <label class="flbl">📚 Chủ đề</label>
+          <select class="sel-inp" id="vv-topic" style="width:100%">
+            <option value="">🔀 Tất cả (${S.vocab.length} từ)</option>
+            ${topics.map(t => {
+              const cnt  = S.vocab.filter(v=>v.topic===t).length;
+              const rule = typeof TOPIC_RULES !== 'undefined' ? TOPIC_RULES.find(r=>r.name===t) : null;
+              return `<option value="${t}">${rule?.emoji||'📌'} ${t} (${cnt})</option>`;
+            }).join('')}
+          </select>
+        </div>
+        <div style="flex:0;min-width:110px">
+          <label class="flbl">🔢 Số từ</label>
+          <select class="sel-inp" id="vv-count" style="width:100%">
+            <option value="5">5 từ</option>
+            <option value="10" selected>10 từ</option>
+            <option value="15">15 từ</option>
+            <option value="20">20 từ</option>
+          </select>
+        </div>
+        <button class="btn btn-primary" style="font-size:15px;padding:11px 24px;font-weight:800"
+          onclick="_vvStart()">▶ Bắt đầu</button>
+      </div>
+    </div>`}
+  `;
+}
+
+function _vvSaveKey(){
+  const val = (document.getElementById('vv-key-inp')?.value || '').trim();
+  _vvSetKey(val);
+  showToast(val ? '✅ Đã lưu Pexels API key!' : '🗑️ Đã xoá key, dùng key mặc định');
+  renderVideoVocab();
+}
+
+/* ════════════════════════════
+   SESSION — BẮT ĐẦU
+════════════════════════════ */
+let _vvSession = null; // { words[], current }
+
+function _vvStart(){
+  const topic = document.getElementById('vv-topic')?.value || '';
+  const count = parseInt(document.getElementById('vv-count')?.value || '10');
+  let pool    = topic ? S.vocab.filter(v=>v.topic===topic) : S.vocab;
+  pool        = pool.filter(v=>v.word);
+
+  if(!pool.length){ showToast('Không có từ vựng!','error'); return; }
+
+  const words = [...pool].sort(()=>Math.random()-.5).slice(0, count);
+  _vvSession  = { words, current: 0 };
+  _vvRenderPlayer();
+}
+
+/* ════════════════════════════
+   PLAYER — RENDER
+════════════════════════════ */
+function _vvRenderPlayer(){
+  const el   = document.getElementById('vv-content');
+  const sess = _vvSession;
+  if(!el || !sess) return;
+
+  const { words, current: idx } = sess;
+  const w = words[idx];
+  if(!w) return;
+
+  // Dots
+  const dots = words.map((_, i) => {
+    const c = _vvCache[words[i].word.toLowerCase()];
+    let cls = 'vv-dot';
+    if(i === idx) cls += ' on';
+    else if(c !== undefined) cls += ' done';
+    return `<div class="${cls}" onclick="_vvGo(${i})" title="${words[i].word}"></div>`;
+  }).join('');
+
+  // Chips
+  const chips = words.map((ww, i) => {
+    const c = _vvCache[ww.word.toLowerCase()];
+    let cls = 'vv-wchip';
+    if(i === idx) cls += ' cur';
+    else if(c !== undefined) cls += ' ok';
+    return `<div class="${cls}" onclick="_vvGo(${i})">
+      <div class="wdot"></div>${ww.word}
+    </div>`;
+  }).join('');
+
+  // Caption với highlight
+  const example = (w.example || `${w.word} is used in everyday conversations.`);
+  const exHL = example.replace(
+    new RegExp(`\\b(${w.word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}(?:\\w*)?)\\b`, 'gi'),
+    m => `<span class="vv-hl">${m}</span>`
+  );
+
+  const pct = Math.round(idx / words.length * 100);
+
+  el.innerHTML = `
+    <!-- PLAYER -->
+    <div class="vv-player-wrap" id="vv-wrap">
+      <div id="vv-media" style="position:absolute;inset:0;"></div>
+
+      <!-- Loading overlay -->
+      <div class="vv-overlay" id="vv-ov">
+        <div class="vv-spin"></div>
+        <div class="vv-overlay-msg" id="vv-ov-msg">Đang tải video…</div>
+      </div>
+
+      <!-- Word badge -->
+      <div class="vv-badge">
+        <div>
+          <div class="vv-badge-word">${w.word}</div>
+          ${w.ipa ? `<div class="vv-badge-ipa">${w.ipa}</div>` : ''}
+        </div>
+        <div class="vv-badge-vi">${w.meaning || ''}</div>
+      </div>
+
+      <!-- Counter -->
+      <div class="vv-counter">${idx+1} / ${words.length}</div>
+
+      <!-- TTS button overlay -->
+      <button class="vv-tts-btn" id="vv-tts-btn" onclick="_vvSpeak('${(w.example||w.word).replace(/'/g,"\\'")}')" title="Phát âm câu ví dụ">🔊</button>
+
+      <!-- Progress bar -->
+      <div class="vv-vpbar"><div class="vv-vpbar-fill" style="width:${pct}%"></div></div>
+    </div>
+
+    <!-- CAPTION -->
+    <div class="vv-caption">
+      <div class="vv-caption-en">"${exHL}"</div>
+      ${w.meaning ? `<div class="vv-caption-vi">🇻🇳 ${w.meaning}</div>` : ''}
+      <div class="vv-caption-btns">
+        <button class="audio-chip" onclick="_vvSpeak('${w.word.replace(/'/g,"\\'")}')">🔊 Từ</button>
+        ${w.example ? `<button class="audio-chip" onclick="_vvSpeak('${w.example.replace(/'/g,"\\'")}')">🔊 Câu</button>` : ''}
+        ${w.ipa ? `<span style="font-size:12px;color:var(--ink3);font-style:italic;margin-left:4px">${w.ipa}</span>` : ''}
+        ${w.topic ? `<span style="font-size:11px;color:var(--ink4);margin-left:auto">📌 ${w.topic}</span>` : ''}
+      </div>
+    </div>
+
+    <!-- NAV -->
+    <div class="vv-nav">
+      <button class="btn btn-outline btn-sm" onclick="_vvPrev()" ${idx===0?'disabled':''} style="flex-shrink:0">← Trước</button>
+      <div class="vv-dots">${dots}</div>
+      <button class="btn btn-${idx>=words.length-1?'primary':'outline'} btn-sm" onclick="_vvNext()" style="flex-shrink:0">
+        ${idx>=words.length-1?'🏁 Xong':'Tiếp →'}
+      </button>
+    </div>
+
+    <!-- WORD STRIP -->
+    <div class="vv-wordstrip">${chips}</div>
+
+    <!-- Attribution (Pexels requires this) -->
+    <div class="vv-attrib" id="vv-attr"></div>
+  `;
+
+  // Auto-speak word khi vào từ mới
+  setTimeout(() => _vvSpeak(w.word), 500);
+
+  // Load video/image
+  _vvLoadMedia(w, idx);
+}
+
+/* ════════════════════════════
+   LOAD MEDIA (Pexels)
+════════════════════════════ */
+async function _vvLoadMedia(w, idx) {
+  const key  = w.word.toLowerCase();
+  const sess = _vvSession;
+
+  // Đã cache → dùng luôn
+  if(_vvCache[key] !== undefined) {
+    _vvMountMedia(_vvCache[key], w);
+    return;
+  }
+
+  const apiKey = _vvGetKey();
+
+  if(!apiKey) {
+    _vvCache[key] = null;
+    _vvMountMedia(null, w);
+    return;
+  }
+
+  // Show loading
+  const ov  = document.getElementById('vv-ov');
+  const msg = document.getElementById('vv-ov-msg');
+  if(ov)  ov.classList.remove('gone');
+  if(msg) msg.textContent = `Đang tìm video cho "${w.word}"…`;
+
+  try {
+    const queries = _vvQueries(w);
+    let found = null;
+
+    for(const q of queries) {
+      const res = await fetch(
+        `https://api.pexels.com/videos/search?query=${encodeURIComponent(q)}&per_page=8&orientation=landscape&size=medium`,
+        { headers: { Authorization: apiKey } }
+      );
+      if(!res.ok) {
+        if(res.status === 403 || res.status === 401) {
+          if(msg) msg.textContent = '❌ API key không hợp lệ';
+          break;
+        }
+        continue;
+      }
+
+      const data   = await res.json();
+      const videos = (data.videos || []).filter(v => v.duration >= 3 && v.duration <= 45);
+      if(!videos.length) continue;
+
+      // Chọn video random trong 3 kết quả đầu
+      const pick  = videos[Math.floor(Math.random() * Math.min(videos.length, 3))];
+      const files = (pick.video_files || [])
+        .filter(f => (f.width||0) > 0)
+        .sort((a,b) => (a.width||0) - (b.width||0)); // nhỏ → lớn
+      // Ưu tiên ≤1280px để load nhanh trên mobile
+      const file  = files.find(f => (f.width||0) <= 1280) || files[0];
+
+      if(file?.link) {
+        found = {
+          videoUrl:    file.link,
+          thumb:       pick.image || '',
+          author:      pick.user?.name || '',
+          authorUrl:   pick.user?.url  || '',
+          pexelsUrl:   pick.url || 'https://pexels.com',
+          duration:    pick.duration,
+          query:       q,
+        };
+        break;
+      }
+    }
+
+    // Nếu không có video → thử kiếm ảnh tĩnh
+    if(!found) {
+      const imgRes = await fetch(
+        `https://api.pexels.com/v1/search?query=${encodeURIComponent(queries[0])}&per_page=3&orientation=landscape`,
+        { headers: { Authorization: apiKey } }
+      );
+      if(imgRes.ok) {
+        const imgData = await imgRes.json();
+        const img     = imgData.photos?.[0];
+        if(img) {
+          found = {
+            videoUrl:  null,
+            thumb:     img.src?.large || img.src?.medium || '',
+            author:    img.photographer || '',
+            authorUrl: img.photographer_url || '',
+            pexelsUrl: img.url || 'https://pexels.com',
+          };
+        }
+      }
+    }
+
+    _vvCache[key] = found;  // null nếu không tìm được gì
+    // Chỉ mount nếu người dùng vẫn đang xem từ này
+    if(_vvSession && _vvSession.current === idx) {
+      _vvMountMedia(found, w);
+    }
+
+  } catch(err) {
+    console.warn('[VV] Pexels error:', err);
+    _vvCache[key] = null;
+    _vvMountMedia(null, w);
+  }
+}
+
+/* Xây query thông minh cho từng từ */
+function _vvQueries(w) {
+  const word  = w.word || '';
+  const topic = (w.topic || '').toLowerCase();
+
+  // Map một số từ trừu tượng → visual context
+  const visual = {
+    appreciate:    ['gratitude flowers gift','appreciation smile'],
+    collaborate:   ['teamwork office colleagues','people working together'],
+    communicate:   ['people conversation talking','communication discussion'],
+    negotiate:     ['business meeting handshake','negotiation deal'],
+    efficient:     ['productivity workflow fast','efficient work laptop'],
+    confident:     ['confident person presentation','self-confidence success'],
+    dedicated:     ['studying hard focus desk','dedicated work effort'],
+    persistent:    ['athlete training running','persistence challenge overcome'],
+    enthusiastic:  ['excited cheerful crowd','enthusiasm energy celebrate'],
+    empathy:       ['people helping kindness','empathy care support'],
+    struggle:      ['challenge climbing mountain','struggle difficulty overcome'],
+    achieve:       ['success celebration trophy','achieve goal finish line'],
+    implement:     ['coding laptop software','implement plan action'],
+    demonstrate:   ['teacher presentation board','demonstrate skill show'],
+    analyze:       ['data chart analysis','analyze research study'],
+    prioritize:    ['planning schedule organize','prioritize tasks work'],
+    improve:       ['growth progress chart','improve skill training'],
+    expand:        ['growth business network','expand map global'],
+    introduce:     ['meeting new person handshake','introduction presentation'],
+    explore:       ['travel adventure nature','explore map discovery'],
+  };
+
+  const mapped = visual[word.toLowerCase()];
+  if(mapped) return [mapped[0], word, mapped[1] || word, topic];
+
+  // Từ có chủ đề → thêm context
+  const topicCtx = {
+    'work': `${word} office professional`,
+    'food': `${word} food kitchen cooking`,
+    'travel': `${word} travel nature outdoor`,
+    'health': `${word} health wellness lifestyle`,
+    'technology': `${word} technology computer digital`,
+    'education': `${word} learning study school`,
+  };
+  const ctxKey = Object.keys(topicCtx).find(k => topic.includes(k));
+
+  return [
+    word,
+    ctxKey ? topicCtx[ctxKey] : `${word} lifestyle`,
+    `${word} people`,
+    topic ? `${topic} ${word}` : word,
+  ].filter((v, i, a) => v && a.indexOf(v) === i); // unique
+}
+
+/* Mount video / ảnh / fallback vào DOM */
+function _vvMountMedia(data, w) {
+  const container = document.getElementById('vv-media');
+  const overlay   = document.getElementById('vv-ov');
+  const attr      = document.getElementById('vv-attr');
+  if(!container)  return;
+
+  // Ẩn overlay
+  if(overlay) overlay.classList.add('gone');
+
+  if(data?.videoUrl) {
+    /* ── VIDEO ── */
+    container.innerHTML = `
+      <video id="vv-vid"
+        src="${data.videoUrl}"
+        poster="${data.thumb}"
+        autoplay loop muted playsinline
+        style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;">
+      </video>`;
+
+    const vid = document.getElementById('vv-vid');
+    if(vid) {
+      vid.play().catch(() => {
+        /* Autoplay bị block → hiện nút play ở giữa */
+        const btn = document.createElement('button');
+        btn.innerHTML = '▶';
+        btn.style.cssText = 'position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:10;width:60px;height:60px;border-radius:50%;border:none;background:rgba(255,255,255,.88);font-size:22px;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,.3)';
+        btn.onclick = () => { vid.play(); btn.remove(); };
+        document.getElementById('vv-wrap')?.appendChild(btn);
+      });
+    }
+
+    if(attr && data.author) {
+      attr.innerHTML = `Video: <a href="${data.authorUrl||data.pexelsUrl}" target="_blank">${data.author}</a> on <a href="${data.pexelsUrl}" target="_blank">Pexels</a>`;
+    }
+
+  } else if(data?.thumb) {
+    /* ── ẢNH TĨNH (fallback khi không có video) ── */
+    container.innerHTML = `
+      <img src="${data.thumb}" alt="${w.word}"
+        style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;border-radius:inherit;">`;
+
+    if(attr && data.author) {
+      attr.innerHTML = `Photo: <a href="${data.authorUrl||data.pexelsUrl}" target="_blank">${data.author}</a> on <a href="${data.pexelsUrl}" target="_blank">Pexels</a>`;
+    }
+
+  } else {
+    /* ── GRADIENT FALLBACK (không có cả ảnh lẫn video) ── */
+    container.innerHTML = `
+      <div class="vv-no-video">
+        <div class="vv-nv-word">${w.word}</div>
+        ${w.ipa ? `<div class="vv-nv-ipa">${w.ipa}</div>` : ''}
+        <div class="vv-nv-meaning">${w.meaning || ''}</div>
+        <div style="font-size:12px;margin-top:20px;opacity:.4">
+          Không tìm được video/ảnh phù hợp
+        </div>
+      </div>`;
+    if(attr) attr.innerHTML = '';
+  }
+}
+
+/* ════════════════════════════
+   NAVIGATION
+════════════════════════════ */
+function _vvNext() {
+  if(!_vvSession) return;
+  if(_vvSession.current < _vvSession.words.length - 1) {
+    _vvSession.current++;
+    _vvRenderPlayer();
+  } else {
+    _vvShowDone();
+  }
+}
+
+function _vvPrev() {
+  if(!_vvSession || _vvSession.current <= 0) return;
+  _vvSession.current--;
+  _vvRenderPlayer();
+}
+
+function _vvGo(i) {
+  if(!_vvSession) return;
+  _vvSession.current = i;
+  _vvRenderPlayer();
+}
+
+/* ════════════════════════════
+   SPEAK (dùng Google TTS)
+════════════════════════════ */
+function _vvSpeak(text) {
+  speak(text, { lang: 'en', slow: false });
+  // Visual feedback
+  const btn = document.getElementById('vv-tts-btn');
+  if(btn) {
+    btn.classList.add('playing');
+    setTimeout(() => btn.classList.remove('playing'), 2200);
+  }
+}
+
+/* ════════════════════════════
+   DONE SCREEN
+════════════════════════════ */
+function _vvShowDone() {
+  const el   = document.getElementById('vv-content');
+  const sess = _vvSession;
+  if(!el || !sess) return;
+
+  const total     = sess.words.length;
+  const withMedia = sess.words.filter(w => !!_vvCache[w.word.toLowerCase()]).length;
+  const withVideo = sess.words.filter(w => _vvCache[w.word.toLowerCase()]?.videoUrl).length;
+
+  const recapChips = sess.words.map((w, i) => {
+    const c   = _vvCache[w.word.toLowerCase()];
+    const ico = c?.videoUrl ? '🎥' : c?.thumb ? '🖼️' : '📝';
+    return `<div class="vv-done-chip" onclick="_vvGo(${i});_vvRenderPlayer()">
+      ${ico} ${w.word}
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `
+    <div class="vv-done">
+      <span class="vv-done-emoji">🎉</span>
+      <div class="vv-done-title">Hoàn thành!</div>
+      <div class="vv-done-sub">
+        Đã xem <strong>${total} từ</strong> —
+        ${withVideo} video · ${withMedia - withVideo} ảnh
+      </div>
+      <div class="vv-done-recap">${recapChips}</div>
+      <div style="display:flex;flex-direction:column;gap:10px;max-width:300px;margin:0 auto">
+        <button class="btn btn-primary" style="font-size:15px;padding:13px"
+          onclick="_vvStart()">🔄 Xem lại bộ này</button>
+        <button class="btn btn-outline" style="font-size:14px;padding:11px"
+          onclick="renderVideoVocab()">🎯 Chọn bộ từ khác</button>
+        <button class="btn btn-ghost btn-sm"
+          onclick="showPanel('study')">📚 Học Flashcard →</button>
+      </div>
+    </div>`;
+}
+
+/* ─── Keyboard nav trong Video Vocab ─── */
+document.addEventListener('keydown', function(e) {
+  if(document.getElementById('panel-video-vocab')?.classList.contains('active') && _vvSession) {
+    if(e.key === 'ArrowRight' || e.key === 'd' || e.key === 'D') { e.preventDefault(); _vvNext(); }
+    if(e.key === 'ArrowLeft'  || e.key === 'a' || e.key === 'A') { e.preventDefault(); _vvPrev(); }
+    if(e.key === ' ') {
+      e.preventDefault();
+      const w = _vvSession.words[_vvSession.current];
+      if(w) _vvSpeak(w.example || w.word);
+    }
+  }
+});
+
 </script>
 </body>
 </html>
