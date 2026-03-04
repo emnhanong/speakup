@@ -3971,9 +3971,23 @@ function renderFlashcard(){
 // flipCard không còn dùng nhưng giữ để tránh lỗi nếu có ref cũ
 function flipCard(){}
 
+/* ── Dừng audio đang phát (dùng chung cho Flashcard nav & speak) ── */
+function _stopCurrentAudio(){
+  if(_ttsAudio){
+    _ttsAudio.oncanplaythrough = null;
+    _ttsAudio.onended = null;
+    _ttsAudio.onerror = null;
+    _ttsAudio.pause();
+    _ttsAudio.src = '';
+    _ttsAudio = null;
+  }
+  if(window.speechSynthesis) window.speechSynthesis.cancel();
+}
+
 /* ── Prev / Next flashcard (không tính XP, chỉ điều hướng) ── */
 function fcPrev(){
   if(S.study.idx > 0){
+    _stopCurrentAudio();
     S.study.idx--;
     _saveFcPosition();
     updPbar();
@@ -3983,6 +3997,7 @@ function fcPrev(){
 function fcNext(){
   const{words,idx}=S.study;
   if(idx < words.length - 1){
+    _stopCurrentAudio();
     S.study.idx++;
     _saveFcPosition();
     updPbar();
@@ -5939,8 +5954,11 @@ function speak(text, opts){
   const slow     = options.slow  || false;
   const textClean = String(text).trim();
 
-  /* Dừng audio đang phát (nếu có) */
+  /* Dừng audio đang phát (nếu có) — gán null TRƯỚC khi tạo audio mới */
   if(_ttsAudio){
+    _ttsAudio.oncanplaythrough = null;
+    _ttsAudio.onended = null;
+    _ttsAudio.onerror = null;
     _ttsAudio.pause();
     _ttsAudio.src = '';
     _ttsAudio = null;
@@ -5956,16 +5974,23 @@ function speak(text, opts){
     _ttsAudio = audio;
 
     audio.oncanplaythrough = () => {
-      audio.play().catch(() => _fallbackSpeak(textClean, lang));
+      /* Chỉ phát nếu đây vẫn là audio request hiện tại */
+      if(_ttsAudio !== audio) return;
+      audio.play().catch(() => {
+        if(_ttsAudio === audio) _fallbackSpeak(textClean, lang);
+      });
     };
     audio.onerror = () => {
       /* Google TTS thất bại → dùng Web Speech API */
-      _fallbackSpeak(textClean, lang);
+      if(_ttsAudio === audio) _fallbackSpeak(textClean, lang);
     };
 
     /* Dùng Blob URL để tránh CORS block trong một số browser */
     if(_ttsCache[cacheKey]){
-      audio.src = _ttsCache[cacheKey];
+      /* Chỉ set src nếu request này vẫn còn hợp lệ */
+      if(_ttsAudio === audio){
+        audio.src = _ttsCache[cacheKey];
+      }
     } else {
       fetch(url, { mode: 'cors', referrerPolicy: 'no-referrer' })
         .then(r => {
@@ -5982,7 +6007,9 @@ function speak(text, opts){
             audio.src = blobUrl;
           }
         })
-        .catch(() => _fallbackSpeak(textClean, lang));
+        .catch(() => {
+          if(_ttsAudio === audio) _fallbackSpeak(textClean, lang);
+        });
     }
   };
 
